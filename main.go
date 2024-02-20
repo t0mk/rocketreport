@@ -5,26 +5,8 @@ import (
 
 	"github.com/rocket-pool/rocketpool-go/node"
 	"github.com/rocket-pool/smartnode/shared/types/api"
+	"github.com/alecthomas/kong"
 )
-
-func EthClientStatusString(status api.ClientStatus) string {
-	sentence := ""
-	if !status.IsWorking {
-		sentence += "not working,"
-	}
-	if status.IsSynced {
-		sentence += "synced"
-	} else {
-		sentence += "not synced,"
-	}
-	if status.SyncProgress < 1 {
-		sentence += fmt.Sprintf(" syncing, now at %d%%", int(100*(status.SyncProgress)))
-	}
-	if status.Error != "" {
-		sentence += fmt.Sprintf(", Error: %s", status.Error)
-	}
-	return sentence
-}
 
 func tabPrint(s string, v ...interface{}) {
 	fmt.Printf("%-30s", s)
@@ -32,6 +14,14 @@ func tabPrint(s string, v ...interface{}) {
 		fmt.Printf("%v ", i)
 	}
 	fmt.Println()
+}
+
+var cli struct {
+	Send struct {
+		DoSend bool `short:"s" help:"Send to configured telegram chat" default:"true"`
+	} `cmd:"" help:Send to configured telegram chat"`
+	Print struct {
+	} `cmd:"" help:Print to stdout"`
 }
 
 func main() {

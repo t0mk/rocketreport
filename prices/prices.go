@@ -1,4 +1,4 @@
-package main
+package prices
 
 import (
 	"encoding/json"
@@ -59,7 +59,7 @@ func fmtRpl(p float64) string {
 }
 
 func priRplEth() (float64, error) {
-	if cachedRplPrice != nil {
+	if config.cachedRplPrice != nil {
 		return *cachedRplPrice, nil
 	}
 	/*

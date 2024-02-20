@@ -1,15 +1,17 @@
-package main
+package config
 
 import (
 	"fmt"
 	"os"
 
 	"github.com/ethereum/go-ethereum/common"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/joho/godotenv"
 	rpgo "github.com/rocket-pool/rocketpool-go/rocketpool"
 	"github.com/rocket-pool/smartnode/shared/services"
 	"github.com/rocket-pool/smartnode/shared/services/config"
 	configtypes "github.com/rocket-pool/smartnode/shared/types/config"
+	"github.com/t0mk/rocketreport/prices"
 )
 
 var rocketStorageAddress common.Address
@@ -18,11 +20,14 @@ var eth1Url string
 var eth2Url string
 var debug bool
 var cachedRplPrice *float64
-var chosenFiat Fiat
+var chosenFiat prices.Fiat
 var rpConfig *config.RocketPoolConfig
 var bc *services.BeaconClientManager
 var ec *services.ExecutionClientManager
 var rp *rpgo.RocketPool
+
+var bot *tgbotapi.BotAPI
+var telegramToken string
 
 const (
 	rocketStorageAddressEnv = "ROCKETSTORAGE_ADDRESS"
@@ -31,6 +36,7 @@ const (
 	eth2UrlEnv              = "ETH2_URL"
 	debugEnv                = "DEBUG"
 	fiatEnv                 = "FIAT"
+	telegramTokenEnv        = "TELEGRAM_TOKEN"
 )
 
 func getEnvOrPanic(key string) string {
