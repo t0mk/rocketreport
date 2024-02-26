@@ -5,114 +5,79 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"math/big"
 	"net/http"
 	"strconv"
 
-	"github.com/ethereum/go-ethereum/params"
-	"golang.org/x/text/language"
-	"golang.org/x/text/message"
+	"github.com/rocket-pool/rocketpool-go/network"
+	"github.com/t0mk/rocketreport/cache"
+	"github.com/t0mk/rocketreport/config"
+	"github.com/t0mk/rocketreport/types"
+	"github.com/t0mk/rocketreport/utils"
 )
 
-type Fiat string
-
-const (
-	USD Fiat = "USD"
-	EUR Fiat = "EUR"
-	GBP Fiat = "GBP"
-	JPY Fiat = "JPY"
-	AUD Fiat = "AUD"
-	CHF Fiat = "CHF"
-	CZK Fiat = "CZK"
-)
-
-func (f Fiat) String() string {
-	return string(f)
+var xchMap = map[types.Denom]func(types.Denom) (float64, error){
+	types.USD: BitfinexPri,
+	types.EUR: BitfinexPri,
+	types.GBP: BitfinexPri,
+	types.JPY: BitfinexPri,
+	types.AUD: KrakenPri,
+	types.CHF: KrakenPri,
+	types.CZK: CoinmatePri,
 }
 
-var fiatCache = make(map[Fiat]float64)
-
-var fiatXchMap = map[Fiat]func(Fiat) (float64, error){
-	USD: bitfinexPri,
-	EUR: bitfinexPri,
-	GBP: bitfinexPri,
-	JPY: bitfinexPri,
-	AUD: krakenPri,
-	CHF: krakenPri,
-	CZK: coinmatePri,
-}
-
-func weiToEther(wei *big.Int) *big.Float {
-	return new(big.Float).Quo(new(big.Float).SetInt(wei), big.NewFloat(params.Ether))
-}
-
-func fmtEth(p float64) string {
-	return fmt.Sprintf("%.6f", p)
-}
-
-func fmtRplEur(p float64) string {
-	return fmt.Sprintf("%.2f", p)
-}
-
-func fmtRpl(p float64) string {
-	return fmt.Sprintf("%.1f", p)
-}
-
-func priRplEth() (float64, error) {
-	if config.cachedRplPrice != nil {
-		return *cachedRplPrice, nil
+func PriRplEthOracle() (float64, error) {
+	if config.CachedRplPrice != nil {
+		return *config.CachedRplPrice, nil
 	}
-	/*
-		rplPrice, err := network.GetRPLPrice(rp, nil)
-		if err != nil {
-			return 0, err
-		}
-	*/
-	rplPrice := big.NewInt(0).SetInt64(0x281ee2f7086259)
-
-	floatRplPrice, _ := weiToEther(rplPrice).Float64()
-
-	// Return the price
-	cachedRplPrice = &floatRplPrice
-	return floatRplPrice, nil
-}
-
-func fmtFiat(p float64) string {
-	f := message.NewPrinter(language.English)
-	i := int(p)
-	return f.Sprintf("%d", i)
-}
-
-func priEthFiat(fiat Fiat) (float64, error) {
-	if debug {
-		log.Println("priEthFiat", fiat)
-	}
-	if f, ok := fiatCache[fiat]; ok {
-		return f, nil
-	}
-	if f, ok := fiatXchMap[fiat]; ok {
-		return f(fiat)
-	}
-	return 0, fmt.Errorf("unsupported fiat: %s", fiat)
-}
-
-func priRplFiat(fiat Fiat) (float64, error) {
-	rplPrice, err := priRplEth()
+	rplPrice, err := network.GetRPLPrice(config.RP, nil)
 	if err != nil {
 		return 0, err
 	}
-	ethPrice, err := priEthFiat(fiat)
+
+	floatRplPrice, _ := utils.WeiToEther(rplPrice).Float64()
+
+	// Return the price
+	config.CachedRplPrice = &floatRplPrice
+	return floatRplPrice, nil
+}
+
+func PriEth(denom types.Denom) (float64, error) {
+	if config.Debug {
+		log.Println("priEthtypes.denom", denom)
+	}
+	item := cache.Cache.Get("price" + denom.String())
+	if (item != nil) && (!item.IsExpired()) {
+		return item.Value().(float64), nil
+	}
+	if f, ok := xchMap[denom]; ok {
+		pri, err := f(denom)
+		if err != nil {
+			return 0, fmt.Errorf("error getting price: %v", err)
+		}
+		cache.Cache.Set("price"+denom.String(), pri, 60*60)
+		return pri, nil
+	}
+	return 0, fmt.Errorf("unsupported denominating currency: %s", denom)
+}
+
+func PriRpl(denom types.Denom) (float64, error) {
+	//rplPrice, err := PriRplEthReal()
+	rplPrice, err := PriRplEthOracle()
+	if err != nil {
+		return 0, err
+	}
+	ethPrice, err := PriEth(denom)
 	if err != nil {
 		return 0, err
 	}
 	return rplPrice * ethPrice, nil
 }
 
-func krakenPri(fiat Fiat) (float64, error) {
-	if debug {
-		log.Println("bitfinexPri", fiat)
+func KrakenPri(denom types.Denom) (float64, error) {
+	if config.Debug {
+		log.Println("bitfinexPri", denom)
 	}
-	ticker := "ETH" + string(fiat)
+	ticker := "ETH" + string(denom)
 	ab, err := KrakenGetter(ticker)
 	if err != nil {
 		return 0, err
@@ -120,11 +85,11 @@ func krakenPri(fiat Fiat) (float64, error) {
 	return ab.Ask, nil
 }
 
-func bitfinexPri(fiat Fiat) (float64, error) {
-	if debug {
-		log.Println("bitfinexPri", fiat)
+func BitfinexPri(denom types.Denom) (float64, error) {
+	if config.Debug {
+		log.Println("bitfinexPri", denom)
 	}
-	ticker := "ETH" + string(fiat)
+	ticker := "ETH" + string(denom)
 	ab, err := BitfinexGetter(ticker)
 	if err != nil {
 		return 0, err
@@ -132,11 +97,11 @@ func bitfinexPri(fiat Fiat) (float64, error) {
 	return ab.Ask, nil
 }
 
-func coinmatePri(fiat Fiat) (float64, error) {
-	if debug {
-		log.Println("coinmatePri", fiat)
+func CoinmatePri(denom types.Denom) (float64, error) {
+	if config.Debug {
+		log.Println("coinmatePri", denom)
 	}
-	ticker := "ETH_" + string(fiat)
+	ticker := "ETH_" + string(denom)
 	ab, err := CoinmateGetter(ticker)
 	if err != nil {
 		return 0, err
@@ -145,7 +110,7 @@ func coinmatePri(fiat Fiat) (float64, error) {
 }
 
 func getHTTPResponseBodyFromUrl(url string) ([]byte, error) {
-	if debug {
+	if config.Debug {
 		log.Println("getHTTPResponseBodyFromUrl", url)
 	}
 	resp, err := http.Get(url)
@@ -157,7 +122,7 @@ func getHTTPResponseBodyFromUrl(url string) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("ioutil.ReadAll: %v", err)
 	}
-	if debug {
+	if config.Debug {
 		log.Println("BODY:", string(body))
 	}
 	return body, nil

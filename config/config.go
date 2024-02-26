@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/ethereum/go-ethereum/common"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -11,32 +12,35 @@ import (
 	"github.com/rocket-pool/smartnode/shared/services"
 	"github.com/rocket-pool/smartnode/shared/services/config"
 	configtypes "github.com/rocket-pool/smartnode/shared/types/config"
-	"github.com/t0mk/rocketreport/prices"
+	"github.com/t0mk/rocketreport/types"
+	"github.com/t0mk/rocketreport/zaplog"
 )
 
-var rocketStorageAddress common.Address
-var nodeAddress common.Address
-var eth1Url string
-var eth2Url string
-var debug bool
-var cachedRplPrice *float64
-var chosenFiat prices.Fiat
-var rpConfig *config.RocketPoolConfig
-var bc *services.BeaconClientManager
-var ec *services.ExecutionClientManager
-var rp *rpgo.RocketPool
+var RocketStorageAddress common.Address
+var NodeAddress common.Address
+var Eth1Url string
+var Eth2Url string
+var Debug bool
+var CachedRplPrice *float64
+var ChosenFiat types.Denom
+var RpConfig *config.RocketPoolConfig
+var BC *services.BeaconClientManager
+var EC *services.ExecutionClientManager
+var RP *rpgo.RocketPool
 
-var bot *tgbotapi.BotAPI
-var telegramToken string
+var Bot *tgbotapi.BotAPI
+var TelegramToken string
+var TelegramChatId int64
 
 const (
-	rocketStorageAddressEnv = "ROCKETSTORAGE_ADDRESS"
-	nodeAddressEnv          = "NODE_ADDRESS"
-	eth1UrlEnv              = "ETH1_URL"
-	eth2UrlEnv              = "ETH2_URL"
-	debugEnv                = "DEBUG"
+	RocketStorageAddressEnv = "ROCKETSTORAGE_ADDRESS"
+	NodeAddressEnv          = "NODE_ADDRESS"
+	Eth1UrlEnv              = "ETH1_URL"
+	Eth2UrlEnv              = "ETH2_URL"
+	DebugEnv                = "DEBUG"
 	fiatEnv                 = "FIAT"
 	telegramTokenEnv        = "TELEGRAM_TOKEN"
+	telegramChatIdEnv       = "TELEGRAM_CHAT_ID"
 )
 
 func getEnvOrPanic(key string) string {
@@ -47,60 +51,82 @@ func getEnvOrPanic(key string) string {
 	return value
 }
 
-func doConfig() {
+func Setup() {
+
+	log := zaplog.New()
+
 	err := godotenv.Load()
 	if err != nil {
 		panic(err)
 	}
 
-	if (os.Getenv(debugEnv) != "") && (os.Getenv(debugEnv) != "0") {
-		debug = true
+	if (os.Getenv(DebugEnv) != "") && (os.Getenv(DebugEnv) != "0") {
+		Debug = true
 	}
 
-	eth1Url = getEnvOrPanic("ETH1_URL")
-	nodeAddress = common.HexToAddress(getEnvOrPanic("NODE_ADDRESS"))
-	rocketStorageAddress = common.HexToAddress(
+	Eth1Url = getEnvOrPanic("ETH1_URL")
+	NodeAddress = common.HexToAddress(getEnvOrPanic("NODE_ADDRESS"))
+	RocketStorageAddress = common.HexToAddress(
 		getEnvOrPanic("ROCKETSTORAGE_ADDRESS"),
 	)
 	fiatValue := os.Getenv(fiatEnv)
 	if fiatValue == "" {
-		chosenFiat = USD
+		ChosenFiat = types.USD
 	}
-	chosenFiat = Fiat(fiatValue)
+	ChosenFiat = types.Denom(fiatValue)
 
-	eth2Url = getEnvOrPanic("ETH2_URL")
+	Eth2Url = getEnvOrPanic("ETH2_URL")
 
-	rpConfig = &config.RocketPoolConfig{
+	RpConfig = &config.RocketPoolConfig{
 		//IsNativeMode: true,
 		ConsensusClientMode:     configtypes.Parameter{Value: configtypes.Mode_External},
 		ExternalConsensusClient: configtypes.Parameter{Value: configtypes.ConsensusClient_Lighthouse},
 		ExternalLighthouse: &config.ExternalLighthouseConfig{
-			HttpUrl: configtypes.Parameter{Value: eth2Url},
+			HttpUrl: configtypes.Parameter{Value: Eth2Url},
 		},
 		ExecutionClientMode: configtypes.Parameter{Value: configtypes.Mode_External},
 		ExternalExecution: &config.ExternalExecutionConfig{
-			HttpUrl: configtypes.Parameter{Value: eth1Url},
+			HttpUrl: configtypes.Parameter{Value: Eth1Url},
 		},
 
 		Native: &config.NativeConfig{
-			CcHttpUrl: configtypes.Parameter{Value: eth1Url},
-			EcHttpUrl: configtypes.Parameter{Value: eth2Url},
+			CcHttpUrl: configtypes.Parameter{Value: Eth1Url},
+			EcHttpUrl: configtypes.Parameter{Value: Eth2Url},
 			ConsensusClient: configtypes.Parameter{
 				Value: configtypes.ConsensusClient_Lighthouse,
 			},
 		},
 	}
+	log.Debug("Setting up beacon client")
+	BC, err = services.NewBeaconClientManager(RpConfig)
+	if err != nil {
+		panic(err)
+	}
+	log.Debug("Getting beacon head")
+	_, err = BC.GetBeaconHead()
+	if err != nil {
+		panic(fmt.Sprintf("Beacon client maybe not working: %s", err))
+	}
+	log.Debug("Setting up execution client")
+	EC, err = services.NewExecutionClientManager(RpConfig)
+	if err != nil {
+		panic(err)
+	}
+	log.Debug("Getting new RP object")
+	RP, err = rpgo.NewRocketPool(EC, RocketStorageAddress)
+	if err != nil {
+		panic(err)
+	}
+	TelegramToken = getEnvOrPanic(telegramTokenEnv)
+	TelegramChatIdStr := getEnvOrPanic(telegramChatIdEnv)
+	TelegramChatId, err = strconv.ParseInt(TelegramChatIdStr, 10, 64)
+	if err != nil {
+		panic(err)
+	}
+	log.Debug("Setting up telegram bot")
+	Bot, err = tgbotapi.NewBotAPI(TelegramToken)
+	if err != nil {
+		panic(err)
+	}
 
-	bc, err = services.NewBeaconClientManager(rpConfig)
-	if err != nil {
-		panic(err)
-	}
-	ec, err = services.NewExecutionClientManager(rpConfig)
-	if err != nil {
-		panic(err)
-	}
-	rp, err = rpgo.NewRocketPool(ec, rocketStorageAddress)
-	if err != nil {
-		panic(err)
-	}
 }

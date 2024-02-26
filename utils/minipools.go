@@ -1,4 +1,4 @@
-package main
+package utils
 
 import (
 	"context"
@@ -30,8 +30,8 @@ type MinipoolInterestingDetails struct {
 	Earned       float64
 }
 
-func GetMinipoolInterestingDetails(rp *rocketpool.RocketPool, bc beacon.Client, nodeAddress common.Address, legacyMinipoolQueueAddress *common.Address) (MinipoolInterestingDetails, error) {
-	minipoolDetails, err := getNodeMinipoolDetails(rp, bc, nodeAddress, legacyMinipoolQueueAddress)
+func GetMinipoolInterestingDetails(rp *rocketpool.RocketPool, bc beacon.Client, NodeAddress common.Address, legacyMinipoolQueueAddress *common.Address) (MinipoolInterestingDetails, error) {
+	minipoolDetails, err := getNodeMinipoolDetails(rp, bc, NodeAddress, legacyMinipoolQueueAddress)
 	if err != nil {
 		return MinipoolInterestingDetails{}, err
 	}
@@ -57,7 +57,7 @@ func GetMinipoolInterestingDetails(rp *rocketpool.RocketPool, bc beacon.Client, 
 }
 
 // Get all node minipool details
-func getNodeMinipoolDetails(rp *rocketpool.RocketPool, bc beacon.Client, nodeAddress common.Address, legacyMinipoolQueueAddress *common.Address) ([]api.MinipoolDetails, error) {
+func getNodeMinipoolDetails(rp *rocketpool.RocketPool, bc beacon.Client, NodeAddress common.Address, legacyMinipoolQueueAddress *common.Address) ([]api.MinipoolDetails, error) {
 
 	// Data
 	var wg1 errgroup.Group
@@ -69,7 +69,7 @@ func getNodeMinipoolDetails(rp *rocketpool.RocketPool, bc beacon.Client, nodeAdd
 	// Get minipool addresses
 	wg1.Go(func() error {
 		var err error
-		addresses, err = minipool.GetNodeMinipoolAddresses(rp, nodeAddress, nil)
+		addresses, err = minipool.GetNodeMinipoolAddresses(rp, NodeAddress, nil)
 		return err
 	})
 
@@ -156,7 +156,7 @@ func getNodeMinipoolDetails(rp *rocketpool.RocketPool, bc beacon.Client, nodeAdd
 	// Get the time of the latest block
 	latestEth1Block, err := rp.Client.HeaderByNumber(context.Background(), nil)
 	if err != nil {
-		return nil, fmt.Errorf("Can't get the latest block time: %w", err)
+		return nil, fmt.Errorf("can't get the latest block time: %w", err)
 	}
 	latestBlockTime := time.Unix(int64(latestEth1Block.Time), 0)
 

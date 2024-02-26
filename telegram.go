@@ -1,33 +1,34 @@
 package main
 
 import (
-	"fmt"
-	"log"
-	"time"
+	"github.com/t0mk/rocketreport/config"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
-func botInit() error {
-	var err error
-	bot, err = tgbotapi.NewBotAPI(tgToken)
-	if err != nil {
-		return err
-	}
-	return nil
+// Table represents a table to send
+type Table struct {
+	Rows [][]string
 }
 
-func tgString(msg string) error {
-	if !sendTg {
-		debug("NOT sending tgString():", msg)
-		return nil
+func (t *Table) Format(subj string) tgbotapi.MessageConfig {
+
+	rowFunc := tgbotapi.NewInlineKeyboardRow
+	b := func(s string) tgbotapi.InlineKeyboardButton {
+		return tgbotapi.NewInlineKeyboardButtonData(s, s)
 	}
-	log.Println("Sending tgString():", msg)
-	if bot != nil {
-		ts := time.Now().Format("Mon 02-Jan 15:04")
-		hea := fmt.Sprintf("%s, %s", ts, msg)
-		nm := tgbotapi.NewMessage(tgChatID, hea)
-		_, err := Bot.Send(nm)
-		return err
+	rows := [][]tgbotapi.InlineKeyboardButton{}
+	for _, r := range t.Rows {
+		row := []tgbotapi.InlineKeyboardButton{}
+		for _, c := range r {
+			row = append(row, b(c))
+		}
+		rows = append(rows, rowFunc(row...))
 	}
-	return nil
+	kb := tgbotapi.NewInlineKeyboardMarkup(rows...)
+	nm := tgbotapi.NewMessage(config.TelegramChatId, subj)
+	nm.DisableWebPagePreview = true
+	nm.ParseMode = "Markdown"
+	nm.ReplyMarkup = kb
+	return nm
 }
