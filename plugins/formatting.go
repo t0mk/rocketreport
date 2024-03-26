@@ -23,7 +23,7 @@ func (ps *PluginSet) TelegramFormat(subj string) tgbotapi.MessageConfig {
 	}
 
 	kb := tgbotapi.NewInlineKeyboardMarkup(rows...)
-	nm := tgbotapi.NewMessage(config.TelegramChatId, subj)
+	nm := tgbotapi.NewMessage(config.TelegramChatID(), subj)
 	nm.DisableWebPagePreview = true
 	nm.ParseMode = "Markdown"
 	nm.ReplyMarkup = kb

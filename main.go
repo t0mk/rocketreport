@@ -41,19 +41,19 @@ type SendCmd struct {
 
 func (s *SendCmd) Run(ctx *Context) error {
 	log := zaplog.New()
-	ethFiat, err := prices.PriEth(config.ChosenFiat)
+	ethFiat, err := prices.PriEth(config.ChosenFiat())
 	if err != nil {
 		log.Error("Error getting eth price", err)
 	}
-	suff := fmt.Sprintf("%s/Ξ", config.ChosenFiat.String())
+	suff := fmt.Sprintf("%s/Ξ", config.ChosenFiat().String())
 	ethFiatStr := plugins.FloatSuffixFormatter(0, suff)(ethFiat)
 
 	fmt.Println("sending")
-	if s.DoSend && config.Bot != nil {
+	if s.DoSend {
 		ts := time.Now().Format("Mon 02-Jan 15:04")
 		subj := fmt.Sprintf("%s - %s", ts, ethFiatStr)
 		nm := plugins.Plugins.TelegramFormat(subj)
-		_, err := config.Bot.Send(nm)
+		_, err := config.TelegramBot().Send(nm)
 		return err
 	} else {
 		fmt.Println("Not sending to Telegram, use -s to send.")

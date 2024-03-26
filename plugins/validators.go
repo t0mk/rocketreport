@@ -12,7 +12,7 @@ func RegisterValidatorPlugins() {
 			Key:       "depositedEthFiat",
 			Desc:      "Deposited Funds",
 			Help:      fmt.Sprintf("Check the amount of dpeosited ETH in %s", config.ChosenFiat),
-			Formatter: FloatSuffixFormatter(0, config.ChosenFiat.String()),
+			Formatter: FloatSuffixFormatter(0, config.ChosenFiat().String()),
 			Refresh: func() (interface{}, error) {
 				ethPriceRaw, err := getPlugin("ethPrice").GetRaw()
 				if err != nil {
@@ -46,7 +46,7 @@ func RegisterValidatorPlugins() {
 			Key:       "earnedConsensusFunds",
 			Desc:      "Earned consensus funds",
 			Help:      fmt.Sprintf("Check the amount of consensus funds in %s", config.ChosenFiat),
-			Formatter: FloatSuffixFormatter(0, config.ChosenFiat.String()),
+			Formatter: FloatSuffixFormatter(0, config.ChosenFiat().String()),
 			Refresh: func() (interface{}, error) {
 				earnedConsesusEthRaw, err := getPlugin("earnedConsesusEth").GetRaw()
 				if err != nil {
@@ -67,7 +67,7 @@ func RegisterValidatorPlugins() {
 			Key:       "totalFunds",
 			Desc:      "Total funds",
 			Help:      fmt.Sprintf("Check the total amount of funds in %s", config.ChosenFiat),
-			Formatter: FloatSuffixFormatter(0, config.ChosenFiat.String()),
+			Formatter: FloatSuffixFormatter(0, config.ChosenFiat().String()),
 			Refresh: func() (interface{}, error) {
 				earnedConsensusFundsRaw, err := getPlugin("earnedConsensusFunds").GetRaw()
 				if err != nil {

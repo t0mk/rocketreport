@@ -10,7 +10,7 @@ import (
 )
 
 func GetActualStake() (interface{}, error) {
-	actualStake, err := node.GetNodeRPLStake(config.RP, config.NodeAddress, nil)
+	actualStake, err := node.GetNodeRPLStake(config.RP(), config.NodeAddress(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -19,7 +19,7 @@ func GetActualStake() (interface{}, error) {
 }
 
 func GetMinStake() (interface{}, error) {
-	minStake, err := node.GetNodeMinimumRPLStake(config.RP, config.NodeAddress, nil)
+	minStake, err := node.GetNodeMinimumRPLStake(config.RP(), config.NodeAddress(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -36,9 +36,9 @@ func CachedGetMinipoolDetails(cacheKey string) (*utils.MinipoolInterestingDetail
 	}
 	log.Debug("Cache miss for ", cacheKey)
 	details, err := utils.GetMinipoolInterestingDetails(
-		config.RP,
-		config.BC,
-		config.NodeAddress,
+		config.RP(),
+		config.BC(),
+		config.NodeAddress(),
 		nil,
 	)
 	log.Debug("Got details ", details)

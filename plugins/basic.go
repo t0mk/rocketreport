@@ -26,7 +26,7 @@ func RegisterBasicPlugins() {
 			Formatter: StrFormatter,
 			Opts:      &PluginOpts{MarkOutputGreen: true},
 			Refresh: func() (interface{}, error) {
-				ecs := config.EC().CheckStatus(config.RpConfig)
+				ecs := config.EC().CheckStatus(config.RpConfig())
 				return utils.EthClientStatusString(ecs), nil
 			},
 		},
@@ -37,7 +37,7 @@ func RegisterBasicPlugins() {
 			Formatter: StrFormatter,
 			Opts:      &PluginOpts{MarkOutputGreen: true},
 			Refresh: func() (interface{}, error) {
-				bcs := config.BC.CheckStatus()
+				bcs := config.BC().CheckStatus()
 				return utils.EthClientStatusString(bcs), nil
 			},
 		},
@@ -87,15 +87,15 @@ func RegisterBasicPlugins() {
 			Key:       "ethPrice",
 			Desc:      fmt.Sprintf("ETH-%s", config.ChosenFiat),
 			Help:      fmt.Sprintf("Check ETH/%s price", config.ChosenFiat),
-			Formatter: FloatSuffixFormatter(0, config.ChosenFiat.String()),
-			Refresh:   func() (interface{}, error) { return prices.PriEth(config.ChosenFiat) },
+			Formatter: FloatSuffixFormatter(0, config.ChosenFiat().String()),
+			Refresh:   func() (interface{}, error) { return prices.PriEth(config.ChosenFiat()) },
 		},
 		{
 			Key:       "rplPrice",
 			Desc:      fmt.Sprintf("RPL-%s", config.ChosenFiat),
 			Help:      fmt.Sprintf("Check RPL/%s price", config.ChosenFiat),
-			Formatter: FloatSuffixFormatter(2, config.ChosenFiat.String()),
-			Refresh:   func() (interface{}, error) { return prices.PriRpl(config.ChosenFiat) },
+			Formatter: FloatSuffixFormatter(2, config.ChosenFiat().String()),
+			Refresh:   func() (interface{}, error) { return prices.PriRpl(config.ChosenFiat()) },
 		},
 		{
 			Key:       "ownEthDeposit",
@@ -114,7 +114,7 @@ func RegisterBasicPlugins() {
 			Key:       "rplFiat",
 			Desc:      "RPL funds",
 			Help:      fmt.Sprintf("Check the amount of RPL in %s", config.ChosenFiat),
-			Formatter: FloatSuffixFormatter(0, config.ChosenFiat.String()),
+			Formatter: FloatSuffixFormatter(0, config.ChosenFiat().String()),
 			Refresh: func() (interface{}, error) {
 				rplPriceRaw, err := getPlugin("rplPrice").GetRaw()
 				if err != nil {

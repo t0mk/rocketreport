@@ -46,7 +46,7 @@ func PriRplEthOracle() (float64, error) {
 	if config.CachedRplPrice != nil {
 		return *config.CachedRplPrice, nil
 	}
-	rplPrice, err := network.GetRPLPrice(config.RP, nil)
+	rplPrice, err := network.GetRPLPrice(config.RP(), nil)
 	if err != nil {
 		return 0, err
 	}
