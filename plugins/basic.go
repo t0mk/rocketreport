@@ -26,7 +26,7 @@ func RegisterBasicPlugins() {
 			Formatter: StrFormatter,
 			Opts:      &PluginOpts{MarkOutputGreen: true},
 			Refresh: func() (interface{}, error) {
-				ecs := config.EC.CheckStatus(config.RpConfig)
+				ecs := config.EC().CheckStatus(config.RpConfig)
 				return utils.EthClientStatusString(ecs), nil
 			},
 		},
