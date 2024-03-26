@@ -30,6 +30,14 @@ type MinipoolInterestingDetails struct {
 	Earned       float64
 }
 
+func GetMinipoolCount(rp *rocketpool.RocketPool, NodeAddress common.Address) (int, error) {
+	addresses, err := minipool.GetNodeMinipoolAddresses(rp, NodeAddress, nil)
+	if err != nil {
+		return 0, err
+	}
+	return len(addresses), nil
+}
+
 func GetMinipoolInterestingDetails(rp *rocketpool.RocketPool, bc beacon.Client, NodeAddress common.Address, legacyMinipoolQueueAddress *common.Address) (MinipoolInterestingDetails, error) {
 	minipoolDetails, err := getNodeMinipoolDetails(rp, bc, NodeAddress, legacyMinipoolQueueAddress)
 	if err != nil {
@@ -38,7 +46,7 @@ func GetMinipoolInterestingDetails(rp *rocketpool.RocketPool, bc beacon.Client, 
 
 	count := 0
 	totalDeposit := 0.0
-	earned := 0.0
+	earnedShare := 0.0
 	for _, mpDetails := range minipoolDetails {
 		if mpDetails.Status.Status == types.Staking {
 			if mpDetails.Finalised {
@@ -46,13 +54,14 @@ func GetMinipoolInterestingDetails(rp *rocketpool.RocketPool, bc beacon.Client, 
 			}
 			count++
 			ndepo := math.RoundDown(eth.WeiToEth(mpDetails.Node.DepositBalance), 6)
-			share := math.RoundDown(eth.WeiToEth(mpDetails.NodeShareOfETHBalance), 6)
+			execShare := math.RoundDown(eth.WeiToEth(mpDetails.NodeShareOfETHBalance), 6)
+			consShare := math.RoundDown(eth.WeiToEth(mpDetails.Validator.NodeBalance), 8)
 
 			totalDeposit += ndepo
-			earned += share
+			earnedShare += consShare + execShare
 		}
 	}
-	return MinipoolInterestingDetails{Count: count, TotalDeposit: totalDeposit, Earned: earned}, nil
+	return MinipoolInterestingDetails{Count: count, TotalDeposit: totalDeposit, Earned: earnedShare - totalDeposit}, nil
 
 }
 

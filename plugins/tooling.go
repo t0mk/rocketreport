@@ -5,6 +5,7 @@ import (
 
 	"github.com/jellydator/ttlcache/v3"
 	"github.com/t0mk/rocketreport/cache"
+	"github.com/t0mk/rocketreport/prices"
 	"github.com/t0mk/rocketreport/zaplog"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
@@ -16,7 +17,9 @@ const (
 	colorGreen string = "\033[32m"
 )
 
-var Plugins []Plugin
+var Plugins PluginSet
+
+type PluginSet []Plugin
 
 type RefreshFunc func() (interface{}, error)
 
@@ -90,27 +93,6 @@ func ToPlaintext(pl []Plugin) string {
 	return s
 }
 
-func ToTermText(pl []Plugin) string {
-	s := ""
-	for _, p := range pl {
-		p.Eval()
-		l := fmt.Sprintf("%-25s", p.Desc)
-		if p.Err != "" {
-			l += fmt.Sprintf("%sError: %s%s", colorRed, p.Err, colorReset)
-		}
-		if p.Output != "" {
-			if p.Opts != nil && p.Opts.MarkOutputGreen {
-				l += fmt.Sprintf("%s%s%s", colorGreen, p.Output, colorReset)
-			} else if p.Opts != nil && p.Opts.MarkNegativeRed && p.RawOutput.(float64) < 0 {
-				l += fmt.Sprintf("%s%s%s", colorRed, p.Output, colorReset)
-			} else {
-				l += p.Output
-			}
-		}
-		s += l + "\n"
-	}
-	return s
-}
 
 func StrFormatter(i interface{}) string {
 	return i.(string)
@@ -119,8 +101,8 @@ func StrFormatter(i interface{}) string {
 func FloatSuffixFormatter(ndecs int, suffix string) func(interface{}) string {
 	return func(i interface{}) string {
 		f := message.NewPrinter(language.English)
-		return f.Sprintf("%.*f %s", ndecs, i.(float64), suffix)
-		//return fmt.Sprintf("%.*f %s", ndecs, i.(float64), suffix)
+		replacedSuffix := prices.FindAndReplaceAllCurrencyOccurencesBySign(suffix)
+		return f.Sprintf("%.*f %s", ndecs, i.(float64), replacedSuffix)
 	}
 }
 

@@ -1,9 +1,11 @@
 package config
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/ethereum/go-ethereum/common"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -27,10 +29,19 @@ var RpConfig *config.RocketPoolConfig
 var BC *services.BeaconClientManager
 var EC *services.ExecutionClientManager
 var RP *rpgo.RocketPool
+var SnConfig *config.SmartnodeConfig
+var Network configtypes.Network
 
 var Bot *tgbotapi.BotAPI
 var TelegramToken string
 var TelegramChatId int64
+
+type EthClientType string
+
+const (
+	Eth1 EthClientType = "eth1"
+	Eth2 EthClientType = "eth2"
+)
 
 const (
 	RocketStorageAddressEnv = "ROCKETSTORAGE_ADDRESS"
@@ -41,6 +52,7 @@ const (
 	fiatEnv                 = "FIAT"
 	telegramTokenEnv        = "TELEGRAM_TOKEN"
 	telegramChatIdEnv       = "TELEGRAM_CHAT_ID"
+	NetworkEnv              = "NETWORK"
 )
 
 func getEnvOrPanic(key string) string {
@@ -49,6 +61,41 @@ func getEnvOrPanic(key string) string {
 		panic(fmt.Sprintf("missing env var %s", key))
 	}
 	return value
+}
+
+func getBeaconHeadTimed(ctx context.Context) error {
+	errChan := make(chan error)
+	go func() {
+		_, err := BC.GetBeaconHead()
+		errChan <- err
+	}()
+
+	select {
+	case e := <-errChan:
+		return e
+	case <-ctx.Done():
+		return fmt.Errorf("timeout, make sure consensus client is ready at %s", Eth2Url)
+	}
+}
+
+func findEthClientUrl(t EthClientType) string {
+	urlVar := Eth1UrlEnv
+	if t == Eth2 {
+		urlVar = Eth2UrlEnv
+	}
+	val := os.Getenv(urlVar)
+	if val != "" {
+		return val
+	}
+	ips, err := FindContainerIPs(string(t))
+	if err != nil {
+		panic(err)
+	}
+	port := "8545"
+	if t == Eth2 {
+		port = "5052"
+	}
+	return fmt.Sprintf("http://%s:%s", ips[0], port)
 }
 
 func Setup() {
@@ -64,7 +111,8 @@ func Setup() {
 		Debug = true
 	}
 
-	Eth1Url = getEnvOrPanic("ETH1_URL")
+	Eth1Url = findEthClientUrl(Eth1)
+	Eth2Url = findEthClientUrl(Eth2)
 	NodeAddress = common.HexToAddress(getEnvOrPanic("NODE_ADDRESS"))
 	RocketStorageAddress = common.HexToAddress(
 		getEnvOrPanic("ROCKETSTORAGE_ADDRESS"),
@@ -75,7 +123,15 @@ func Setup() {
 	}
 	ChosenFiat = types.Denom(fiatValue)
 
-	Eth2Url = getEnvOrPanic("ETH2_URL")
+	network := getEnvOrPanic(NetworkEnv)
+	switch network {
+	case "mainnet":
+		Network = configtypes.Network_Mainnet
+	case "holesky":
+		Network = configtypes.Network_Holesky
+	default:
+		panic(fmt.Sprintf("Unknown network: %s", network))
+	}
 
 	RpConfig = &config.RocketPoolConfig{
 		//IsNativeMode: true,
@@ -97,13 +153,23 @@ func Setup() {
 			},
 		},
 	}
+
+	SnConfig = config.NewSmartnodeConfig(RpConfig)
+	SnConfig.Network = configtypes.Parameter{Value: Network}
+
 	log.Debug("Setting up beacon client")
 	BC, err = services.NewBeaconClientManager(RpConfig)
 	if err != nil {
 		panic(err)
 	}
+
 	log.Debug("Getting beacon head")
-	_, err = BC.GetBeaconHead()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	err = getBeaconHeadTimed(ctx)
+	/*
+		_, err = BC.GetBeaconHead()
+	*/
 	if err != nil {
 		panic(fmt.Sprintf("Beacon client maybe not working: %s", err))
 	}

@@ -3,15 +3,16 @@ package utils
 import (
 	"fmt"
 
+	"math/big"
+
+	"github.com/ethereum/go-ethereum/params"
 	"github.com/rocket-pool/smartnode/shared/types/api"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
-	"math/big"
-	"github.com/ethereum/go-ethereum/params"
 )
 
-func EthClientStatusString(status api.ClientStatus) string {
-	sentence := ""
+func SingleClientStatusString(status api.ClientStatus) string {
+	sentence := " "
 	if !status.IsWorking {
 		sentence += "not working,"
 	}
@@ -29,6 +30,15 @@ func EthClientStatusString(status api.ClientStatus) string {
 	return sentence
 }
 
+func EthClientStatusString(status *api.ClientManagerStatus) string {
+	sentence := "Prim" + SingleClientStatusString(status.PrimaryClientStatus)
+	if status.FallbackEnabled {
+		sentence += ", FB " + SingleClientStatusString(status.FallbackClientStatus)
+	} else {
+		sentence += ", FB n/a"
+	}
+	return sentence
+}
 
 func WeiToEther(wei *big.Int) *big.Float {
 	return new(big.Float).Quo(new(big.Float).SetInt(wei), big.NewFloat(params.Ether))

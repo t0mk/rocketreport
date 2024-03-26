@@ -27,7 +27,7 @@ func RegisterBasicPlugins() {
 			Opts:      &PluginOpts{MarkOutputGreen: true},
 			Refresh: func() (interface{}, error) {
 				ecs := config.EC.CheckStatus(config.RpConfig)
-				return utils.EthClientStatusString(ecs.PrimaryClientStatus), nil
+				return utils.EthClientStatusString(ecs), nil
 			},
 		},
 		{
@@ -38,7 +38,7 @@ func RegisterBasicPlugins() {
 			Opts:      &PluginOpts{MarkOutputGreen: true},
 			Refresh: func() (interface{}, error) {
 				bcs := config.BC.CheckStatus()
-				return utils.EthClientStatusString(bcs.PrimaryClientStatus), nil
+				return utils.EthClientStatusString(bcs), nil
 			},
 		},
 		{
@@ -78,21 +78,21 @@ func RegisterBasicPlugins() {
 		},
 		{
 			Key:       "oracleRplPrice",
-			Desc:      "Oracle RPL/ETH",
+			Desc:      "Oracle RPL-ETH",
 			Help:      "Check the RPL price from the oracle",
 			Formatter: FloatSuffixFormatter(6, "ETH"),
 			Refresh:   func() (interface{}, error) { return prices.PriRplEthOracle() },
 		},
 		{
 			Key:       "ethPrice",
-			Desc:      fmt.Sprintf("ETH/%s", config.ChosenFiat),
+			Desc:      fmt.Sprintf("ETH-%s", config.ChosenFiat),
 			Help:      fmt.Sprintf("Check ETH/%s price", config.ChosenFiat),
 			Formatter: FloatSuffixFormatter(0, config.ChosenFiat.String()),
 			Refresh:   func() (interface{}, error) { return prices.PriEth(config.ChosenFiat) },
 		},
 		{
 			Key:       "rplPrice",
-			Desc:      fmt.Sprintf("RPL/%s", config.ChosenFiat),
+			Desc:      fmt.Sprintf("RPL-%s", config.ChosenFiat),
 			Help:      fmt.Sprintf("Check RPL/%s price", config.ChosenFiat),
 			Formatter: FloatSuffixFormatter(2, config.ChosenFiat.String()),
 			Refresh:   func() (interface{}, error) { return prices.PriRpl(config.ChosenFiat) },

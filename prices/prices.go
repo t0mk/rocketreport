@@ -4,15 +4,16 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/rocket-pool/rocketpool-go/network"
 	"github.com/t0mk/rocketreport/cache"
 	"github.com/t0mk/rocketreport/config"
 	"github.com/t0mk/rocketreport/types"
 	"github.com/t0mk/rocketreport/utils"
+	"github.com/t0mk/rocketreport/zaplog"
 )
 
 var xchMap = map[types.Denom]func(types.Denom) (float64, error){
@@ -23,6 +24,22 @@ var xchMap = map[types.Denom]func(types.Denom) (float64, error){
 	types.AUD: KrakenPri,
 	types.CHF: KrakenPri,
 	types.CZK: CoinmatePri,
+}
+
+var currencySymbols = map[string]rune{
+	"USD": '$',
+	"EUR": '€',
+	"GBP": '£',
+	"JPY": '¥',
+	"ETH": 'Ξ',
+}
+
+func FindAndReplaceAllCurrencyOccurencesBySign(s string) string {
+	ret := s
+	for k, v := range currencySymbols {
+		ret = strings.ReplaceAll(ret, k, string(v))
+	}
+	return ret
 }
 
 func PriRplEthOracle() (float64, error) {
@@ -42,9 +59,8 @@ func PriRplEthOracle() (float64, error) {
 }
 
 func PriEth(denom types.Denom) (float64, error) {
-	if config.Debug {
-		log.Println("priEthtypes.denom", denom)
-	}
+	log := zaplog.New()
+	log.Debug("priEthtypes.denom", denom)
 	item := cache.Cache.Get("price" + denom.String())
 	if (item != nil) && (!item.IsExpired()) {
 		return item.Value().(float64), nil
@@ -74,9 +90,8 @@ func PriRpl(denom types.Denom) (float64, error) {
 }
 
 func KrakenPri(denom types.Denom) (float64, error) {
-	if config.Debug {
-		log.Println("bitfinexPri", denom)
-	}
+	log := zaplog.New()
+	log.Debug("bitfinexPri", denom)
 	ticker := "ETH" + string(denom)
 	ab, err := KrakenGetter(ticker)
 	if err != nil {
@@ -86,9 +101,8 @@ func KrakenPri(denom types.Denom) (float64, error) {
 }
 
 func BitfinexPri(denom types.Denom) (float64, error) {
-	if config.Debug {
-		log.Println("bitfinexPri", denom)
-	}
+	log := zaplog.New()
+	log.Debug("bitfinexPri", denom)
 	ticker := "ETH" + string(denom)
 	ab, err := BitfinexGetter(ticker)
 	if err != nil {
@@ -98,9 +112,8 @@ func BitfinexPri(denom types.Denom) (float64, error) {
 }
 
 func CoinmatePri(denom types.Denom) (float64, error) {
-	if config.Debug {
-		log.Println("coinmatePri", denom)
-	}
+	log := zaplog.New()
+	log.Debug("coinmatePri", denom)
 	ticker := "ETH_" + string(denom)
 	ab, err := CoinmateGetter(ticker)
 	if err != nil {
@@ -110,9 +123,8 @@ func CoinmatePri(denom types.Denom) (float64, error) {
 }
 
 func getHTTPResponseBodyFromUrl(url string) ([]byte, error) {
-	if config.Debug {
-		log.Println("getHTTPResponseBodyFromUrl", url)
-	}
+	log := zaplog.New()
+	log.Debug("getHTTPResponseBodyFromUrl", url)
 	resp, err := http.Get(url)
 	if err != nil {
 		return nil, fmt.Errorf("http.Get: %v", err)
@@ -122,9 +134,7 @@ func getHTTPResponseBodyFromUrl(url string) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("ioutil.ReadAll: %v", err)
 	}
-	if config.Debug {
-		log.Println("BODY:", string(body))
-	}
+	log.Debug("BODY:", string(body))
 	return body, nil
 }
 

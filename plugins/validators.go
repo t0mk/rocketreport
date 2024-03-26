@@ -33,7 +33,7 @@ func RegisterValidatorPlugins() {
 			Key:       "earnedConsesusEth",
 			Desc:      "Earned consensus ETH",
 			Help:      fmt.Sprintf("Check the amount of consensus ETH in %s", config.ChosenFiat),
-			Formatter: FloatSuffixFormatter(3, "ETH"),
+			Formatter: FloatSuffixFormatter(5, "ETH"),
 			Refresh: func() (interface{}, error) {
 				details, err := CachedGetMinipoolDetails(minipoolDetails)
 				if err != nil {
