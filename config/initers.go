@@ -12,7 +12,6 @@ import (
 	rpgo "github.com/rocket-pool/rocketpool-go/rocketpool"
 	"github.com/rocket-pool/smartnode/shared/services"
 	"github.com/rocket-pool/smartnode/shared/services/config"
-	"github.com/t0mk/rocketreport/types"
 	"github.com/t0mk/rocketreport/zaplog"
 
 	configtypes "github.com/rocket-pool/smartnode/shared/types/config"
@@ -142,12 +141,17 @@ func initRP() *rpgo.RocketPool {
 	return rp
 }
 
-func initChosenFiat() types.Denom {
+func initChosenFiat() string {
 	fiatValue := os.Getenv(fiatEnv)
 	if fiatValue == "" {
-		return types.USD
+		return USD
 	}
-	return types.Denom(fiatValue)
+	// test
+
+	if _, ok := XchMap[fiatValue]; !ok {
+		panic(fmt.Sprintf("Unknown fiat %s", fiatValue))
+	}
+	return fiatValue
 }
 
 func initTelegramChatID() int64 {
@@ -167,3 +171,4 @@ func initTelegramBot() *tgbotapi.BotAPI {
 	}
 	return bot
 }
+

@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/joho/godotenv"
+	"github.com/t0mk/rocketreport/exchanges"
 )
 
 const (
@@ -74,6 +75,18 @@ var RP = sync.OnceValue(initRP)
 var ChosenFiat = sync.OnceValue(initChosenFiat)
 var TelegramChatID = sync.OnceValue(initTelegramChatID)
 var TelegramBot = sync.OnceValue(initTelegramBot)
+
+
+
+var XchMap = map[string]func(string) (float64, error){
+	USD: exchanges.BitfinexPri,
+	EUR:  exchanges.BitfinexPri,
+	GBP:  exchanges.BitfinexPri,
+	JPY:  exchanges.BitfinexPri,
+	AUD:  exchanges.KrakenPri,
+	CHF:  exchanges.KrakenPri,
+	CZK:  exchanges.CoinmatePri,
+}
 
 func Setup() {
 	err := godotenv.Load()

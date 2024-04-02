@@ -85,16 +85,16 @@ func RegisterBasicPlugins() {
 		},
 		{
 			Key:       "ethPrice",
-			Desc:      fmt.Sprintf("ETH-%s", config.ChosenFiat),
-			Help:      fmt.Sprintf("Check ETH/%s price", config.ChosenFiat),
-			Formatter: FloatSuffixFormatter(0, config.ChosenFiat().String()),
+			Desc:      fmt.Sprintf("ETH-%s", config.ChosenFiat()),
+			Help:      fmt.Sprintf("Check ETH/%s price", config.ChosenFiat()),
+			Formatter: FloatSuffixFormatter(0, config.ChosenFiat()),
 			Refresh:   func() (interface{}, error) { return prices.PriEth(config.ChosenFiat()) },
 		},
 		{
 			Key:       "rplPrice",
-			Desc:      fmt.Sprintf("RPL-%s", config.ChosenFiat),
-			Help:      fmt.Sprintf("Check RPL/%s price", config.ChosenFiat),
-			Formatter: FloatSuffixFormatter(2, config.ChosenFiat().String()),
+			Desc:      fmt.Sprintf("RPL-%s", config.ChosenFiat()),
+			Help:      fmt.Sprintf("Check RPL/%s price", config.ChosenFiat()),
+			Formatter: FloatSuffixFormatter(2, config.ChosenFiat()),
 			Refresh:   func() (interface{}, error) { return prices.PriRpl(config.ChosenFiat()) },
 		},
 		{
@@ -113,8 +113,8 @@ func RegisterBasicPlugins() {
 		{
 			Key:       "rplFiat",
 			Desc:      "RPL funds",
-			Help:      fmt.Sprintf("Check the amount of RPL in %s", config.ChosenFiat),
-			Formatter: FloatSuffixFormatter(0, config.ChosenFiat().String()),
+			Help:      fmt.Sprintf("Check the amount of RPL in %s", config.ChosenFiat()),
+			Formatter: FloatSuffixFormatter(0, config.ChosenFiat()),
 			Refresh: func() (interface{}, error) {
 				rplPriceRaw, err := getPlugin("rplPrice").GetRaw()
 				if err != nil {

@@ -45,7 +45,7 @@ func (s *SendCmd) Run(ctx *Context) error {
 	if err != nil {
 		log.Error("Error getting eth price", err)
 	}
-	suff := fmt.Sprintf("%s/Ξ", config.ChosenFiat().String())
+	suff := fmt.Sprintf("%s/Ξ", config.ChosenFiat())
 	ethFiatStr := plugins.FloatSuffixFormatter(0, suff)(ethFiat)
 
 	fmt.Println("sending")
