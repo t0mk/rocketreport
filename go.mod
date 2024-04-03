@@ -4,10 +4,11 @@ go 1.21.5
 
 require (
 	github.com/alecthomas/kong v0.8.1
+	github.com/cristalhq/aconfig v0.18.5
+	github.com/cristalhq/aconfig/aconfigyaml v0.17.1
 	github.com/ethereum/go-ethereum v1.10.26
 	github.com/go-telegram-bot-api/telegram-bot-api v4.6.4+incompatible
 	github.com/jellydator/ttlcache/v3 v3.2.0
-	github.com/joho/godotenv v1.5.1
 	github.com/rocket-pool/rocketpool-go v1.8.2
 	github.com/rocket-pool/smartnode v1.11.7
 	go.uber.org/zap v1.24.0
@@ -16,9 +17,8 @@ require (
 )
 
 require (
-	github.com/mitchellh/colorstring v0.0.0-20190213212951-d06e56a500db // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
-	golang.org/x/term v0.17.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
 require (
@@ -36,7 +36,7 @@ require (
 	github.com/deckarep/golang-set v1.8.0 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.1.0 // indirect
 	github.com/docker/distribution v2.8.2+incompatible // indirect
-	github.com/docker/docker v23.0.3+incompatible // indirect
+	github.com/docker/docker v23.0.3+incompatible
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/fatih/color v1.14.1 // indirect
@@ -96,7 +96,6 @@ require (
 	github.com/prysmaticlabs/prysm/v3 v3.2.0 // indirect
 	github.com/rjeczalik/notify v0.9.1 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
-	github.com/schollz/progressbar/v3 v3.14.2
 	github.com/sethvargo/go-password v0.2.0 // indirect
 	github.com/shirou/gopsutil v3.21.11+incompatible // indirect
 	github.com/sirupsen/logrus v1.8.1 // indirect

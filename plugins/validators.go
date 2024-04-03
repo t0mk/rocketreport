@@ -7,13 +7,13 @@ import (
 )
 
 func RegisterValidatorPlugins() {
-	Plugins = append(Plugins, []Plugin{
+	AllPlugins = append(AllPlugins, []Plugin{
 		{
 			Key:       "depositedEthFiat",
 			Desc:      "Deposited Funds",
 			Help:      fmt.Sprintf("Check the amount of dpeosited ETH in %s", config.ChosenFiat()),
 			Formatter: FloatSuffixFormatter(0, config.ChosenFiat()),
-			Refresh: func() (interface{}, error) {
+			Refresh: func(...interface{}) (interface{}, error) {
 				ethPriceRaw, err := getPlugin("ethPrice").GetRaw()
 				if err != nil {
 					return nil, err
@@ -34,7 +34,7 @@ func RegisterValidatorPlugins() {
 			Desc:      "Earned consensus ETH",
 			Help:      fmt.Sprintf("Check the amount of consensus ETH in %s", config.ChosenFiat()),
 			Formatter: FloatSuffixFormatter(5, "ETH"),
-			Refresh: func() (interface{}, error) {
+			Refresh: func(...interface{}) (interface{}, error) {
 				details, err := CachedGetMinipoolDetails(minipoolDetails)
 				if err != nil {
 					return nil, err
@@ -47,7 +47,7 @@ func RegisterValidatorPlugins() {
 			Desc:      "Earned consensus funds",
 			Help:      fmt.Sprintf("Check the amount of consensus funds in %s", config.ChosenFiat()),
 			Formatter: FloatSuffixFormatter(0, config.ChosenFiat()),
-			Refresh: func() (interface{}, error) {
+			Refresh: func(...interface{}) (interface{}, error) {
 				earnedConsesusEthRaw, err := getPlugin("earnedConsesusEth").GetRaw()
 				if err != nil {
 					return nil, err
@@ -68,7 +68,7 @@ func RegisterValidatorPlugins() {
 			Desc:      "Total funds",
 			Help:      fmt.Sprintf("Check the total amount of funds in %s", config.ChosenFiat()),
 			Formatter: FloatSuffixFormatter(0, config.ChosenFiat()),
-			Refresh: func() (interface{}, error) {
+			Refresh: func(...interface{}) (interface{}, error) {
 				earnedConsensusFundsRaw, err := getPlugin("earnedConsensusFunds").GetRaw()
 				if err != nil {
 					return nil, err

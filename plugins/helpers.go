@@ -9,7 +9,7 @@ import (
 	"github.com/t0mk/rocketreport/zaplog"
 )
 
-func GetActualStake() (interface{}, error) {
+func GetActualStake(...interface{}) (interface{}, error) {
 	actualStake, err := node.GetNodeRPLStake(config.RP(), config.NodeAddress(), nil)
 	if err != nil {
 		return nil, err
@@ -18,7 +18,7 @@ func GetActualStake() (interface{}, error) {
 	return actualStakeFloat, nil
 }
 
-func GetMinStake() (interface{}, error) {
+func GetMinStake(...interface{}) (interface{}, error) {
 	minStake, err := node.GetNodeMinimumRPLStake(config.RP(), config.NodeAddress(), nil)
 	if err != nil {
 		return nil, err

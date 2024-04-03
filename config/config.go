@@ -5,8 +5,8 @@ import (
 	"os"
 	"sync"
 
-	"github.com/joho/godotenv"
-	"github.com/t0mk/rocketreport/exchanges"
+	"github.com/cristalhq/aconfig"
+	"github.com/cristalhq/aconfig/aconfigyaml"
 )
 
 const (
@@ -20,15 +20,10 @@ const (
 	telegramChatIdEnv       = "TELEGRAM_CHAT_ID"
 	NetworkEnv              = "NETWORK"
 	ConsensusClientEnv      = "CONSENSUS_CLIENT"
+	PluginListEnv           = "PLUGIN_LIST"
 )
 
-var Debug bool
 var CachedRplPrice *float64
-
-type Telegram struct {
-	Token  string
-	ChatId int64
-}
 
 type EthClientType string
 
@@ -65,36 +60,58 @@ func findEthClientUrl(t EthClientType) string {
 	return fmt.Sprintf("http://%s:%s", ips[0], port)
 }
 
+type PluginConf map[string]struct {
+	Key  string
+	Desc string
+	Args []string
+}
+
+type ConfigData struct {
+	NodeAddress          string `env:"NODE_ADDRESS" yaml:"node_address" json:"node_address"`
+	Eth1Url              string `env:"ETH1_URL" yaml:"eth1_url" json:"eth1_url"`
+	Eth2Url              string `env:"ETH2_URL" yaml:"eth2_url" json:"eth2_url"`
+	ConsensusClient      string `env:"CONSENSUS_CLIENT" yaml:"consensus_client" json:"consensus_client"`
+	Network              string `env:"NETWORK" yaml:"network" json:"network"`
+	RocketStorageAddress string `env:"ROCKETSTORAGE_ADDRESS" yaml:"rocketstorage_address" json:"rocketstorage_address"`
+	Fiat                 string `default:"USD" env:"FIAT" yaml:"fiat" json:"fiat"`
+	TelegramToken        string `env:"TELEGRAM_TOKEN" yaml:"telegram_token" json:"telegram_token"`
+	TelegramChatId       int64  `env:"TELEGRAM_CHAT_ID" yaml:"telegram_chat_id" json:"telegram_chat_id"`
+	Debug                bool   `env:"DEBUG" yaml:"debug" json:"debug"`
+	PluginConf           []PluginConf `env:"PLUGIN_LIST" yaml:"plugin_list" json:"plugin_list"`
+}
+
+var c ConfigData
+
 var EC = sync.OnceValue(initEC)
 var BC = sync.OnceValue(initBC)
 var RpConfig = sync.OnceValue(initRpConfig)
 var NodeAddress = sync.OnceValue(initNodeAddress)
 var RocketStorageAddress = sync.OnceValue(initRocketStorageAddress)
-var Network = sync.OnceValue(initNetworkValue)
+var Network = sync.OnceValue(initNetwork)
 var RP = sync.OnceValue(initRP)
+var PluginList = sync.OnceValue(initPluginList)
 var ChosenFiat = sync.OnceValue(initChosenFiat)
-var TelegramChatID = sync.OnceValue(initTelegramChatID)
+var TelegramChatID = sync.OnceValue(initTelegramChatId)
+var TelegramToken = sync.OnceValue(initTelegramToken)
 var TelegramBot = sync.OnceValue(initTelegramBot)
-
-
-
-var XchMap = map[string]func(string) (float64, error){
-	USD: exchanges.BitfinexPri,
-	EUR:  exchanges.BitfinexPri,
-	GBP:  exchanges.BitfinexPri,
-	JPY:  exchanges.BitfinexPri,
-	AUD:  exchanges.KrakenPri,
-	CHF:  exchanges.KrakenPri,
-	CZK:  exchanges.CoinmatePri,
-}
+var Debug bool
 
 func Setup() {
-	err := godotenv.Load()
+	loader := aconfig.LoaderFor(&c, aconfig.Config{
+		Files: []string{"config.yaml", "config.yml", "config.json"},
+		FileDecoders: map[string]aconfig.FileDecoder{
+			".yaml": aconfigyaml.New(),
+			".yml":  aconfigyaml.New(),
+		},
+	})
+	err := loader.Load()
 	if err != nil {
 		panic(err)
 	}
-
-	if (os.Getenv(DebugEnv) != "") && (os.Getenv(DebugEnv) != "0") {
-		Debug = true
-	}
+	/*
+		err := godotenv.Load()
+		if err != nil {
+			panic(err)
+		}
+	*/
 }

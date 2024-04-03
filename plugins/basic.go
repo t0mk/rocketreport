@@ -15,17 +15,18 @@ const (
 func RegisterAll() {
 	RegisterBasicPlugins()
 	RegisterValidatorPlugins()
+	RegisterExchangeTickerPlugins()
 }
 
 func RegisterBasicPlugins() {
-	Plugins = append(Plugins, []Plugin{
+	AllPlugins = append(AllPlugins, []Plugin{
 		{
 			Key:       "eth1sync",
 			Desc:      "Eth1 client",
 			Help:      "Check the sync status of the Eth1 client",
 			Formatter: StrFormatter,
 			Opts:      &PluginOpts{MarkOutputGreen: true},
-			Refresh: func() (interface{}, error) {
+			Refresh: func(...interface{}) (interface{}, error) {
 				ecs := config.EC().CheckStatus(config.RpConfig())
 				return utils.EthClientStatusString(ecs), nil
 			},
@@ -36,7 +37,7 @@ func RegisterBasicPlugins() {
 			Help:      "Check the sync status of the Eth2 client",
 			Formatter: StrFormatter,
 			Opts:      &PluginOpts{MarkOutputGreen: true},
-			Refresh: func() (interface{}, error) {
+			Refresh: func(...interface{}) (interface{}, error) {
 				bcs := config.BC().CheckStatus()
 				return utils.EthClientStatusString(bcs), nil
 			},
@@ -61,7 +62,7 @@ func RegisterBasicPlugins() {
 			Help:      "Check the reserve of RPL stake",
 			Formatter: FloatSuffixFormatter(1, "RPL"),
 			Opts:      &PluginOpts{MarkNegativeRed: true},
-			Refresh: func() (interface{}, error) {
+			Refresh: func(...interface{}) (interface{}, error) {
 				actualStakeRaw, err := getPlugin("actualStake").GetRaw()
 				if err != nil {
 					return nil, err
@@ -81,28 +82,28 @@ func RegisterBasicPlugins() {
 			Desc:      "Oracle RPL-ETH",
 			Help:      "Check the RPL price from the oracle",
 			Formatter: FloatSuffixFormatter(6, "ETH"),
-			Refresh:   func() (interface{}, error) { return prices.PriRplEthOracle() },
+			Refresh:   func(...interface{}) (interface{}, error) { return prices.PriRplEthOracle() },
 		},
 		{
 			Key:       "ethPrice",
 			Desc:      fmt.Sprintf("ETH-%s", config.ChosenFiat()),
 			Help:      fmt.Sprintf("Check ETH/%s price", config.ChosenFiat()),
 			Formatter: FloatSuffixFormatter(0, config.ChosenFiat()),
-			Refresh:   func() (interface{}, error) { return prices.PriEth(config.ChosenFiat()) },
+			Refresh:   func(...interface{}) (interface{}, error) { return prices.PriEth(config.ChosenFiat()) },
 		},
 		{
 			Key:       "rplPrice",
 			Desc:      fmt.Sprintf("RPL-%s", config.ChosenFiat()),
 			Help:      fmt.Sprintf("Check RPL/%s price", config.ChosenFiat()),
 			Formatter: FloatSuffixFormatter(2, config.ChosenFiat()),
-			Refresh:   func() (interface{}, error) { return prices.PriRpl(config.ChosenFiat()) },
+			Refresh:   func(...interface{}) (interface{}, error) { return prices.PriRpl(config.ChosenFiat()) },
 		},
 		{
 			Key:       "ownEthDeposit",
 			Desc:      "Own ETH deposit",
 			Help:      "Check the amount of ETH deposited",
 			Formatter: FloatSuffixFormatter(0, "ETH"),
-			Refresh: func() (interface{}, error) {
+			Refresh: func(...interface{}) (interface{}, error) {
 				mpd, err := CachedGetMinipoolDetails(minipoolDetails)
 				if err != nil {
 					return nil, err
@@ -115,7 +116,7 @@ func RegisterBasicPlugins() {
 			Desc:      "RPL funds",
 			Help:      fmt.Sprintf("Check the amount of RPL in %s", config.ChosenFiat()),
 			Formatter: FloatSuffixFormatter(0, config.ChosenFiat()),
-			Refresh: func() (interface{}, error) {
+			Refresh: func(...interface{}) (interface{}, error) {
 				rplPriceRaw, err := getPlugin("rplPrice").GetRaw()
 				if err != nil {
 					return nil, err

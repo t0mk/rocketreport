@@ -3,8 +3,6 @@ package config
 import (
 	"context"
 	"fmt"
-	"os"
-	"strconv"
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -17,37 +15,86 @@ import (
 	configtypes "github.com/rocket-pool/smartnode/shared/types/config"
 )
 
-func initRocketStorageAddress() common.Address {
-	rocketStorageAddress := os.Getenv(RocketStorageAddressEnv)
-	if rocketStorageAddress == "" {
-		panic("Couldn't find rocket storage address. You can set ROCKETSTORAGE_ADDRESS envvar")
+
+
+func initNodeAddress() common.Address {
+	if c.NodeAddress == "" {
+		panic("NodeAddress not set")
 	}
-	return common.HexToAddress(rocketStorageAddress)
+	return common.HexToAddress(c.NodeAddress)
 }
 
-func initNetworkValue() configtypes.Network {
-	network := os.Getenv(NetworkEnv)
-	switch network {
+func Eth1Url() string {
+	if c.Eth1Url == "" {
+		panic("Eth1Url not set")
+	}
+	return c.Eth1Url
+}
+
+func Eth2Url() string {
+	if c.Eth2Url == "" {
+		panic("Eth2Url not set")
+	}
+	return c.Eth2Url
+}
+
+func ConsensusClient() configtypes.ConsensusClient {
+	if c.ConsensusClient == "" {
+		panic("ConsensusClient not set")
+	}
+	return configtypes.ConsensusClient(c.ConsensusClient)
+}
+
+func initNetwork() configtypes.Network {
+	if c.Network == "" {
+		panic("Network not set")
+	}
+	switch c.Network {
 	case "mainnet":
 		return configtypes.Network_Mainnet
 	case "holesky":
 		return configtypes.Network_Holesky
 	}
-	panic(fmt.Sprintf("Unknown network %s", network))
+	panic(fmt.Sprintf("Unknown network %s", c.Network))
 }
 
-func initNodeAddress() common.Address {
-	nodeAddress := os.Getenv(NodeAddressEnv)
-	if nodeAddress == "" {
-		panic("Couldn't find node address. You can set NODE_ADDRESS envvar")
+func initRocketStorageAddress() common.Address {
+	if c.RocketStorageAddress == "" {
+		panic("RocketStorageAddress not set")
 	}
-	return common.HexToAddress(nodeAddress)
+	return common.HexToAddress(c.RocketStorageAddress)
+}
+
+func initChosenFiat() string {
+	if len(c.Fiat) != 3 {
+		panic("Fiat currency must be 3 letters")
+	}
+	for _, c := range c.Fiat {
+		if c < 'A' || c > 'Z' {
+			panic("Fiat currency must be all capital letters")
+		}
+	}
+	return c.Fiat
+}
+
+func initTelegramToken() string {
+	if c.TelegramToken == "" {
+		panic("TelegramToken not set")
+	}
+	return c.TelegramToken
+}
+
+func initTelegramChatId() int64 {
+	if c.TelegramChatId == 0 {
+		panic("TelegramChatId not set")
+	}
+	return c.TelegramChatId
 }
 
 func initRpConfig() *config.RocketPoolConfig {
-	eth1Url := findEthClientUrl(Eth1)
-	eth2Url := findEthClientUrl(Eth2)
-	consensusClient := configtypes.ConsensusClient(os.Getenv(ConsensusClientEnv))
+	eth1Url := Eth1Url()
+	eth2Url := Eth2Url()
+	consensusClient := ConsensusClient()
 	ret := &config.RocketPoolConfig{
 		ConsensusClientMode: configtypes.Parameter{Value: configtypes.Mode_External},
 		ExecutionClientMode: configtypes.Parameter{Value: configtypes.Mode_External},
@@ -90,6 +137,20 @@ func initRpConfig() *config.RocketPoolConfig {
 	return ret
 }
 
+func initEC() *services.ExecutionClientManager {
+	ec, err := services.NewExecutionClientManager(RpConfig())
+	if err != nil {
+		panic(err)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+	_, err = ec.BlockNumber(ctx)
+	if err != nil {
+		panic(fmt.Sprintf("Execution client probably not available at %s: %s", Eth1Url(), err))
+	}
+	return ec
+}
+
 func initBC() *services.BeaconClientManager {
 	log := zaplog.New()
 	bc, err := services.NewBeaconClientManager(RpConfig())
@@ -105,7 +166,7 @@ func initBC() *services.BeaconClientManager {
 		_, err := bc.GetBeaconHead()
 		errChan <- err
 	}()
-	eth2Url := findEthClientUrl(Eth2)
+	eth2Url := Eth2Url()
 
 	select {
 	case err := <-errChan:
@@ -118,21 +179,6 @@ func initBC() *services.BeaconClientManager {
 	return bc
 }
 
-func initEC() *services.ExecutionClientManager {
-	fmt.Println("ecinit")
-	ec, err := services.NewExecutionClientManager(RpConfig())
-	if err != nil {
-		panic(err)
-	}
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
-	defer cancel()
-	_, err = ec.BlockNumber(ctx)
-	if err != nil {
-		panic(fmt.Sprintf("Execution client probably not available at %s: %s", findEthClientUrl(Eth1), err))
-	}
-	return ec
-}
-
 func initRP() *rpgo.RocketPool {
 	rp, err := rpgo.NewRocketPool(EC(), RocketStorageAddress())
 	if err != nil {
@@ -141,30 +187,9 @@ func initRP() *rpgo.RocketPool {
 	return rp
 }
 
-func initChosenFiat() string {
-	fiatValue := os.Getenv(fiatEnv)
-	if fiatValue == "" {
-		return USD
-	}
-	// test
-
-	if _, ok := XchMap[fiatValue]; !ok {
-		panic(fmt.Sprintf("Unknown fiat %s", fiatValue))
-	}
-	return fiatValue
-}
-
-func initTelegramChatID() int64 {
-	telegramChatIdStr := os.Getenv(telegramChatIdEnv)
-	telegramChatId, err := strconv.ParseInt(telegramChatIdStr, 10, 64)
-	if err != nil {
-		panic(err)
-	}
-	return telegramChatId
-}
 
 func initTelegramBot() *tgbotapi.BotAPI {
-	token := getEnvOrPanic(telegramTokenEnv)
+	token := TelegramToken()
 	bot, err := tgbotapi.NewBotAPI(token)
 	if err != nil {
 		panic(err)
@@ -172,3 +197,4 @@ func initTelegramBot() *tgbotapi.BotAPI {
 	return bot
 }
 
+func initPluginList

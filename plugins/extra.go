@@ -3,13 +3,13 @@ package plugins
 import "github.com/t0mk/rocketreport/utils"
 
 func RegisterExtraPlugins() {
-	Plugins = append(Plugins, []Plugin{
+	AllPlugins = append(AllPlugins, []Plugin{
 		{
-			Key:  "smoothingPoolBalance",
-			Desc: "Smoothing Pool Balance",
-			Help: "ETH in the smoothing pool",
+			Key:       "smoothingPoolBalance",
+			Desc:      "Smoothing Pool Balance",
+			Help:      "ETH in the smoothing pool",
 			Formatter: FloatSuffixFormatter(2, "ETH"),
-			Refresh: func() (interface{}, error) {
+			Refresh: func(...interface{}) (interface{}, error) {
 				b, err := utils.SmoothingPoolBalance()
 				if err != nil {
 					return nil, err

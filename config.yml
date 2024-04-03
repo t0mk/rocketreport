@@ -1,0 +1,10 @@
+node_address: 0xffF1A0301BDf0A5D3686Dd19374fc6Fd68a57a15
+eth2_url: http://127.0.0.1:5052
+consensus_client: lighthouse
+network: mainnet
+rocketstorage_address: 0x1d8f8f00cfa6758d7bE78336684788Fb0ee0Fa46
+fiat: EUR
+telegram_token: 7143779734:AAFPxe79Srr_fPMZsFdsaV0yELNWRR0Ea7I
+telegram_chat_id: 568975557
+plugins:
+  - [kraken, XETHZUSD, dasdasdasdasd ad]
