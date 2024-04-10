@@ -6,17 +6,19 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
+const Void = "void"
+
 func buttonize(s1, s2 string) tgbotapi.InlineKeyboardButton {
 	return tgbotapi.NewInlineKeyboardButtonData(s1, s2)
 }
 
-func (ps *PluginSet) TelegramFormat(chatId int64, subj string) *tgbotapi.MessageConfig {
+func (ps *PluginSelection) TelegramFormat(chatId int64, subj string) *tgbotapi.MessageConfig {
 	rows := [][]tgbotapi.InlineKeyboardButton{}
 	for _, p := range *ps {
 		row := []tgbotapi.InlineKeyboardButton{}
-		p.Eval()
-		row = append(row, buttonize(p.Desc, ""))
-		row = append(row, buttonize(p.Output, ""))
+		p.Plugin.Eval()
+		row = append(row, buttonize(p.Plugin.Desc, Void))
+		row = append(row, buttonize(p.Plugin.Output(), p.Id))
 		rows = append(rows, row)
 	}
 
@@ -28,21 +30,24 @@ func (ps *PluginSet) TelegramFormat(chatId int64, subj string) *tgbotapi.Message
 	return &nm
 }
 
-func (ps *PluginSet) TextFormat() string {
+func (ps *PluginSelection) TextFormat() string {
 	s := ""
 	for _, p := range *ps {
-		p.Eval()
-		l := fmt.Sprintf("%-25s", p.Desc)
-		if p.Err != "" {
-			l += fmt.Sprintf("%sError: %s%s", colorRed, p.Err, colorReset)
+		p.Plugin.Eval()
+		descLen := len(p.Plugin.Desc)
+		indent := max(25, descLen)
+		fString := fmt.Sprintf("%%-%ds ", indent)
+		l := fmt.Sprintf(fString, p.Plugin.Desc)
+		if p.Plugin.Error() != "" {
+			l += fmt.Sprintf("%sError: %s%s", colorRed, p.Plugin.Error(), colorReset)
 		}
-		if p.Output != "" {
-			if p.Opts != nil && p.Opts.MarkOutputGreen {
-				l += fmt.Sprintf("%s%s%s", colorGreen, p.Output, colorReset)
-			} else if p.Opts != nil && p.Opts.MarkNegativeRed && p.RawOutput.(float64) < 0 {
-				l += fmt.Sprintf("%s%s%s", colorRed, p.Output, colorReset)
+		if p.Plugin.Output() != "" {
+			if p.Plugin.Opts != nil && p.Plugin.Opts.MarkOutputGreen {
+				l += fmt.Sprintf("%s%s%s", colorGreen, p.Plugin.Output(), colorReset)
+			} else if p.Plugin.Opts != nil && p.Plugin.Opts.MarkNegativeRed && p.Plugin.RawOutput().(float64) < 0 {
+				l += fmt.Sprintf("%s%s%s", colorRed, p.Plugin.Output(), colorReset)
 			} else {
-				l += p.Output
+				l += p.Plugin.Output()
 			}
 		}
 		s += l + "\n"

@@ -6,10 +6,9 @@ import (
 	"github.com/t0mk/rocketreport/config"
 )
 
-func RegisterValidatorPlugins() {
-	AllPlugins = append(AllPlugins, []Plugin{
-		{
-			Key:       "depositedEthFiat",
+func ValidatorPlugins() map[string]Plugin {
+	return map[string]Plugin{
+		"depositedEthFiat": {
 			Desc:      "Deposited Funds",
 			Help:      fmt.Sprintf("Check the amount of dpeosited ETH in %s", config.ChosenFiat()),
 			Formatter: FloatSuffixFormatter(0, config.ChosenFiat()),
@@ -29,8 +28,7 @@ func RegisterValidatorPlugins() {
 				return ethPrice * ownEthDeposit, nil
 			},
 		},
-		{
-			Key:       "earnedConsesusEth",
+		"earnedConsesusEth": {
 			Desc:      "Earned consensus ETH",
 			Help:      fmt.Sprintf("Check the amount of consensus ETH in %s", config.ChosenFiat()),
 			Formatter: FloatSuffixFormatter(5, "ETH"),
@@ -42,8 +40,7 @@ func RegisterValidatorPlugins() {
 				return details.Earned, nil
 			},
 		},
-		{
-			Key:       "earnedConsensusFunds",
+		"earnedConsensusFunds": {
 			Desc:      "Earned consensus funds",
 			Help:      fmt.Sprintf("Check the amount of consensus funds in %s", config.ChosenFiat()),
 			Formatter: FloatSuffixFormatter(0, config.ChosenFiat()),
@@ -63,8 +60,7 @@ func RegisterValidatorPlugins() {
 				return earnedConsesusEth * ethPrice, nil
 			},
 		},
-		{
-			Key:       "totalFunds",
+		"totalFunds": {
 			Desc:      "Total funds",
 			Help:      fmt.Sprintf("Check the total amount of funds in %s", config.ChosenFiat()),
 			Formatter: FloatSuffixFormatter(0, config.ChosenFiat()),
@@ -90,6 +86,5 @@ func RegisterValidatorPlugins() {
 				return earnedConsensusFunds + rplFiat + depositedEthFiat, nil
 			},
 		},
-	}...)
-
+	}
 }

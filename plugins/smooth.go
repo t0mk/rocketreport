@@ -2,10 +2,9 @@ package plugins
 
 import "github.com/t0mk/rocketreport/utils"
 
-func RegisterExtraPlugins() {
-	AllPlugins = append(AllPlugins, []Plugin{
-		{
-			Key:       "smoothingPoolBalance",
+func ExtraPlugins() map[string]Plugin {
+	return map[string]Plugin{
+		"smoothingPoolBalance": {
 			Desc:      "Smoothing Pool Balance",
 			Help:      "ETH in the smoothing pool",
 			Formatter: FloatSuffixFormatter(2, "ETH"),
@@ -17,6 +16,5 @@ func RegisterExtraPlugins() {
 				return *b, nil
 			},
 		},
-	}...)
-
+	}
 }

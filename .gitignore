@@ -1,3 +1,4 @@
 rocketreport
 vendor
-.env*
+config.yml
+plugins.yml

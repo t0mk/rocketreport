@@ -6,6 +6,7 @@ import (
 	"github.com/alecthomas/kong"
 	"github.com/t0mk/rocketreport/config"
 	"github.com/t0mk/rocketreport/plugins"
+	"github.com/t0mk/rocketreport/utils"
 )
 
 type Context struct {
@@ -16,43 +17,22 @@ type ServePluginCmd struct {
 }
 
 func (s *ServePluginCmd) Run(ctx *Context) error {
-	RunBot(&plugins.AllPlugins)
+	RunBot(plugins.All.Select(config.Plugins))
 	return nil
 }
 
 type ListPluginsCmd struct {
-	Eval     bool `short:"e" help:"Evaluate all plugins" xor:"template,eval"`
-	Template bool `short:"t" help:"Output in template format" xor:"template,eval"`
+	Eval           bool `short:"e" help:"Evaluate all plugins" xor:"config,eval"`
+	ConfigTemplate bool `short:"c" help:"Output list of all plugins in yaml for plugins.yml" xor:"config,eval"`
 }
 
 func (l *ListPluginsCmd) Run(ctx *Context) error {
-	for _, p := range plugins.AllPlugins {
-		line := fmt.Sprintf("%-20s %-20s", p.Key, p.Desc)
-		if l.Eval && p.ArgDescs != nil {
-			line += fmt.Sprintf("(%s)", p.ArgDescs.ExamplesString())
-		}
-		if p.ArgDescs != nil {
-			line += "\n  args:\n"
-			for _, a := range p.ArgDescs {
-				line += fmt.Sprintf("   - %s: %s, for example \"%s\"\n", a.Name, a.Desc, a.Example)
-			}
-		}
-		if l.Template {
-			line = p.Key
-			if p.ArgDescs != nil {
-				line = fmt.Sprintf("%s: %s", p.Key, p.ArgDescs.ExamplesString())
-			}
-		}
-		if l.Eval {
-			p.Eval(p.ArgDescs.ExamplesIf()...)
-			if p.Err != "" {
-				line += fmt.Sprintf(" (%s)", p.Err)
-			} else {
-				line += fmt.Sprintf(" (%s)", p.Output)
-			}
-		}
-		fmt.Println(line)
+	allPlugins := plugins.All.SelectAll()
+	if l.ConfigTemplate {
+		fmt.Println(allPlugins.DocConfig())
+		return nil
 	}
+	fmt.Println(allPlugins.DocList(l.Eval))
 	return nil
 }
 
@@ -63,12 +43,12 @@ type SendCmd struct {
 func (s *SendCmd) Run(ctx *Context) error {
 	fmt.Println("sending")
 	if s.DoSend {
-		nm := plugins.AllPlugins.TelegramFormat(config.TelegramChatID(), tgMsgSubject())
+		nm := plugins.All.Select(config.Plugins).TelegramFormat(config.TelegramChatID(), tgMsgSubject())
 		_, err := config.TelegramBot().Send(*nm)
 		return err
 	} else {
 		fmt.Println("Not sending to Telegram, use -s to send.")
-		txt := plugins.ToPlaintext(plugins.AllPlugins)
+		txt := plugins.All.Select(config.Plugins).TextFormat()
 		fmt.Println(txt)
 	}
 	return nil
@@ -76,22 +56,45 @@ func (s *SendCmd) Run(ctx *Context) error {
 
 type PrintCmd struct{}
 
+type RunPluginCmd struct {
+	PluginCommandLine []string `arg:"" type:"string" help:"Plugin name and arguments"`
+}
+
+func (r *RunPluginCmd) Run(ctx *Context) error {
+	pluginName := r.PluginCommandLine[0]
+	pluginArgs := r.PluginCommandLine[1:]
+	p, ok := plugins.All[pluginName]
+	if !ok {
+		return fmt.Errorf("plugin %s not found", pluginName)
+	}
+	p.SetArgs(utils.ToIfSlice(pluginArgs))
+	p.Eval()
+	if p.Error() != "" {
+		return fmt.Errorf("error: %s", p.Error())
+	}
+	fmt.Println(p.Output())
+	return nil
+}
+
 var cli struct {
-	Send  SendCmd        `cmd:"" help:"Send to configured telegram chat"`
-	Print PrintCmd       `cmd:"" help:"Print to stdout"`
-	List  ListPluginsCmd `cmd:"" help:"List all plugins"`
-	Serve ServePluginCmd `cmd:"" help:"Serve bot"`
+	ConfigFile       string         `type:"path" name:"config" help:"Config file"`
+	PluginConfigFile string         `type:"path" name:"plugins" help:"Plugins config" default:"plugins.yaml"`
+	Send             SendCmd        `cmd:"" help:"Send to configured telegram chat"`
+	Print            PrintCmd       `cmd:"" help:"Print to stdout"`
+	Plugins          ListPluginsCmd `cmd:"" help:"List all plugins"`
+	Plugin           RunPluginCmd   `cmd:"" help:"List all plugins"`
+	Serve            ServePluginCmd `cmd:"" help:"Serve bot"`
 }
 
 func (p *PrintCmd) Run(ctx *Context) error {
-	fmt.Println(plugins.AllPlugins.TextFormat())
+	fmt.Println(plugins.All.Select(config.Plugins).TextFormat())
 	return nil
 }
 
 func main() {
-	config.Setup()
 	plugins.RegisterAll()
 	ctx := kong.Parse(&cli)
+	config.Setup(cli.ConfigFile, cli.PluginConfigFile)
 	err := ctx.Run(&Context{Debug: true})
 	ctx.FatalIfErrorf(err)
 	kong.Parse(&cli)

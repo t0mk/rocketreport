@@ -2,29 +2,10 @@ package exchanges
 
 import (
 	"encoding/json"
-	"fmt"
-	"io"
-	"net/http"
 	"strconv"
 
-	"github.com/t0mk/rocketreport/zaplog"
+	"github.com/t0mk/rocketreport/utils"
 )
-
-func getHTTPResponseBodyFromUrl(url string) ([]byte, error) {
-	log := zaplog.New()
-	log.Debug("getHTTPResponseBodyFromUrl", url)
-	resp, err := http.Get(url)
-	if err != nil {
-		return nil, fmt.Errorf("http.Get: %v", err)
-	}
-	defer resp.Body.Close()
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("ioutil.ReadAll: %v", err)
-	}
-	log.Debug("BODY:", string(body))
-	return body, nil
-}
 
 type BitfinexTicker []float64
 
@@ -33,9 +14,11 @@ type AskBid struct {
 	Bid float64
 }
 
+type ExchangeGetter func(string) (*AskBid, error)
+
 func Bitfinex(ticker string) (*AskBid, error) {
 	url := "https://api-pub.bitfinex.com/v2/ticker/t" + ticker
-	body, err := getHTTPResponseBodyFromUrl(url)
+	body, err := utils.GetHTTPResponseBodyFromUrl(url)
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +41,7 @@ type KrakenTicker struct {
 
 func Kraken(ticker string) (*AskBid, error) {
 	url := "https://api.kraken.com/0/public/Ticker?pair=" + ticker
-	body, err := getHTTPResponseBodyFromUrl(url)
+	body, err := utils.GetHTTPResponseBodyFromUrl(url)
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +72,7 @@ type CoinmateTicker struct {
 
 func Coinmate(ticker string) (*AskBid, error) {
 	url := "https://coinmate.io/api/ticker?currencyPair=" + ticker
-	body, err := getHTTPResponseBodyFromUrl(url)
+	body, err := utils.GetHTTPResponseBodyFromUrl(url)
 	if err != nil {
 		return nil, err
 	}

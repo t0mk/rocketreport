@@ -27,6 +27,7 @@ type BotCommand struct {
 	Func func(chatId string) *tgbotapi.MessageConfig
 }
 
+/*
 type BotLogic struct {
 	Plugins  *plugins.PluginSet
 	Commands []BotCommand
@@ -42,7 +43,6 @@ func (bl *BotLogic) Help() *tgbotapi.MessageConfig {
 	}
 }
 
-/*
 func getLogic(ps plugins.PluginSet) *BotLogic {
 	bl := &BotLogic{
 		Plugins: &ps,
@@ -100,7 +100,7 @@ func tgMsgSubject() string {
 	return fmt.Sprintf("%s - %s", ts, ethFiatStr)
 }
 
-func RunBot(ps *plugins.PluginSet) {
+func RunBot(ps *plugins.PluginSelection) {
 
 	log := zaplog.New()
 	bot := config.TelegramBot()
@@ -136,7 +136,18 @@ func RunBot(ps *plugins.PluginSet) {
 			}
 
 		} else if update.CallbackQuery != nil {
-			callback := tgbotapi.NewCallback(update.CallbackQuery.ID, "udpate")
+			fmt.Println(update.CallbackQuery.Data)
+			pluginId := update.CallbackQuery.Data
+			if pluginId == plugins.Void {
+				continue
+			}
+			p := ps.GetPluginById(pluginId)
+			if p == nil {
+				continue
+			}
+
+			p.Eval()
+			callback := tgbotapi.NewCallback(update.CallbackQuery.ID, p.Output())
 
 			if _, err = bot.AnswerCallbackQuery(callback); err != nil {
 				panic(err)

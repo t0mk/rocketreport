@@ -12,16 +12,9 @@ const (
 	minipoolDetails = "minipoolDetails"
 )
 
-func RegisterAll() {
-	RegisterBasicPlugins()
-	RegisterValidatorPlugins()
-	RegisterExchangeTickerPlugins()
-}
-
-func RegisterBasicPlugins() {
-	AllPlugins = append(AllPlugins, []Plugin{
-		{
-			Key:       "eth1sync",
+func BasicPlugins() map[string]Plugin {
+	return map[string]Plugin{
+		"eth1sync": {
 			Desc:      "Eth1 client",
 			Help:      "Check the sync status of the Eth1 client",
 			Formatter: StrFormatter,
@@ -31,8 +24,7 @@ func RegisterBasicPlugins() {
 				return utils.EthClientStatusString(ecs), nil
 			},
 		},
-		{
-			Key:       "eth2sync",
+		"eth2sync": {
 			Desc:      "Eth2 client",
 			Help:      "Check the sync status of the Eth2 client",
 			Formatter: StrFormatter,
@@ -42,22 +34,19 @@ func RegisterBasicPlugins() {
 				return utils.EthClientStatusString(bcs), nil
 			},
 		},
-		{
-			Key:       "actualStake",
+		"actualStake": {
 			Desc:      "Actual stake",
 			Help:      "Check the actual RPL stake",
 			Formatter: FloatSuffixFormatter(1, "RPL"),
 			Refresh:   GetActualStake,
 		},
-		{
-			Key:       "minStake",
+		"minStake": {
 			Desc:      "Minimum stake",
 			Help:      "Check the minimum RPL stake",
 			Formatter: FloatSuffixFormatter(1, "RPL"),
 			Refresh:   GetMinStake,
 		},
-		{
-			Key:       "stakeReserve",
+		"stakeReserve": {
 			Desc:      "Stake reserve",
 			Help:      "Check the reserve of RPL stake",
 			Formatter: FloatSuffixFormatter(1, "RPL"),
@@ -77,29 +66,25 @@ func RegisterBasicPlugins() {
 				return actualStake - minStake, nil
 			},
 		},
-		{
-			Key:       "oracleRplPrice",
+		"oracleRplPrice": {
 			Desc:      "Oracle RPL-ETH",
 			Help:      "Check the RPL price from the oracle",
 			Formatter: FloatSuffixFormatter(6, "ETH"),
 			Refresh:   func(...interface{}) (interface{}, error) { return prices.PriRplEthOracle() },
 		},
-		{
-			Key:       "ethPrice",
+		"ethPrice": {
 			Desc:      fmt.Sprintf("ETH-%s", config.ChosenFiat()),
 			Help:      fmt.Sprintf("Check ETH/%s price", config.ChosenFiat()),
 			Formatter: FloatSuffixFormatter(0, config.ChosenFiat()),
 			Refresh:   func(...interface{}) (interface{}, error) { return prices.PriEth(config.ChosenFiat()) },
 		},
-		{
-			Key:       "rplPrice",
+		"rplPrice": {
 			Desc:      fmt.Sprintf("RPL-%s", config.ChosenFiat()),
 			Help:      fmt.Sprintf("Check RPL/%s price", config.ChosenFiat()),
 			Formatter: FloatSuffixFormatter(2, config.ChosenFiat()),
 			Refresh:   func(...interface{}) (interface{}, error) { return prices.PriRpl(config.ChosenFiat()) },
 		},
-		{
-			Key:       "ownEthDeposit",
+		"ownEthDeposit": {
 			Desc:      "Own ETH deposit",
 			Help:      "Check the amount of ETH deposited",
 			Formatter: FloatSuffixFormatter(0, "ETH"),
@@ -111,8 +96,7 @@ func RegisterBasicPlugins() {
 				return mpd.TotalDeposit, nil
 			},
 		},
-		{
-			Key:       "rplFiat",
+		"rplFiat": {
 			Desc:      "RPL funds",
 			Help:      fmt.Sprintf("Check the amount of RPL in %s", config.ChosenFiat()),
 			Formatter: FloatSuffixFormatter(0, config.ChosenFiat()),
@@ -132,5 +116,5 @@ func RegisterBasicPlugins() {
 				return rplPrice * actualStake, nil
 			},
 		},
-	}...)
+	}
 }

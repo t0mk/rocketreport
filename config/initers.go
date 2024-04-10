@@ -15,39 +15,37 @@ import (
 	configtypes "github.com/rocket-pool/smartnode/shared/types/config"
 )
 
-
-
 func initNodeAddress() common.Address {
 	if c.NodeAddress == "" {
-		panic("NodeAddress not set")
+		panic("NodeAddress not set in config")
 	}
 	return common.HexToAddress(c.NodeAddress)
 }
 
 func Eth1Url() string {
 	if c.Eth1Url == "" {
-		panic("Eth1Url not set")
+		panic("Eth1Url not set in config")
 	}
 	return c.Eth1Url
 }
 
 func Eth2Url() string {
 	if c.Eth2Url == "" {
-		panic("Eth2Url not set")
+		panic("Eth2Url not set in config")
 	}
 	return c.Eth2Url
 }
 
 func ConsensusClient() configtypes.ConsensusClient {
 	if c.ConsensusClient == "" {
-		panic("ConsensusClient not set")
+		panic("ConsensusClient not set in config")
 	}
 	return configtypes.ConsensusClient(c.ConsensusClient)
 }
 
 func initNetwork() configtypes.Network {
 	if c.Network == "" {
-		panic("Network not set")
+		panic("Network not set in config")
 	}
 	switch c.Network {
 	case "mainnet":
@@ -60,12 +58,15 @@ func initNetwork() configtypes.Network {
 
 func initRocketStorageAddress() common.Address {
 	if c.RocketStorageAddress == "" {
-		panic("RocketStorageAddress not set")
+		panic("RocketStorageAddress not set in config")
 	}
 	return common.HexToAddress(c.RocketStorageAddress)
 }
 
 func initChosenFiat() string {
+	if c.Fiat == "" {
+		return "USD"
+	}
 	if len(c.Fiat) != 3 {
 		panic("Fiat currency must be 3 letters")
 	}
@@ -79,14 +80,14 @@ func initChosenFiat() string {
 
 func initTelegramToken() string {
 	if c.TelegramToken == "" {
-		panic("TelegramToken not set")
+		panic("TelegramToken not set in config")
 	}
 	return c.TelegramToken
 }
 
 func initTelegramChatId() int64 {
 	if c.TelegramChatId == 0 {
-		panic("TelegramChatId not set")
+		panic("TelegramChatId not set in config")
 	}
 	return c.TelegramChatId
 }
@@ -187,7 +188,6 @@ func initRP() *rpgo.RocketPool {
 	return rp
 }
 
-
 func initTelegramBot() *tgbotapi.BotAPI {
 	token := TelegramToken()
 	bot, err := tgbotapi.NewBotAPI(token)
@@ -196,5 +196,3 @@ func initTelegramBot() *tgbotapi.BotAPI {
 	}
 	return bot
 }
-
-func initPluginList

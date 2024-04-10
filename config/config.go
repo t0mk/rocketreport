@@ -20,7 +20,6 @@ const (
 	telegramChatIdEnv       = "TELEGRAM_CHAT_ID"
 	NetworkEnv              = "NETWORK"
 	ConsensusClientEnv      = "CONSENSUS_CLIENT"
-	PluginListEnv           = "PLUGIN_LIST"
 )
 
 var CachedRplPrice *float64
@@ -31,14 +30,6 @@ const (
 	Eth1 EthClientType = "eth1"
 	Eth2 EthClientType = "eth2"
 )
-
-func getEnvOrPanic(key string) string {
-	value := os.Getenv(key)
-	if value == "" {
-		panic(fmt.Sprintf("missing env var %s", key))
-	}
-	return value
-}
 
 func findEthClientUrl(t EthClientType) string {
 	urlVar := Eth1UrlEnv
@@ -60,10 +51,29 @@ func findEthClientUrl(t EthClientType) string {
 	return fmt.Sprintf("http://%s:%s", ips[0], port)
 }
 
-type PluginConf map[string]struct {
-	Key  string
-	Desc string
-	Args []string
+type PluginConf struct {
+	Name string        `yaml:"name" json:"name"`
+	Desc string        `yaml:"desc" json:"desc"`
+	Args []interface{} `yaml:"args" json:"args"`
+}
+
+type PluginConfs struct {
+	Plugins []PluginConf `yaml:"plugins" json:"plugins"`
+	Test    string       `yaml:"test" json:"test"`
+}
+
+func PluginsString(pcs []PluginConf) string {
+	s := "plugins:\n"
+	for _, p := range pcs {
+		s += fmt.Sprintf("  - name: %s\n", p.Name)
+		if p.Args != nil {
+			s += "    args:\n"
+			for _, a := range p.Args {
+				s += fmt.Sprintf("      - %v\n", a)
+			}
+		}
+	}
+	return s
 }
 
 type ConfigData struct {
@@ -77,10 +87,13 @@ type ConfigData struct {
 	TelegramToken        string `env:"TELEGRAM_TOKEN" yaml:"telegram_token" json:"telegram_token"`
 	TelegramChatId       int64  `env:"TELEGRAM_CHAT_ID" yaml:"telegram_chat_id" json:"telegram_chat_id"`
 	Debug                bool   `env:"DEBUG" yaml:"debug" json:"debug"`
-	PluginConf           []PluginConf `env:"PLUGIN_LIST" yaml:"plugin_list" json:"plugin_list"`
 }
 
 var c ConfigData
+
+func (cd ConfigData) String() string {
+	return fmt.Sprintf("NodeAddress: %s\nEth1Url: %s\nEth2Url: %s\nConsensusClient: %s\nNetwork: %s\nRocketStorageAddress: %s\nFiat: %s\nTelegramToken: %s\nTelegramChatId: %d\nDebug: %t\n", cd.NodeAddress, cd.Eth1Url, cd.Eth2Url, cd.ConsensusClient, cd.Network, cd.RocketStorageAddress, cd.Fiat, cd.TelegramToken, cd.TelegramChatId, cd.Debug)
+}
 
 var EC = sync.OnceValue(initEC)
 var BC = sync.OnceValue(initBC)
@@ -89,16 +102,22 @@ var NodeAddress = sync.OnceValue(initNodeAddress)
 var RocketStorageAddress = sync.OnceValue(initRocketStorageAddress)
 var Network = sync.OnceValue(initNetwork)
 var RP = sync.OnceValue(initRP)
-var PluginList = sync.OnceValue(initPluginList)
 var ChosenFiat = sync.OnceValue(initChosenFiat)
 var TelegramChatID = sync.OnceValue(initTelegramChatId)
 var TelegramToken = sync.OnceValue(initTelegramToken)
 var TelegramBot = sync.OnceValue(initTelegramBot)
 var Debug bool
+var Plugins []PluginConf
+var pluginsFileContent PluginConfs
 
-func Setup() {
+func Setup(configFile, pluginsFile string) {
+	cfgFiles := []string{configFile}
+	if configFile == "" {
+		cfgFiles = []string{}
+	}
+
 	loader := aconfig.LoaderFor(&c, aconfig.Config{
-		Files: []string{"config.yaml", "config.yml", "config.json"},
+		Files: cfgFiles,
 		FileDecoders: map[string]aconfig.FileDecoder{
 			".yaml": aconfigyaml.New(),
 			".yml":  aconfigyaml.New(),
@@ -108,10 +127,30 @@ func Setup() {
 	if err != nil {
 		panic(err)
 	}
-	/*
-		err := godotenv.Load()
-		if err != nil {
-			panic(err)
-		}
-	*/
+	if c.Debug {
+		Debug = true
+	}
+	if Debug {
+		fmt.Println("Loaded config")
+		fmt.Println(c)
+	}
+	if pluginsFile == "" {
+		pluginsFile = "defaultplugins.yaml"
+	}
+	loader = aconfig.LoaderFor(&pluginsFileContent, aconfig.Config{
+		Files: []string{pluginsFile},
+		FileDecoders: map[string]aconfig.FileDecoder{
+			".yaml": aconfigyaml.New(),
+			".yml":  aconfigyaml.New(),
+		},
+	})
+	err = loader.Load()
+	if err != nil {
+		panic(err)
+	}
+	Plugins = pluginsFileContent.Plugins
+	if Debug {
+		fmt.Println("Loaded plugins")
+		fmt.Println(Plugins)
+	}
 }
