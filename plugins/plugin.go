@@ -98,6 +98,15 @@ func (ps *PluginSelection) DocConfig() string {
 	return s
 }
 
+func (ps *PluginSelection) MarkdownTable() string {
+	s := "| Name | Description | Args | Example Args |\n"
+	s += "|------|-------------|------|--------------|\n"
+	for _, p := range *ps {
+		s += fmt.Sprintf("| %s | %s | %s | %s |\n", p.Name, p.Plugin.Help, p.Plugin.ArgDescs.HelpStringDoc(), p.Plugin.ArgDescs.ExamplesString())
+	}
+	return s
+}
+
 type NamedPlugin struct {
 	Id     string
 	Name   string
@@ -132,12 +141,34 @@ func (a ArgDescs) ExamplesIf() []interface{} {
 	return examples
 }
 
+func (a ArgDescs) ExamplesString() string {
+	if len(a) == 0 {
+		return ""
+	}
+	s := []string{}
+	for _, arg := range a {
+		s = append(s, fmt.Sprintf("%v", arg.Default))
+	}
+	return strings.Join(s, ", ")
+}
+
 func (a ArgDescs) HelpString() string {
 	s := []string{}
 	for _, arg := range a {
 		s = append(s, fmt.Sprintf("%s (%T)", arg.Desc, arg.Default))
 	}
 	return "[" + strings.Join(s, ", ") + "]"
+}
+
+func (a ArgDescs) HelpStringDoc() string {
+	s := []string{}
+	if len(a) == 0 {
+		return ""
+	}
+	for _, arg := range a {
+		s = append(s, fmt.Sprintf("%s (%T)", arg.Desc, arg.Default))
+	}
+	return strings.Join(s, ", ")
 }
 
 type PluginDesc map[string]struct {

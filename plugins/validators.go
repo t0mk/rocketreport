@@ -10,7 +10,7 @@ func ValidatorPlugins() map[string]Plugin {
 	return map[string]Plugin{
 		"depositedEthFiat": {
 			Desc:      "Deposited Funds",
-			Help:      fmt.Sprintf("Check the amount of dpeosited ETH in %s", config.ChosenFiat()),
+			Help:      fmt.Sprintf("Check the amount of deposited ETH in %s*", config.ChosenFiat()),
 			Formatter: FloatSuffixFormatter(0, config.ChosenFiat()),
 			Refresh: func(...interface{}) (interface{}, error) {
 				ethPriceRaw, err := getPlugin("ethPrice").GetRaw()
@@ -30,7 +30,7 @@ func ValidatorPlugins() map[string]Plugin {
 		},
 		"earnedConsesusEth": {
 			Desc:      "Earned consensus ETH",
-			Help:      fmt.Sprintf("Check the amount of consensus ETH in %s", config.ChosenFiat()),
+			Help:      fmt.Sprintf("Check the amount of consensus ETH in %s*", config.ChosenFiat()),
 			Formatter: FloatSuffixFormatter(5, "ETH"),
 			Refresh: func(...interface{}) (interface{}, error) {
 				details, err := CachedGetMinipoolDetails(minipoolDetails)
@@ -42,7 +42,7 @@ func ValidatorPlugins() map[string]Plugin {
 		},
 		"earnedConsensusFunds": {
 			Desc:      "Earned consensus funds",
-			Help:      fmt.Sprintf("Check the amount of consensus funds in %s", config.ChosenFiat()),
+			Help:      fmt.Sprintf("Check the amount of consensus funds in %s*", config.ChosenFiat()),
 			Formatter: FloatSuffixFormatter(0, config.ChosenFiat()),
 			Refresh: func(...interface{}) (interface{}, error) {
 				earnedConsesusEthRaw, err := getPlugin("earnedConsesusEth").GetRaw()
@@ -62,7 +62,7 @@ func ValidatorPlugins() map[string]Plugin {
 		},
 		"totalFunds": {
 			Desc:      "Total funds",
-			Help:      fmt.Sprintf("Check the total amount of funds in %s", config.ChosenFiat()),
+			Help:      fmt.Sprintf("Check the total amount of funds in %s*", config.ChosenFiat()),
 			Formatter: FloatSuffixFormatter(0, config.ChosenFiat()),
 			Refresh: func(...interface{}) (interface{}, error) {
 				earnedConsensusFundsRaw, err := getPlugin("earnedConsensusFunds").GetRaw()

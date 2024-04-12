@@ -1,4 +1,4 @@
-package main
+package telegram
 
 import (
 	"fmt"
@@ -89,7 +89,7 @@ func newMsg(chatId int64, text string) *tgbotapi.MessageConfig {
 	return &ret
 }
 
-func tgMsgSubject() string {
+func MessageSubject() string {
 	ethFiat, err := prices.PriEth(config.ChosenFiat())
 	if err != nil {
 		panic(err)
@@ -123,7 +123,7 @@ func RunBot(ps *plugins.PluginSelection) {
 
 			received := update.Message.Text
 			if strIs(received, "open", "o", "ope", "refresh", "r", "re", "ref") {
-				msg = ps.TelegramFormat(update.Message.Chat.ID, tgMsgSubject())
+				msg = ps.TelegramFormat(update.Message.Chat.ID, MessageSubject())
 			}
 			if strIs(received, "help", "h", "he", "hel") {
 				msg = newMsg(update.Message.Chat.ID, "help")

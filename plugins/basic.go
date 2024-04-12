@@ -16,7 +16,7 @@ func BasicPlugins() map[string]Plugin {
 	return map[string]Plugin{
 		"eth1sync": {
 			Desc:      "Eth1 client",
-			Help:      "Check the sync status of the Eth1 client",
+			Help:      "Check the sync status of Eth1 client (with Rocketpool Golang library)",
 			Formatter: StrFormatter,
 			Opts:      &PluginOpts{MarkOutputGreen: true},
 			Refresh: func(...interface{}) (interface{}, error) {
@@ -26,7 +26,7 @@ func BasicPlugins() map[string]Plugin {
 		},
 		"eth2sync": {
 			Desc:      "Eth2 client",
-			Help:      "Check the sync status of the Eth2 client",
+			Help:      "Check the sync status of Eth2 client (with Rocketpool Golang library)",
 			Formatter: StrFormatter,
 			Opts:      &PluginOpts{MarkOutputGreen: true},
 			Refresh: func(...interface{}) (interface{}, error) {
@@ -36,7 +36,7 @@ func BasicPlugins() map[string]Plugin {
 		},
 		"actualStake": {
 			Desc:      "Actual stake",
-			Help:      "Check the actual RPL stake",
+			Help:      "Check actual RPL stake of Rocketpool node",
 			Formatter: FloatSuffixFormatter(1, "RPL"),
 			Refresh:   GetActualStake,
 		},
@@ -68,19 +68,19 @@ func BasicPlugins() map[string]Plugin {
 		},
 		"oracleRplPrice": {
 			Desc:      "Oracle RPL-ETH",
-			Help:      "Check the RPL price from the oracle",
+			Help:      "Check the RPL price from Rocketpool oracle",
 			Formatter: FloatSuffixFormatter(6, "ETH"),
 			Refresh:   func(...interface{}) (interface{}, error) { return prices.PriRplEthOracle() },
 		},
 		"ethPrice": {
 			Desc:      fmt.Sprintf("ETH-%s", config.ChosenFiat()),
-			Help:      fmt.Sprintf("Check ETH/%s price", config.ChosenFiat()),
+			Help:      fmt.Sprintf("Check ETH/%s* price", config.ChosenFiat()),
 			Formatter: FloatSuffixFormatter(0, config.ChosenFiat()),
 			Refresh:   func(...interface{}) (interface{}, error) { return prices.PriEth(config.ChosenFiat()) },
 		},
 		"rplPrice": {
 			Desc:      fmt.Sprintf("RPL-%s", config.ChosenFiat()),
-			Help:      fmt.Sprintf("Check RPL/%s price", config.ChosenFiat()),
+			Help:      fmt.Sprintf("Check RPL/%s* price", config.ChosenFiat()),
 			Formatter: FloatSuffixFormatter(2, config.ChosenFiat()),
 			Refresh:   func(...interface{}) (interface{}, error) { return prices.PriRpl(config.ChosenFiat()) },
 		},
@@ -98,7 +98,7 @@ func BasicPlugins() map[string]Plugin {
 		},
 		"rplFiat": {
 			Desc:      "RPL funds",
-			Help:      fmt.Sprintf("Check the amount of RPL in %s", config.ChosenFiat()),
+			Help:      fmt.Sprintf("Check the amount of RPL in %s*", config.ChosenFiat()),
 			Formatter: FloatSuffixFormatter(0, config.ChosenFiat()),
 			Refresh: func(...interface{}) (interface{}, error) {
 				rplPriceRaw, err := getPlugin("rplPrice").GetRaw()
