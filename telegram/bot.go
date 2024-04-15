@@ -100,7 +100,39 @@ func MessageSubject() string {
 	return fmt.Sprintf("%s - %s", ts, ethFiatStr)
 }
 
-func RunBot(ps *plugins.PluginSelection) {
+func ReportChatID() {
+	bot := config.TelegramBot()
+
+	u := tgbotapi.NewUpdate(0)
+	u.Timeout = 60
+
+	updates, err := bot.GetUpdatesChan(u)
+	if err != nil {
+		panic(err)
+	}
+	botMe, err := bot.GetMe()
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("To find out Chat ID, send a message to your bot (@" + botMe.UserName + ")")
+
+	update := <-updates
+	if update.Message != nil {
+		chatId := update.Message.Chat.ID
+		txt := fmt.Sprintf("Your  Chat ID is:\n%d", chatId)
+		fmt.Println(txt)
+		msg := newMsg(chatId, txt)
+		_, err := bot.Send(*msg)
+		if err != nil {
+			panic(err)
+		}
+	}
+	fmt.Println()
+	fmt.Printf("You can create another Chat at:\nhttps://t.me/%s\n", botMe.UserName)
+
+}
+
+func RunBot() {
 
 	log := zaplog.New()
 	bot := config.TelegramBot()
@@ -114,6 +146,8 @@ func RunBot(ps *plugins.PluginSelection) {
 	if err != nil {
 		panic(err)
 	}
+
+	ps := plugins.Selected
 
 	for update := range updates {
 		if update.Message != nil {
@@ -141,7 +175,7 @@ func RunBot(ps *plugins.PluginSelection) {
 			if pluginId == plugins.Void {
 				continue
 			}
-			p := ps.GetPluginById(pluginId)
+			p := plugins.GetPluginById(pluginId)
 			if p == nil {
 				continue
 			}

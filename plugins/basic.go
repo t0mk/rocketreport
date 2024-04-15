@@ -42,13 +42,13 @@ func BasicPlugins() map[string]Plugin {
 		},
 		"minStake": {
 			Desc:      "Minimum stake",
-			Help:      "Check the minimum RPL stake",
+			Help:      "Check the minimum RPL stake for Rocketpool node",
 			Formatter: FloatSuffixFormatter(1, "RPL"),
 			Refresh:   GetMinStake,
 		},
 		"stakeReserve": {
 			Desc:      "Stake reserve",
-			Help:      "Check the reserve of RPL stake",
+			Help:      "Check the reserve of RPL stake in Rocketpool node (above 10%)",
 			Formatter: FloatSuffixFormatter(1, "RPL"),
 			Opts:      &PluginOpts{MarkNegativeRed: true},
 			Refresh: func(...interface{}) (interface{}, error) {
@@ -80,13 +80,13 @@ func BasicPlugins() map[string]Plugin {
 		},
 		"rplPrice": {
 			Desc:      fmt.Sprintf("RPL-%s", config.ChosenFiat()),
-			Help:      fmt.Sprintf("Check RPL/%s* price", config.ChosenFiat()),
+			Help:      fmt.Sprintf("Check RPL/%s* price (RPL/ETH based on Rocketpool Oracle)", config.ChosenFiat()),
 			Formatter: FloatSuffixFormatter(2, config.ChosenFiat()),
 			Refresh:   func(...interface{}) (interface{}, error) { return prices.PriRpl(config.ChosenFiat()) },
 		},
 		"ownEthDeposit": {
 			Desc:      "Own ETH deposit",
-			Help:      "Check the amount of ETH deposited",
+			Help:      "Check the amount of ETH deposited in Rocketpool node",
 			Formatter: FloatSuffixFormatter(0, "ETH"),
 			Refresh: func(...interface{}) (interface{}, error) {
 				mpd, err := CachedGetMinipoolDetails(minipoolDetails)
@@ -98,7 +98,7 @@ func BasicPlugins() map[string]Plugin {
 		},
 		"rplFiat": {
 			Desc:      "RPL funds",
-			Help:      fmt.Sprintf("Check the amount of RPL in %s*", config.ChosenFiat()),
+			Help:      fmt.Sprintf("Check the amount of RPL in %s*, deposited to Rocketpool node", config.ChosenFiat()),
 			Formatter: FloatSuffixFormatter(0, config.ChosenFiat()),
 			Refresh: func(...interface{}) (interface{}, error) {
 				rplPriceRaw, err := getPlugin("rplPrice").GetRaw()

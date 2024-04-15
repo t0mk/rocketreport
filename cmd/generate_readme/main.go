@@ -24,7 +24,8 @@ func main() {
 	readmeTemplate := string(readmeTemplateBytes)
 
 	plugins.RegisterAll()
-	pluginTable := plugins.All.SelectAll().MarkdownTable()
+	plugins.All.SelectAll()
+	pluginTable := plugins.Selected.MarkdownTable()
 
 	readme := strings.Replace(readmeTemplate, pluginTableMarker, pluginTable, 1)
 

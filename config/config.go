@@ -54,12 +54,12 @@ func findEthClientUrl(t EthClientType) string {
 type PluginConf struct {
 	Name string        `yaml:"name" json:"name"`
 	Desc string        `yaml:"desc" json:"desc"`
+	Id   string        `yaml:"id" json:"id"`
 	Args []interface{} `yaml:"args" json:"args"`
 }
 
 type PluginConfs struct {
 	Plugins []PluginConf `yaml:"plugins" json:"plugins"`
-	Test    string       `yaml:"test" json:"test"`
 }
 
 func PluginsString(pcs []PluginConf) string {
@@ -117,7 +117,8 @@ func Setup(configFile, pluginsFile string) {
 	}
 
 	loader := aconfig.LoaderFor(&c, aconfig.Config{
-		Files: cfgFiles,
+		SkipFlags: true,
+		Files:     cfgFiles,
 		FileDecoders: map[string]aconfig.FileDecoder{
 			".yaml": aconfigyaml.New(),
 			".yml":  aconfigyaml.New(),
@@ -138,7 +139,9 @@ func Setup(configFile, pluginsFile string) {
 		pluginsFile = "defaultplugins.yaml"
 	}
 	loader = aconfig.LoaderFor(&pluginsFileContent, aconfig.Config{
-		Files: []string{pluginsFile},
+		SkipFlags: true,
+		SkipEnv:   true,
+		Files:     []string{pluginsFile},
 		FileDecoders: map[string]aconfig.FileDecoder{
 			".yaml": aconfigyaml.New(),
 			".yml":  aconfigyaml.New(),

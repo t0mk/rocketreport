@@ -3,14 +3,13 @@ package plugins
 import (
 	"fmt"
 	"math"
-	"sort"
-	"strconv"
 	"strings"
 
 	"math/rand"
 	"time"
 
-	"github.com/t0mk/rocketreport/config"
+	"strconv"
+
 	"github.com/t0mk/rocketreport/prices"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
@@ -28,34 +27,6 @@ const (
 func getRandomPluginId(base string) string {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	return fmt.Sprintf("base-%d", r.Intn(10000))
-}
-
-type PluginMap map[string]Plugin
-
-func (pm *PluginMap) Select(confs []config.PluginConf) *PluginSelection {
-	ps := PluginSelection{}
-	for _, conf := range confs {
-		p := getPlugin(conf.Name)
-		p.SetArgs(conf.Args)
-		if conf.Desc != "" {
-			p.Desc = conf.Desc
-		}
-		ps = append(ps, NamedPlugin{getRandomPluginId(conf.Name), conf.Name, *p})
-	}
-	return &ps
-}
-
-func (pm *PluginMap) SelectAll() *PluginSelection {
-	ps := PluginSelection{}
-	sortedKeys := []string{}
-	for k := range *pm {
-		sortedKeys = append(sortedKeys, k)
-	}
-	sort.Strings(sortedKeys)
-	for _, k := range sortedKeys {
-		ps = append(ps, NamedPlugin{getRandomPluginId(k), k, (*pm)[k]})
-	}
-	return &ps
 }
 
 func (ps *PluginSelection) DocList(doEval bool) string {
@@ -99,7 +70,7 @@ func (ps *PluginSelection) DocConfig() string {
 }
 
 func (ps *PluginSelection) MarkdownTable() string {
-	s := "| Name | Description | Args | Example Args |\n"
+	s := "| Name | Description | Args | Defaults |\n"
 	s += "|------|-------------|------|--------------|\n"
 	for _, p := range *ps {
 		s += fmt.Sprintf("| %s | %s | %s | %s |\n", p.Name, p.Plugin.Help, p.Plugin.ArgDescs.HelpStringDoc(), p.Plugin.ArgDescs.ExamplesString())
@@ -107,21 +78,17 @@ func (ps *PluginSelection) MarkdownTable() string {
 	return s
 }
 
-type NamedPlugin struct {
-	Id     string
-	Name   string
-	Plugin Plugin
-}
-
-type PluginSelection []NamedPlugin
-
-func (ps *PluginSelection) GetPluginById(id string) *Plugin {
+func (ps *PluginSelection) FindById(id string) *Plugin {
 	for _, p := range *ps {
 		if p.Id == id {
 			return &p.Plugin
 		}
 	}
 	return nil
+}
+
+func GetPluginById(id string) *Plugin {
+	return Selected.FindById(id)
 }
 
 type RefreshFunc func(...interface{}) (interface{}, error)
@@ -194,9 +161,11 @@ func ValidateAndExpandArgs(args []interface{}, argDescs ArgDescs) ([]interface{}
 					if s, ok := arg.(string); ok {
 						f, err := strconv.ParseFloat(s, 64)
 						if err != nil {
-							return nil, fmt.Errorf("arg #%d (%s): expected float64, got %T %s", i, argDescs[i].Desc, arg, arg)
+							return nil, fmt.Errorf("arg #%d (%s): expected float64, but got %T %s", i, argDescs[i].Desc, arg, arg)
 						}
 						args[i] = f
+					} else if _, ok := arg.(int); ok {
+						args[i] = float64(arg.(int))
 					} else {
 						return nil, fmt.Errorf("arg #%d (%s): expected float64, got %T %s", i, argDescs[i].Desc, arg, arg)
 					}
