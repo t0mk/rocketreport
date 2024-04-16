@@ -1,4 +1,5 @@
 rocketreport
+rocketreport-amd64
 vendor
 config.yml
 plugins.yml

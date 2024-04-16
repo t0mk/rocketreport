@@ -1,3 +1,6 @@
+VERSION_FILE=version
+VERSION := $(shell cat ${VERSION_FILE})
+
 # Go parameters
 GOCMD=go
 GOBUILD=$(GOCMD) build
@@ -8,11 +11,14 @@ GOGET=$(GOCMD) get
 # Docker parameters
 DOCKER=docker
 DOCKER_BUILD=$(DOCKER) build
+DOCKER_BUILDX=$(DOCKER) buildx
 DOCKER_RUN=$(DOCKER) run
 DOCKER_IMAGE_NAME=t0mk/rocketreport
+DOCKER_BUILDER_IMAGE_NAME=t0mk/rocketreport
 
 # Name of the binary
 BINARY_NAME=rocketreport
+BINARY_NAME_AMD64=${BINARY_NAME}-amd64
 
 # Main package path
 MAIN_PATH=./cmd/rocketreport/main.go
@@ -40,14 +46,6 @@ test:
 deps:
 	$(GOGET) ./...
 
-# Run the binary
-run:
-	$(GOBUILD) -o $(BINARY_NAME) $(MAIN_PATH)
-	./$(BINARY_NAME)
-
-# Short alias for run
-r: run
-
 # Short alias for clean
 c: clean
 
@@ -56,13 +54,18 @@ t: test
 
 # Build Docker container
 docker-build:
-	$(DOCKER_BUILD) -t $(DOCKER_IMAGE_NAME) .
+	# build builder image
+	${DOCKER_BUILD} -t ${DOCKER_BUILDER_IMAGE_NAME}:${VERSION} -f docker/builder .
+	# build statically compiled binary
+	${DOCKER_RUN} --rm -v ${shell pwd}:/app ${DOCKER_BUILDER_IMAGE_NAME}:${VERSION} /app/build-inside-container.sh
+	@if ! test `find ${BINARY_NAME_AMD64} -newermt "10 seconds ago"`; then echo "binary was not created in last 5 secs"; exit 1; fi
+	# build actual docker image for t0mk/rocketreport
+	$(DOCKER_BUILDX) build --platform=linux/amd64 -t $(DOCKER_IMAGE_NAME) --load .
 
-# Run Docker container
-docker-run:
-	$(DOCKER_RUN) -p 8080:8080 $(DOCKER_IMAGE_NAME)
+docker-testrun:
+	${DOCKER_RUN} --rm ${DOCKER_IMAGE_NAME} plugin gasPrice
 
 docker-push:
 	$(DOCKER) push $(DOCKER_IMAGE_NAME)
 
-.PHONY: all build clean test deps run r c t docker-build docker-run
+.PHONY: all build clean test deps run r c t docker-build docker-run docker-push

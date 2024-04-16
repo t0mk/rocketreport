@@ -1,5 +1,4 @@
-FROM ubuntu:latest
+FROM debian:bookworm-slim
 RUN apt update && apt install -y ca-certificates
-WORKDIR /app
-COPY rocketreport /app/rocketreport
+COPY rocketreport-amd64 /app/rocketreport
 ENTRYPOINT ["/app/rocketreport"]
