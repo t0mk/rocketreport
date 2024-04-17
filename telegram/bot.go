@@ -7,7 +7,8 @@ import (
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/t0mk/rocketreport/config"
-	"github.com/t0mk/rocketreport/plugins"
+	"github.com/t0mk/rocketreport/plugins/formatting"
+	"github.com/t0mk/rocketreport/plugins/registry"
 	"github.com/t0mk/rocketreport/prices"
 	"github.com/t0mk/rocketreport/zaplog"
 )
@@ -96,7 +97,7 @@ func MessageSubject() string {
 	}
 	suff := fmt.Sprintf("%s/Ξ", config.ChosenFiat())
 	ts := time.Now().Format("Mon 02-Jan 15:04")
-	ethFiatStr := plugins.FloatSuffixFormatter(0, suff)(ethFiat)
+	ethFiatStr := formatting.FloatSuffix(0, suff)(ethFiat)
 	return fmt.Sprintf("%s - %s", ts, ethFiatStr)
 }
 
@@ -147,7 +148,7 @@ func RunBot() {
 		panic(err)
 	}
 
-	ps := plugins.Selected
+	ps := registry.Selected
 
 	for update := range updates {
 		if update.Message != nil {
@@ -172,10 +173,10 @@ func RunBot() {
 		} else if update.CallbackQuery != nil {
 			fmt.Println(update.CallbackQuery.Data)
 			pluginId := update.CallbackQuery.Data
-			if pluginId == plugins.Void {
+			if pluginId == registry.Void {
 				continue
 			}
-			p := plugins.GetPluginById(pluginId)
+			p := registry.GetPluginById(pluginId)
 			if p == nil {
 				continue
 			}

@@ -1,9 +1,10 @@
-package plugins
+package registry
 
 import (
 	"fmt"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/t0mk/rocketreport/plugins/formatting"
 )
 
 const Void = "void"
@@ -39,13 +40,13 @@ func (ps *PluginSelection) TextFormat() string {
 		fString := fmt.Sprintf("%%-%ds ", indent)
 		l := fmt.Sprintf(fString, p.Plugin.Desc)
 		if p.Plugin.Error() != "" {
-			l += fmt.Sprintf("%sError: %s%s", colorRed, p.Plugin.Error(), colorReset)
+			l += fmt.Sprintf("%sError: %s%s", formatting.ColorRed, p.Plugin.Error(), formatting.ColorReset)
 		}
 		if p.Plugin.Output() != "" {
 			if p.Plugin.Opts != nil && p.Plugin.Opts.MarkOutputGreen {
-				l += fmt.Sprintf("%s%s%s", colorGreen, p.Plugin.Output(), colorReset)
+				l += fmt.Sprintf("%s%s%s", formatting.ColorGreen, p.Plugin.Output(), formatting.ColorReset)
 			} else if p.Plugin.Opts != nil && p.Plugin.Opts.MarkNegativeRed && p.Plugin.RawOutput().(float64) < 0 {
-				l += fmt.Sprintf("%s%s%s", colorRed, p.Plugin.Output(), colorReset)
+				l += fmt.Sprintf("%s%s%s", formatting.ColorRed, p.Plugin.Output(), formatting.ColorReset)
 			} else {
 				l += p.Plugin.Output()
 			}

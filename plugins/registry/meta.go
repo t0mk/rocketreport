@@ -1,27 +1,36 @@
-package plugins
+package registry
 
 import (
 	"fmt"
 	"strconv"
+
+	"github.com/t0mk/rocketreport/plugins/formatting"
+	"github.com/t0mk/rocketreport/plugins/types"
 )
 
 type Reducer func(float64, float64) float64
 
-func CreateMetaPlugin(desc, help string, reducer Reducer, seed float64) Plugin {
-	return Plugin{
+func CreateMetaPlugin(desc, help string, reducer Reducer) types.RRPlugin {
+	return types.RRPlugin{
 		Desc:      desc,
 		Help:      help,
-		Formatter: FloatSuffixFormatter(0, ""),
-		ArgDescs: ArgDescs{
-			{"list of values - numbers or plugin outputs", []interface{}{}},
+		Formatter: formatting.FloatSuffix(0, ""),
+		ArgDescs: types.ArgDescs{
+			{
+				Desc:    "list of values - numbers or plugin outputs",
+				Default: []interface{}{},
+			},
 		},
 		Refresh: func(args ...interface{}) (interface{}, error) {
-			ret := seed
+			ret, err := GetArgValue(args[0])
+			if err != nil {
+				return nil, err
+			}
 			vals, err := ValidateAndExpandMetaArgs(args)
 			if err != nil {
 				return nil, err
 			}
-			for _, v := range vals {
+			for _, v := range vals[1:] {
 				ret = reducer(ret, v)
 			}
 			return ret, nil
@@ -89,19 +98,26 @@ func simpleProd(a, b float64) float64 {
 	return a * b
 }
 
-func MetaPlugins() map[string]Plugin {
-	return map[string]Plugin{
+func simpleSub(a, b float64) float64 {
+	return a - b
+}
+
+func MetaPlugins() map[string]types.RRPlugin {
+	return map[string]types.RRPlugin{
 		"sum": CreateMetaPlugin(
 			"Sum",
 			"Sum of given args, either numbers or plugin outputs, adds args and outputs a float",
 			simpleSum,
-			0,
 		),
 		"prod": CreateMetaPlugin(
 			"Product",
 			"Product of given args, either numbers or plugin outputs, multiplies args and outputs a float",
 			simpleProd,
-			1,
+		),
+		"sub": CreateMetaPlugin(
+			"Subtract",
+			"Subtract second arg from first, either numbers or plugin outputs, subtracts args and outputs a float",
+			simpleSub,
 		),
 	}
 }

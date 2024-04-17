@@ -1,13 +1,17 @@
 package plugins
 
-import "github.com/t0mk/rocketreport/utils"
+import (
+	"github.com/t0mk/rocketreport/plugins/formatting"
+	"github.com/t0mk/rocketreport/plugins/types"
+	"github.com/t0mk/rocketreport/utils"
+)
 
-func ExtraPlugins() map[string]Plugin {
-	return map[string]Plugin{
+func ExtraPlugins() map[string]types.RRPlugin {
+	return map[string]types.RRPlugin{
 		"smoothingPoolBalance": {
 			Desc:      "Smoothing Pool Balance",
 			Help:      "ETH in the smoothing pool",
-			Formatter: FloatSuffixFormatter(2, "ETH"),
+			Formatter: formatting.FloatSuffix(2, "ETH"),
 			Refresh: func(...interface{}) (interface{}, error) {
 				b, err := utils.SmoothingPoolBalance()
 				if err != nil {

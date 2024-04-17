@@ -1,19 +1,25 @@
-package plugins
+package registry
 
 import (
+	"fmt"
 	"maps"
+	"math/rand"
 	"sort"
+	"time"
 
 	"github.com/t0mk/rocketreport/config"
+	"github.com/t0mk/rocketreport/plugins/rocket"
+	"github.com/t0mk/rocketreport/plugins/types"
+	"github.com/t0mk/rocketreport/plugins/common"
 )
 
 type NamedPlugin struct {
 	Id     string
 	Name   string
-	Plugin Plugin
+	Plugin types.RRPlugin
 }
 
-type PluginMap map[string]Plugin
+type PluginMap map[string]types.RRPlugin
 type PluginSelection []NamedPlugin
 
 var All PluginMap
@@ -21,11 +27,23 @@ var Selected *PluginSelection
 
 func RegisterAll() {
 	All = PluginMap{}
-	maps.Copy(All, BasicPlugins())
-	maps.Copy(All, ExchangeTickerPlugins())
-	maps.Copy(All, ValidatorPlugins())
-	maps.Copy(All, GasPlugins())
+	maps.Copy(All, common.ExchangeTickerPlugins())
+	maps.Copy(All, common.GasPlugins())
 	maps.Copy(All, MetaPlugins())
+	maps.Copy(All, rocket.BasicPlugins())
+	maps.Copy(All, rocket.ValidatorPlugins())
+}
+
+func getRandomPluginId(base string) string {
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	return fmt.Sprintf("%s-%d", base, r.Intn(10000))
+}
+
+func getPlugin(key string) *types.RRPlugin {
+	if p, ok := All[key]; ok {
+		return &p
+	}
+	panic(fmt.Sprintf("Plugin not found: %s", key))
 }
 
 func (pm *PluginMap) Select(confs []config.PluginConf) {

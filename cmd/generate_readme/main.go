@@ -4,7 +4,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/t0mk/rocketreport/plugins"
+	"github.com/t0mk/rocketreport/plugins/registry"
 )
 
 const (
@@ -23,9 +23,9 @@ func main() {
 
 	readmeTemplate := string(readmeTemplateBytes)
 
-	plugins.RegisterAll()
-	plugins.All.SelectAll()
-	pluginTable := plugins.Selected.MarkdownTable()
+	registry.RegisterAll()
+	registry.All.SelectAll()
+	pluginTable := registry.Selected.MarkdownTable()
 
 	readme := strings.Replace(readmeTemplate, pluginTableMarker, pluginTable, 1)
 

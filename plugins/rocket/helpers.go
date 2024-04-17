@@ -1,4 +1,4 @@
-package plugins
+package rocket
 
 import (
 	"github.com/jellydator/ttlcache/v3"

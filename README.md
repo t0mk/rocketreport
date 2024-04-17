@@ -33,26 +33,23 @@ Rocketreport messages are compiled from plugin output. That way you can configur
 
 | Name | Description | Args | Defaults |
 |------|-------------|------|--------------|
-| actualStake | Check actual RPL stake of Rocketpool node |  |  |
 | bitfinex | Get the latest ticker price from Bitfinex | ticker (string), amount (float64) | ETHEUR, 1 |
 | coinmate | Get the latest ticker price from Coinmate | ticker (string), amount (float64) | ETH_EUR, 1 |
-| depositedEthFiat | Check the amount of deposited ETH in USD* |  |  |
-| earnedConsensusFunds | Check the amount of consensus funds in USD* |  |  |
 | earnedConsesusEth | Check the amount of consensus ETH in USD* |  |  |
-| eth1sync | Check the sync status of Eth1 client (with Rocketpool Golang library) |  |  |
-| eth2sync | Check the sync status of Eth2 client (with Rocketpool Golang library) |  |  |
-| ethPrice | Check ETH/USD* price |  |  |
+| ethPrice | [Rocketpool] Check ETH/USD* price |  |  |
 | gasPrice | Get the latest gas price |  |  |
 | kraken | Get the latest ticker price from Kraken | ticker (string), amount (float64) | XETHZEUR, 1 |
-| minStake | Check the minimum RPL stake for Rocketpool node |  |  |
-| oracleRplPrice | Check the RPL price from Rocketpool oracle |  |  |
-| ownEthDeposit | Check the amount of ETH deposited in Rocketpool node |  |  |
+| ownEthDeposit | [Rocketpool] Check the amount of ETH deposited in Rocketpool node |  |  |
 | prod | Product of given args, either numbers or plugin outputs, multiplies args and outputs a float | list of values - numbers or plugin outputs ([]interface {}) | [] |
-| rplFiat | Check the amount of RPL in USD*, deposited to Rocketpool node |  |  |
-| rplPrice | Check RPL/USD* price (RPL/ETH based on Rocketpool Oracle) |  |  |
-| stakeReserve | Check the reserve of RPL stake in Rocketpool node (above 10%) |  |  |
+| rpActualStake | [Rocketpool] Check actual RPL stake of Rocketpool node |  |  |
+| rpEth1sync | [Rocketpool] Check the sync status of Eth1 client (with Rocketpool Golang library) |  |  |
+| rpEth2sync | [Rocketpool] Check the sync status of Eth2 client (with Rocketpool Golang library) |  |  |
+| rpIntervalEnds | [Rocketpool] Check the end of the current interval |  |  |
+| rpMinStake | [Rocketpool] Check the minimum RPL stake for Rocketpool node |  |  |
+| rpOracleRplPrice | [Rocketpool] Check the RPL price from Rocketpool oracle |  |  |
+| rplPrice | [Rocketpool] Check RPL/USD* price (RPL/ETH based on Rocketpool Oracle) |  |  |
+| sub | Subtract second arg from first, either numbers or plugin outputs, subtracts args and outputs a float | list of values - numbers or plugin outputs ([]interface {}) | [] |
 | sum | Sum of given args, either numbers or plugin outputs, adds args and outputs a float | list of values - numbers or plugin outputs ([]interface {}) | [] |
-| totalFunds | Check the total amount of funds in USD* |  |  |
 
 &ast; you can use different fiat as quote currency in these plugins if you set `fiat` option in config.yml
 

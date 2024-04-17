@@ -1,4 +1,4 @@
-package plugins
+package common
 
 import (
 	"encoding/json"
@@ -6,17 +6,19 @@ import (
 	"math/big"
 
 	"github.com/rocket-pool/rocketpool-go/utils/eth"
+	"github.com/t0mk/rocketreport/plugins/formatting"
+	"github.com/t0mk/rocketreport/plugins/types"
 	"github.com/t0mk/rocketreport/utils"
 )
 
 const bcGasUrl = "https://beaconcha.in/api/v1/execution/gasnow"
 
-func GasPlugins() map[string]Plugin {
-	return map[string]Plugin{
+func GasPlugins() map[string]types.RRPlugin {
+	return map[string]types.RRPlugin{
 		"gasPrice": {
 			Desc:      "Gas Price",
 			Help:      "Get the latest gas price",
-			Formatter: SmartFloatFormatter,
+			Formatter: formatting.SmartFloat,
 			Refresh: func(...interface{}) (interface{}, error) {
 				body, err := utils.GetHTTPResponseBodyFromUrl(bcGasUrl)
 				if err != nil {
