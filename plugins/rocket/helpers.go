@@ -48,3 +48,5 @@ func CachedGetMinipoolDetails(cacheKey string) (*utils.MinipoolInterestingDetail
 	cache.Cache.Set("minipoolDetails", details, ttlcache.DefaultTTL)
 	return &details, nil
 }
+
+

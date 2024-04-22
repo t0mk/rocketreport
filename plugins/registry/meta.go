@@ -12,6 +12,7 @@ type Reducer func(float64, float64) float64
 
 func CreateMetaPlugin(desc, help string, reducer Reducer) types.RRPlugin {
 	return types.RRPlugin{
+		Cat:       types.PluginCatMeta,
 		Desc:      desc,
 		Help:      help,
 		Formatter: formatting.FloatSuffix(0, ""),
@@ -90,34 +91,35 @@ func ValidateAndExpandMetaArgs(args []interface{}) (MetaVals, error) {
 	return ret, nil
 }
 
-func simpleSum(a, b float64) float64 {
-	return a + b
-}
-
-func simpleProd(a, b float64) float64 {
-	return a * b
-}
-
-func simpleSub(a, b float64) float64 {
-	return a - b
-}
-
 func MetaPlugins() map[string]types.RRPlugin {
 	return map[string]types.RRPlugin{
-		"sum": CreateMetaPlugin(
+		"add": CreateMetaPlugin(
 			"Sum",
 			"Sum of given args, either numbers or plugin outputs, adds args and outputs a float",
-			simpleSum,
+			func(a, b float64) float64 {
+				return a + b
+			},
 		),
-		"prod": CreateMetaPlugin(
-			"Product",
+		"mul": CreateMetaPlugin(
+			"Multiply",
 			"Product of given args, either numbers or plugin outputs, multiplies args and outputs a float",
-			simpleProd,
+			func(a, b float64) float64 {
+				return a * b
+			},
 		),
 		"sub": CreateMetaPlugin(
 			"Subtract",
 			"Subtract second arg from first, either numbers or plugin outputs, subtracts args and outputs a float",
-			simpleSub,
+			func(a, b float64) float64 {
+				return a - b
+			},
+		),
+		"div": CreateMetaPlugin(
+			"Divide",
+			"Divide first arg by second, either numbers or plugin outputs, divides args and outputs a float",
+			func(a, b float64) float64 {
+				return a / b
+			},
 		),
 	}
 }

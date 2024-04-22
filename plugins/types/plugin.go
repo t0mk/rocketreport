@@ -5,12 +5,24 @@ import (
 	"strings"
 )
 
+type PluginCat string
+
+const (
+	PluginCatRocket   PluginCat = "Rocketpool"
+	PluginCatMeta     PluginCat = "Meta"
+	PluginCatCommon   PluginCat = "Common"
+	PluginCatExchange PluginCat = "Exchange"
+	OptOkGreen                  = "okgreen"
+	OptNegativeRed              = "negativered"
+)
+
 type RRPlugin struct {
+	Cat       PluginCat
 	Desc      string
 	args      []interface{}
 	Help      string
 	Formatter func(interface{}) string
-	Opts      *Opts
+	Opts      []string
 	ArgDescs  ArgDescs
 	Refresh   RefreshFunc
 	// will be set by Eval()
@@ -84,10 +96,6 @@ func (p *RRPlugin) RawOutput() interface{} {
 	return p.rawOutput
 }
 
-type Opts struct {
-	MarkOutputGreen bool
-	MarkNegativeRed bool
-}
 
 func (p *RRPlugin) SetArgs(args []interface{}) {
 	p.args = args

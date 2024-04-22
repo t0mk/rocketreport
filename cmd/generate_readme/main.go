@@ -25,9 +25,15 @@ func main() {
 
 	registry.RegisterAll()
 	registry.All.SelectAll()
-	pluginTable := registry.Selected.MarkdownTable()
 
-	readme := strings.Replace(readmeTemplate, pluginTableMarker, pluginTable, 1)
+	tableChapter := ""
+
+	for _, c := range registry.Categories {
+		tableChapter += "### " + string(c) + " Plugins\n\n"
+		tableChapter += registry.Selected.Cat(c).MarkdownTable() + "\n\n"
+	}
+
+	readme := strings.Replace(readmeTemplate, pluginTableMarker, tableChapter, 1)
 
 	err = os.WriteFile("README.md", []byte(readme), 0644)
 	if err != nil {

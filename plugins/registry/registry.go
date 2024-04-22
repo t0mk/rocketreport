@@ -24,6 +24,12 @@ type PluginSelection []NamedPlugin
 
 var All PluginMap
 var Selected *PluginSelection
+var Categories = []types.PluginCat{
+	types.PluginCatRocket,
+	types.PluginCatExchange,
+	types.PluginCatMeta,
+	types.PluginCatCommon,
+}
 
 func RegisterAll() {
 	All = PluginMap{}
@@ -51,6 +57,7 @@ func (pm *PluginMap) Select(confs []config.PluginConf) {
 	for _, conf := range confs {
 		p := getPlugin(conf.Name)
 		p.SetArgs(conf.Args)
+		p.Opts = conf.Opts
 		if conf.Desc != "" {
 			p.Desc = conf.Desc
 		}

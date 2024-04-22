@@ -7,19 +7,19 @@ import (
 
 	"github.com/cristalhq/aconfig"
 	"github.com/cristalhq/aconfig/aconfigyaml"
+	"github.com/ethereum/go-ethereum/common"
 )
 
 const (
-	RocketStorageAddressEnv = "ROCKETSTORAGE_ADDRESS"
-	NodeAddressEnv          = "NODE_ADDRESS"
-	Eth1UrlEnv              = "ETH1_URL"
-	Eth2UrlEnv              = "ETH2_URL"
-	DebugEnv                = "DEBUG"
-	fiatEnv                 = "FIAT"
-	telegramTokenEnv        = "TELEGRAM_TOKEN"
-	telegramChatIdEnv       = "TELEGRAM_CHAT_ID"
-	NetworkEnv              = "NETWORK"
-	ConsensusClientEnv      = "CONSENSUS_CLIENT"
+	NodeAddressEnv     = "NODE_ADDRESS"
+	Eth1UrlEnv         = "ETH1_URL"
+	Eth2UrlEnv         = "ETH2_URL"
+	DebugEnv           = "DEBUG"
+	fiatEnv            = "FIAT"
+	telegramTokenEnv   = "TELEGRAM_TOKEN"
+	telegramChatIdEnv  = "TELEGRAM_CHAT_ID"
+	NetworkEnv         = "NETWORK"
+	ConsensusClientEnv = "CONSENSUS_CLIENT"
 )
 
 var CachedRplPrice *float64
@@ -30,6 +30,11 @@ const (
 	Eth1 EthClientType = "eth1"
 	Eth2 EthClientType = "eth2"
 )
+
+var RocketStorageAddress = map[string]common.Address{
+	"mainnet": common.HexToAddress("0x1d8f8f00cfa6758d7bE78336684788Fb0ee0Fa46"),
+	"holesky": common.HexToAddress("0x594Fb75D3dc2DFa0150Ad03F99F97817747dd4E1"),
+}
 
 func findEthClientUrl(t EthClientType) string {
 	urlVar := Eth1UrlEnv
@@ -56,6 +61,7 @@ type PluginConf struct {
 	Desc string        `yaml:"desc" json:"desc"`
 	Id   string        `yaml:"id" json:"id"`
 	Args []interface{} `yaml:"args" json:"args"`
+	Opts []string      `yaml:"opts" json:"opts"`
 }
 
 type PluginConfs struct {
@@ -82,7 +88,6 @@ type ConfigData struct {
 	Eth2Url              string `env:"ETH2_URL" yaml:"eth2_url" json:"eth2_url"`
 	ConsensusClient      string `env:"CONSENSUS_CLIENT" yaml:"consensus_client" json:"consensus_client"`
 	Network              string `env:"NETWORK" yaml:"network" json:"network"`
-	RocketStorageAddress string `env:"ROCKETSTORAGE_ADDRESS" yaml:"rocketstorage_address" json:"rocketstorage_address"`
 	Fiat                 string `default:"USD" env:"FIAT" yaml:"fiat" json:"fiat"`
 	TelegramToken        string `env:"TELEGRAM_TOKEN" yaml:"telegram_token" json:"telegram_token"`
 	TelegramChatId       int64  `env:"TELEGRAM_CHAT_ID" yaml:"telegram_chat_id" json:"telegram_chat_id"`
@@ -91,15 +96,10 @@ type ConfigData struct {
 
 var c ConfigData
 
-func (cd ConfigData) String() string {
-	return fmt.Sprintf("NodeAddress: %s\nEth1Url: %s\nEth2Url: %s\nConsensusClient: %s\nNetwork: %s\nRocketStorageAddress: %s\nFiat: %s\nTelegramToken: %s\nTelegramChatId: %d\nDebug: %t\n", cd.NodeAddress, cd.Eth1Url, cd.Eth2Url, cd.ConsensusClient, cd.Network, cd.RocketStorageAddress, cd.Fiat, cd.TelegramToken, cd.TelegramChatId, cd.Debug)
-}
-
 var EC = sync.OnceValue(initEC)
 var BC = sync.OnceValue(initBC)
 var RpConfig = sync.OnceValue(initRpConfig)
 var NodeAddress = sync.OnceValue(initNodeAddress)
-var RocketStorageAddress = sync.OnceValue(initRocketStorageAddress)
 var Network = sync.OnceValue(initNetwork)
 var RP = sync.OnceValue(initRP)
 var ChosenFiat = sync.OnceValue(initChosenFiat)

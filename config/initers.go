@@ -56,13 +56,6 @@ func initNetwork() configtypes.Network {
 	panic(fmt.Sprintf("Unknown network %s", c.Network))
 }
 
-func initRocketStorageAddress() common.Address {
-	if c.RocketStorageAddress == "" {
-		panic("RocketStorageAddress not set in config")
-	}
-	return common.HexToAddress(c.RocketStorageAddress)
-}
-
 func initChosenFiat() string {
 	if c.Fiat == "" {
 		return "USD"
@@ -135,6 +128,11 @@ func initRpConfig() *config.RocketPoolConfig {
 		nat.ConsensusClient = configtypes.Parameter{Value: consensusClient}
 	}
 	ret.Native = nat
+	ret.Smartnode = config.NewSmartnodeConfig(ret)
+	ret.Smartnode.Network = configtypes.Parameter{Value: initNetwork()}
+	ret.Smartnode.DataPath = configtypes.Parameter{Value: "./"}
+
+	//fmt.Printf("#%v\n", ret.Smartnode)
 	return ret
 }
 
@@ -181,7 +179,7 @@ func initBC() *services.BeaconClientManager {
 }
 
 func initRP() *rpgo.RocketPool {
-	rp, err := rpgo.NewRocketPool(EC(), RocketStorageAddress())
+	rp, err := rpgo.NewRocketPool(EC(), RocketStorageAddress[string(Network())])
 	if err != nil {
 		panic(err)
 	}

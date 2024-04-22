@@ -78,9 +78,9 @@ func FmtFiat(p float64) string {
 }
 
 func ToIfSlice[T any](slice []T) []interface{} {
-    convertedSlice := make([]interface{}, len(slice))
-    for i, v := range slice {
-        convertedSlice[i] = v
-    }
-    return convertedSlice
+	convertedSlice := make([]interface{}, len(slice))
+	for i, v := range slice {
+		convertedSlice[i] = v
+	}
+	return convertedSlice
 }

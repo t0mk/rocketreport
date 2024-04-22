@@ -20,6 +20,7 @@ func (ps *PluginSelection) DocList(doEval bool) string {
 		}
 		if doEval {
 			p.SetArgs(p.ArgDescs.ExamplesIf())
+			p.Opts = p.Opts
 			p.Eval()
 			if p.Error() != "" {
 				s += fmt.Sprintf("  error: %s%s%s\n", formatting.ColorRed, p.Error(), formatting.ColorReset)
@@ -30,6 +31,16 @@ func (ps *PluginSelection) DocList(doEval bool) string {
 
 	}
 	return s
+}
+
+func (ps *PluginSelection) Cat(cat types.PluginCat) *PluginSelection {
+	ret := PluginSelection{}
+	for _, p := range *ps {
+		if p.Plugin.Cat == cat {
+			ret = append(ret, p)
+		}
+	}
+	return &ret
 }
 
 func (ps *PluginSelection) DocConfig() string {
@@ -48,11 +59,29 @@ func (ps *PluginSelection) DocConfig() string {
 }
 
 func (ps *PluginSelection) MarkdownTable() string {
+
+	selectionHasArgs := false
+	for _, p := range *ps {
+		if p.Plugin.ArgDescs != nil {
+			selectionHasArgs = true
+			break
+		}
+	}
+
 	s := "| Name | Description | Args | Defaults |\n"
 	s += "|------|-------------|------|--------------|\n"
-	for _, p := range *ps {
-		s += fmt.Sprintf("| %s | %s | %s | %s |\n", p.Name, p.Plugin.Help, p.Plugin.ArgDescs.HelpStringDoc(), p.Plugin.ArgDescs.ExamplesString())
+	if !selectionHasArgs {
+		s = "| Name | Description |\n"
+		s += "|------|-------------|\n"
 	}
+	for _, p := range *ps {
+		if selectionHasArgs {
+			s += fmt.Sprintf("| %s | %s | %s | %s |\n", p.Name, p.Plugin.Help, p.Plugin.ArgDescs.HelpStringDoc(), p.Plugin.ArgDescs.ExamplesString())
+		} else {
+			s += fmt.Sprintf("| %s | %s |\n", p.Name, p.Plugin.Help)
+		}
+	}
+
 	return s
 }
 

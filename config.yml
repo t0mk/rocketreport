@@ -1,4 +1,4 @@
-node_address: 0xffF1A0301BDf0A5D3686Dd19374fc6Fd68a57a15
+node_address: 0x03d2634F6b03B24F835bE14F8807B58E6acD14cB`
 eth2_url: http://127.0.0.1:5052
 eth1_url: http://127.0.0.1:8545
 consensus_client: lighthouse

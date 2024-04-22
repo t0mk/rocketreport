@@ -3,8 +3,11 @@ package registry
 import (
 	"fmt"
 
+	"slices"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/t0mk/rocketreport/plugins/formatting"
+	"github.com/t0mk/rocketreport/plugins/types"
 )
 
 const Void = "void"
@@ -39,19 +42,23 @@ func (ps *PluginSelection) TextFormat() string {
 		indent := max(25, descLen)
 		fString := fmt.Sprintf("%%-%ds ", indent)
 		l := fmt.Sprintf(fString, p.Plugin.Desc)
-		if p.Plugin.Error() != "" {
-			l += fmt.Sprintf("%sError: %s%s", formatting.ColorRed, p.Plugin.Error(), formatting.ColorReset)
-		}
+		out := p.Plugin.Output()
 		if p.Plugin.Output() != "" {
-			if p.Plugin.Opts != nil && p.Plugin.Opts.MarkOutputGreen {
-				l += fmt.Sprintf("%s%s%s", formatting.ColorGreen, p.Plugin.Output(), formatting.ColorReset)
-			} else if p.Plugin.Opts != nil && p.Plugin.Opts.MarkNegativeRed && p.Plugin.RawOutput().(float64) < 0 {
-				l += fmt.Sprintf("%s%s%s", formatting.ColorRed, p.Plugin.Output(), formatting.ColorReset)
-			} else {
-				l += p.Plugin.Output()
+			out = fmt.Sprintf("%s%s%s", formatting.ColorBlue, p.Plugin.Output(), formatting.ColorReset)
+			if p.Plugin.Opts != nil {
+				if slices.Contains(p.Plugin.Opts, types.OptOkGreen) {
+					out = fmt.Sprintf("%s%s%s", formatting.ColorGreen, out, formatting.ColorReset)
+				} else if slices.Contains(p.Plugin.Opts, types.OptNegativeRed) {
+					if p.Plugin.RawOutput().(float64) < 0 {
+						out = fmt.Sprintf("%s%s%s", formatting.ColorRed, out, formatting.ColorReset)
+					}
+				}
 			}
 		}
-		s += l + "\n"
+		if p.Plugin.Error() != "" {
+			out = fmt.Sprintf("%sError: %s%s", formatting.ColorRed, p.Plugin.Error(), formatting.ColorReset)
+		}
+		s += fmt.Sprintf("%s\t%s\n", l, out)
 	}
 	return s
 }
