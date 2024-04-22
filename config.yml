@@ -1,9 +1,0 @@
-node_address: 0x03d2634F6b03B24F835bE14F8807B58E6acD14cB`
-eth2_url: http://127.0.0.1:5052
-eth1_url: http://127.0.0.1:8545
-consensus_client: lighthouse
-network: mainnet
-rocketstorage_address: 0x1d8f8f00cfa6758d7bE78336684788Fb0ee0Fa46
-fiat: EUR
-telegram_token: 7143779734:AAFPxe79Srr_fPMZsFdsaV0yELNWRR0Ea7I
-telegram_chat_id: 568975557

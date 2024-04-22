@@ -58,10 +58,10 @@ func initNetwork() configtypes.Network {
 
 func initChosenFiat() string {
 	if c.Fiat == "" {
-		return "USD"
+		return "USDT"
 	}
 	if len(c.Fiat) != 3 {
-		panic("Fiat currency must be 3 letters")
+		panic("Fiat currency must be 3 letters or \"USDT\"")
 	}
 	for _, c := range c.Fiat {
 		if c < 'A' || c > 'Z' {

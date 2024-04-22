@@ -1,20 +1,38 @@
 package rocket
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/rocket-pool/rocketpool-go/rewards"
+	"github.com/t0mk/rocketreport/cache"
 	"github.com/t0mk/rocketreport/config"
 	"github.com/t0mk/rocketreport/plugins/formatting"
 	"github.com/t0mk/rocketreport/plugins/types"
-	"github.com/t0mk/rocketreport/prices"
 	"github.com/t0mk/rocketreport/utils"
 )
 
 const (
 	minipoolDetails = "minipoolDetails"
 )
+
+
+func RewardPlugins() map[string]types.RRPlugin {
+	floatRewardPluginNameDescHelpUnits := [][]string{
+		{"rpEffectiveRplStake", "Effective RPL stake", "Check the effective RPL stake of Rocketpool node", "RPL"},
+		{"rpTotalRplStake", "Total RPL stake", "Check the total RPL stake of Rocketpool node", "RPL"},
+		{"rpEstimatedRewards", "Estimated rewards", "Check the estimated rewards of Rocketpool node", "RPL"},
+		{"rpCumulativeRplRewards", "Cumulative RPL rewards", "Check the cumulative RPL rewards of Rocketpool node", "RPL"},
+		{"rpCumulativeEthRewards", "Cumulative ETH rewards", "Check the cumulative ETH rewards of Rocketpool node", "ETH"},
+		{"rpUnclaimedRplRewards", "Unclaimed RPL rewards", "Check the unclaimed RPL rewards of Rocketpool node", "RPL"},
+		{"rpUnclaimedEthRewards", "Unclaimed ETH rewards", "Check the unclaimed ETH rewards of Rocketpool node", "ETH"},
+		{"rpBeaconRewards", "Beacon rewards", "Check the beacon rewards of Rocketpool node", "ETH"},
+	}
+	rewardPlugins := map[string]types.RRPlugin{}
+	for _, frp := range floatRewardPluginNameDescHelpUnits {
+		rewardPlugins[frp[0]] = GetFloatRewardPlugin(frp[0], frp[1], frp[2], frp[3])
+	}
+	return rewardPlugins
+}
 
 func BasicPlugins() map[string]types.RRPlugin {
 	return map[string]types.RRPlugin{
@@ -38,13 +56,6 @@ func BasicPlugins() map[string]types.RRPlugin {
 				return utils.EthClientStatusString(bcs), nil
 			},
 		},
-		"rpActualStake": {
-			Cat:       types.PluginCatRocket,
-			Desc:      "Actual stake",
-			Help:      "Check actual RPL stake of Rocketpool node",
-			Formatter: formatting.FloatSuffix(1, "RPL"),
-			Refresh:   GetActualStake,
-		},
 		"rpMinStake": {
 			Cat:       types.PluginCatRocket,
 			Desc:      "Minimum stake",
@@ -57,21 +68,7 @@ func BasicPlugins() map[string]types.RRPlugin {
 			Desc:      "Oracle RPL-ETH",
 			Help:      "Check the RPL price from Rocketpool oracle",
 			Formatter: formatting.FloatSuffix(6, "ETH"),
-			Refresh:   func(...interface{}) (interface{}, error) { return prices.PriRplEthOracle() },
-		},
-		"ethPrice": {
-			Cat:       types.PluginCatRocket,
-			Desc:      fmt.Sprintf("ETH-%s", config.ChosenFiat()),
-			Help:      fmt.Sprintf("Check ETH/%s* price", config.ChosenFiat()),
-			Formatter: formatting.FloatSuffix(0, config.ChosenFiat()),
-			Refresh:   func(...interface{}) (interface{}, error) { return prices.PriEth(config.ChosenFiat()) },
-		},
-		"rplPrice": {
-			Cat:       types.PluginCatRocket,
-			Desc:      fmt.Sprintf("RPL-%s", config.ChosenFiat()),
-			Help:      fmt.Sprintf("Check RPL/%s* price (RPL/ETH based on Rocketpool Oracle)", config.ChosenFiat()),
-			Formatter: formatting.FloatSuffix(2, config.ChosenFiat()),
-			Refresh:   func(...interface{}) (interface{}, error) { return prices.PriRpl(config.ChosenFiat()) },
+			Refresh:   cache.FloatWrap("rplEthOraclePrice", RplEthOraclePrice),
 		},
 		"rpOwnEthDeposit": {
 			Cat:       types.PluginCatRocket,
@@ -86,11 +83,11 @@ func BasicPlugins() map[string]types.RRPlugin {
 				return mpd.TotalDeposit, nil
 			},
 		},
-		"rpIntervalEnds": types.RRPlugin{
+		"rpIntervalEnd": types.RRPlugin{
 			Cat:       types.PluginCatRocket,
-			Desc:      "End of current interval",
-			Help:      "Check the end of the current interval",
-			Formatter: formatting.Str,
+			Desc:      "End of current RP interval",
+			Help:      "Check the end of the current Rocketpool interval",
+			Formatter: formatting.Time,
 			Refresh: func(args ...interface{}) (interface{}, error) {
 				start, err := rewards.GetClaimIntervalTimeStart(config.RP(), nil)
 				if err != nil {
@@ -100,15 +97,14 @@ func BasicPlugins() map[string]types.RRPlugin {
 				if err != nil {
 					return nil, err
 				}
-				endTimeinString := start.Add(duration).UTC().Format("2006-01-02 15:04:05")
-				return endTimeinString, nil
+				return start.Add(duration).UTC(), nil
 			},
 		},
-		"rpUntilEndOfInterval": types.RRPlugin{
+		"rpUntilIntervalEnd": types.RRPlugin{
 			Cat:       types.PluginCatRocket,
-			Desc:      "Until end of interval",
-			Help:      "Check the time until the end of the current interval",
-			Formatter: formatting.Str,
+			Desc:      "Until end of RP interval",
+			Help:      "Check the time until the end of the current Rocketpool interval",
+			Formatter: formatting.Duration,
 			Refresh: func(args ...interface{}) (interface{}, error) {
 				start, err := rewards.GetClaimIntervalTimeStart(config.RP(), nil)
 				if err != nil {
@@ -120,40 +116,37 @@ func BasicPlugins() map[string]types.RRPlugin {
 				}
 				timeUntilEnd := time.Until(start.Add(duration).UTC())
 
-				return formatDuration(timeUntilEnd), nil
+				return timeUntilEnd, nil
 			},
 		},
-		"rpEstimatedRewards": {
+		"rpOracleRplPriceUpdate": types.RRPlugin{
 			Cat:       types.PluginCatRocket,
-			Desc:      "Estimated RPL rewards",
-			Help:      "Check the estimated RPL rewards for the current interval",
-			Formatter: formatting.FloatSuffix(2, "RPL"),
+			Desc:      "Oracle RPL price update",
+			Help:      "Time of next RPL price update in Rocketpool oracle",
+			Formatter: formatting.Time,
+			Refresh:   cache.TimeWrap("rplEthOraclePriceUpdate", NextRplPriceUpdate),
+		},
+		"rpUntilOracleRplPriceUpdate": types.RRPlugin{
+			Cat:       types.PluginCatRocket,
+			Desc:      "Until RPL price update",
+			Help:      "Time until next RPL price update in Rocketpool oracle",
+			Formatter: formatting.Duration,
 			Refresh: func(args ...interface{}) (interface{}, error) {
-				rewards, err := GetRewards()
+				updateTimeRaw, err := cache.TimeWrap("rplEthOraclePriceUpdate", NextRplPriceUpdate)()
 				if err != nil {
 					return nil, err
 				}
-				return rewards.EstimatedRewards, nil
+				updateTime := updateTimeRaw.(time.Time)
+				timeUntilUpdate := time.Until(updateTime.UTC())
+				return timeUntilUpdate, nil
 			},
 		},
+		"rpFeeDistributorBalance": {
+			Cat:       types.PluginCatRocket,
+			Desc:      "Fee distributor balance",
+			Help:      "Check the balance of the Rocketpool fee distributor",
+			Formatter: formatting.SmartFloatSuffix("ETH"),
+			Refresh:   cache.FloatWrap("feeDistributorBalance", GetFeeDistributorBalance),
+		},
 	}
-}
-
-func formatDuration(duration time.Duration) string {
-	days := duration / (time.Hour * 24)
-	hours := (duration % (time.Hour * 24)) / time.Hour
-	minutes := (duration % time.Hour) / time.Minute
-
-	formatted := ""
-	if days > 0 {
-		formatted += fmt.Sprintf("%dd ", days)
-	}
-	if hours > 0 {
-		formatted += fmt.Sprintf("%dh ", hours)
-	}
-	if minutes > 0 {
-		formatted += fmt.Sprintf("%dmin", minutes)
-	}
-
-	return formatted
 }

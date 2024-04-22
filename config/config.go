@@ -22,8 +22,6 @@ const (
 	ConsensusClientEnv = "CONSENSUS_CLIENT"
 )
 
-var CachedRplPrice *float64
-
 type EthClientType string
 
 const (
@@ -62,6 +60,7 @@ type PluginConf struct {
 	Id   string        `yaml:"id" json:"id"`
 	Args []interface{} `yaml:"args" json:"args"`
 	Opts []string      `yaml:"opts" json:"opts"`
+	Mute bool          `yaml:"mute" json:"mute"`
 }
 
 type PluginConfs struct {
@@ -83,15 +82,15 @@ func PluginsString(pcs []PluginConf) string {
 }
 
 type ConfigData struct {
-	NodeAddress          string `env:"NODE_ADDRESS" yaml:"node_address" json:"node_address"`
-	Eth1Url              string `env:"ETH1_URL" yaml:"eth1_url" json:"eth1_url"`
-	Eth2Url              string `env:"ETH2_URL" yaml:"eth2_url" json:"eth2_url"`
-	ConsensusClient      string `env:"CONSENSUS_CLIENT" yaml:"consensus_client" json:"consensus_client"`
-	Network              string `env:"NETWORK" yaml:"network" json:"network"`
-	Fiat                 string `default:"USD" env:"FIAT" yaml:"fiat" json:"fiat"`
-	TelegramToken        string `env:"TELEGRAM_TOKEN" yaml:"telegram_token" json:"telegram_token"`
-	TelegramChatId       int64  `env:"TELEGRAM_CHAT_ID" yaml:"telegram_chat_id" json:"telegram_chat_id"`
-	Debug                bool   `env:"DEBUG" yaml:"debug" json:"debug"`
+	NodeAddress     string `env:"NODE_ADDRESS" yaml:"node_address" json:"node_address"`
+	Eth1Url         string `env:"ETH1_URL" yaml:"eth1_url" json:"eth1_url"`
+	Eth2Url         string `env:"ETH2_URL" yaml:"eth2_url" json:"eth2_url"`
+	ConsensusClient string `env:"CONSENSUS_CLIENT" yaml:"consensus_client" json:"consensus_client"`
+	Network         string `env:"NETWORK" yaml:"network" json:"network"`
+	Fiat            string `default:"USD" env:"FIAT" yaml:"fiat" json:"fiat"`
+	TelegramToken   string `env:"TELEGRAM_TOKEN" yaml:"telegram_token" json:"telegram_token"`
+	TelegramChatId  int64  `env:"TELEGRAM_CHAT_ID" yaml:"telegram_chat_id" json:"telegram_chat_id"`
+	Debug           bool   `env:"DEBUG" yaml:"debug" json:"debug"`
 }
 
 var c ConfigData

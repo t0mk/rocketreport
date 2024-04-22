@@ -8,7 +8,7 @@ Rocketreport is a tool that fetches stats about Rocketpool node and other crypto
 
 Use `gasPrice` plugin to display Eth gas price:
 ```
-./rocketreport plugin gasPrice
+./rocketreport plugin gasPriceBeaconChain
 ```
 
 Print stats based on plugin configiuration, pass config file

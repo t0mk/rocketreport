@@ -35,9 +35,11 @@ func RegisterAll() {
 	All = PluginMap{}
 	maps.Copy(All, common.ExchangeTickerPlugins())
 	maps.Copy(All, common.GasPlugins())
+	maps.Copy(All, common.PricePlugins())
 	maps.Copy(All, MetaPlugins())
 	maps.Copy(All, rocket.BasicPlugins())
 	maps.Copy(All, rocket.ValidatorPlugins())
+	maps.Copy(All, rocket.RewardPlugins())
 }
 
 func getRandomPluginId(base string) string {

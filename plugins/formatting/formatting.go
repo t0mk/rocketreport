@@ -3,6 +3,7 @@ package formatting
 import (
 	"fmt"
 	"math"
+	"time"
 
 	"github.com/t0mk/rocketreport/prices"
 	"golang.org/x/text/language"
@@ -30,6 +31,19 @@ func FloatSuffix(ndecs int, suffix string) func(interface{}) string {
 	}
 }
 
+func SmartFloatSuffix(suffix string) func(interface{}) string {
+	return func(i interface{}) string {
+		n := SmartFloat(i)
+		replacedSuffix := prices.FindAndReplaceAllCurrencyOccurencesBySign(suffix)
+		return fmt.Sprintf("%s %s", n, replacedSuffix)
+	}
+}
+
+func Time (i interface{}) string {
+	return i.(time.Time).Format("2006-01-02 15:04:05")
+}
+
+
 func SmartFloat(i interface{}) string {
 	f := i.(float64)
 	pr := message.NewPrinter(language.English)
@@ -48,4 +62,24 @@ func SmartFloat(i interface{}) string {
 
 func Uint(i interface{}) string {
 	return fmt.Sprintf("%d", i.(uint64))
+}
+
+func Duration(i interface{}) string {
+	duration := i.(time.Duration)
+	days := duration / (time.Hour * 24)
+	hours := (duration % (time.Hour * 24)) / time.Hour
+	minutes := (duration % time.Hour) / time.Minute
+
+	formatted := ""
+	if days > 0 {
+		formatted += fmt.Sprintf("%dd ", days)
+	}
+	if hours > 0 {
+		formatted += fmt.Sprintf("%dh ", hours)
+	}
+	if minutes > 0 {
+		formatted += fmt.Sprintf("%dmin", minutes)
+	}
+
+	return formatted
 }

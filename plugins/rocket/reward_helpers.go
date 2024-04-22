@@ -6,7 +6,10 @@ import (
 	"math/big"
 	"time"
 
+	"github.com/t0mk/rocketreport/cache"
 	"github.com/t0mk/rocketreport/config"
+	"github.com/t0mk/rocketreport/plugins/formatting"
+	"github.com/t0mk/rocketreport/plugins/types"
 
 	"os"
 
@@ -15,6 +18,7 @@ import (
 	"github.com/rocket-pool/rocketpool-go/node"
 	"github.com/rocket-pool/rocketpool-go/rewards"
 	"github.com/rocket-pool/rocketpool-go/tokens"
+
 	"github.com/rocket-pool/rocketpool-go/utils/eth"
 	rpstate "github.com/rocket-pool/rocketpool-go/utils/state"
 	"github.com/rocket-pool/smartnode/shared/services/beacon"
@@ -30,14 +34,37 @@ type NodeRewardsResponse struct {
 	RewardsInterval      time.Duration `json:"rewardsInterval"`
 	LastCheckpoint       time.Time     `json:"lastCheckpoint"`
 	Registered           bool          `json:"registered"`
-	EffectiveRplStake    float64       `json:"effectiveRplStake"`
-	TotalRplStake        float64       `json:"totalRplStake"`
-	EstimatedRewards     float64       `json:"estimatedRewards"`
-	CumulativeRplRewards float64       `json:"cumulativeRplRewards"`
-	CumulativeEthRewards float64       `json:"cumulativeEthRewards"`
-	UnclaimedRplRewards  float64       `json:"unclaimedRplRewards"`
-	UnclaimedEthRewards  float64       `json:"unclaimedEthRewards"`
-	BeaconRewards        float64       `json:"beaconRewards"`
+	FloatMap             map[string]float64
+}
+
+func GetFloatRewardPlugin(name, desc, help, unit string) types.RRPlugin {
+	return types.RRPlugin{
+		Cat:       types.PluginCatRocket,
+		Desc:      desc,
+		Help:      help,
+		Formatter: formatting.SmartFloatSuffix(unit),
+		Refresh: func(...interface{}) (interface{}, error) {
+			rewards, err := GetRewardsCached()
+			if err != nil {
+				return nil, err
+			}
+			return rewards.FloatMap[name], nil
+		},
+	}
+}
+
+func GetRewardsCached() (*NodeRewardsResponse, error) {
+	key := "rocket.GetRewards"
+	if val, ok := cache.Get(key); ok {
+		retVal := val.(NodeRewardsResponse)
+		return &retVal, nil
+	}
+	val, err := GetRewards()
+	if err != nil {
+		return nil, err
+	}
+	cache.Set(key, *val)
+	return val, nil
 }
 
 func GetIntervalInfo(interval uint64) (info rprewards.IntervalInfo, err error) {
@@ -113,8 +140,7 @@ func GetRewards() (*NodeRewardsResponse, error) {
 	cfg := config.RpConfig()
 	nodeAddress := config.NodeAddress()
 
-	// Response
-	response := NodeRewardsResponse{}
+	response := NodeRewardsResponse{FloatMap: make(map[string]float64)}
 
 	var totalEffectiveStake *big.Int
 	var totalRplSupply *big.Int
@@ -174,7 +200,7 @@ func GetRewards() (*NodeRewardsResponse, error) {
 				return err
 			}
 			if !intervalInfo.TreeFileExists {
-				return fmt.Errorf("Error calculating lifetime node rewards: rewards file %s doesn't exist but interval %d was claimed", intervalInfo.TreeFilePath, claimedInterval)
+				return fmt.Errorf("error calculating lifetime node rewards: rewards file %s doesn't exist but interval %d was claimed", intervalInfo.TreeFilePath, claimedInterval)
 			}
 			rplRewards.Add(rplRewards, &intervalInfo.CollateralRplAmount.Int)
 			ethRewards.Add(ethRewards, &intervalInfo.SmoothingPoolEthAmount.Int)
@@ -188,7 +214,7 @@ func GetRewards() (*NodeRewardsResponse, error) {
 				return err
 			}
 			if !intervalInfo.TreeFileExists {
-				return fmt.Errorf("Error calculating lifetime node rewards: rewards file %s doesn't exist and interval %d is unclaimed", intervalInfo.TreeFilePath, unclaimedInterval)
+				return fmt.Errorf("error calculating lifetime node rewards: rewards file %s doesn't exist and interval %d is unclaimed", intervalInfo.TreeFilePath, unclaimedInterval)
 			}
 			if intervalInfo.NodeExists {
 				unclaimedRplRewardsWei.Add(unclaimedRplRewardsWei, &intervalInfo.CollateralRplAmount.Int)
@@ -197,10 +223,10 @@ func GetRewards() (*NodeRewardsResponse, error) {
 		}
 
 		if err == nil {
-			response.CumulativeRplRewards = eth.WeiToEth(rplRewards)
-			response.UnclaimedRplRewards = eth.WeiToEth(unclaimedRplRewardsWei)
-			response.CumulativeEthRewards = eth.WeiToEth(ethRewards)
-			response.UnclaimedEthRewards = eth.WeiToEth(unclaimedEthRewardsWei)
+			response.FloatMap["rpCumulativeRplRewards"] = eth.WeiToEth(rplRewards)
+			response.FloatMap["rpUnclaimedRplRewards"] = eth.WeiToEth(unclaimedRplRewardsWei)
+			response.FloatMap["rpCumulativeEthRewards"] = eth.WeiToEth(ethRewards)
+			response.FloatMap["rpUnclaimedEthRewards"] = eth.WeiToEth(unclaimedEthRewardsWei)
 		}
 		return err
 	})
@@ -227,7 +253,7 @@ func GetRewards() (*NodeRewardsResponse, error) {
 	wg.Go(func() error {
 		effectiveStake, err := node.GetNodeEffectiveRPLStake(rp, nodeAddress, nil)
 		if err == nil {
-			response.EffectiveRplStake = eth.WeiToEth(effectiveStake)
+			response.FloatMap["rpEffectiveRplStake"] = eth.WeiToEth(effectiveStake)
 		}
 		return err
 	})
@@ -236,7 +262,7 @@ func GetRewards() (*NodeRewardsResponse, error) {
 	wg.Go(func() error {
 		stake, err := node.GetNodeRPLStake(rp, nodeAddress, nil)
 		if err == nil {
-			response.TotalRplStake = eth.WeiToEth(stake)
+			response.FloatMap["rpTotalRplStake"] = eth.WeiToEth(stake)
 		}
 		return err
 	})
@@ -290,7 +316,7 @@ func GetRewards() (*NodeRewardsResponse, error) {
 	wg.Go(func() error {
 		_addresses, err := minipool.GetNodeMinipoolAddresses(rp, nodeAddress, nil)
 		if err != nil {
-			return fmt.Errorf("Error getting node minipool addresses: %w", err)
+			return fmt.Errorf("error getting node minipool addresses: %w", err)
 		}
 		addresses = _addresses
 		return nil
@@ -300,7 +326,7 @@ func GetRewards() (*NodeRewardsResponse, error) {
 	wg.Go(func() error {
 		_beaconHead, err := bc.GetBeaconHead()
 		if err != nil {
-			return fmt.Errorf("Error getting beacon chain head: %w", err)
+			return fmt.Errorf("error getting beacon chain head: %w", err)
 		}
 		beaconHead = _beaconHead
 		return nil
@@ -320,7 +346,7 @@ func GetRewards() (*NodeRewardsResponse, error) {
 		totalDepositBalance += eth.WeiToEth(minipool.NodeDeposit)
 		totalNodeShare += eth.WeiToEth(minipool.NodeBalance)
 	}
-	response.BeaconRewards = totalNodeShare - totalDepositBalance
+	response.FloatMap["rpBeaconRewards"] = totalNodeShare - totalDepositBalance
 
 	// Calculate the estimated rewards
 	rewardsIntervalDays := response.RewardsInterval.Seconds() / (60 * 60 * 24)
@@ -331,7 +357,7 @@ func GetRewards() (*NodeRewardsResponse, error) {
 	}
 
 	if totalEffectiveStake.Cmp(big.NewInt(0)) == 1 {
-		response.EstimatedRewards = response.EffectiveRplStake / eth.WeiToEth(totalEffectiveStake) * totalRplAtNextCheckpoint * nodeOperatorRewardsPercent
+		response.FloatMap["rpEstimatedRewards"] = response.FloatMap["rpEffectiveRplStake"] / eth.WeiToEth(totalEffectiveStake) * totalRplAtNextCheckpoint * nodeOperatorRewardsPercent
 	}
 
 	// Return response

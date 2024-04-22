@@ -4,11 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/rocket-pool/rocketpool-go/network"
 	"github.com/t0mk/rocketreport/cache"
 	"github.com/t0mk/rocketreport/config"
 	"github.com/t0mk/rocketreport/exchanges"
-	"github.com/t0mk/rocketreport/utils"
 	"github.com/t0mk/rocketreport/zaplog"
 )
 
@@ -26,22 +24,6 @@ func FindAndReplaceAllCurrencyOccurencesBySign(s string) string {
 		ret = strings.ReplaceAll(ret, k, string(v))
 	}
 	return ret
-}
-
-func PriRplEthOracle() (float64, error) {
-	if config.CachedRplPrice != nil {
-		return *config.CachedRplPrice, nil
-	}
-	rplPrice, err := network.GetRPLPrice(config.RP(), nil)
-	if err != nil {
-		return 0, err
-	}
-
-	floatRplPrice, _ := utils.WeiToEther(rplPrice).Float64()
-
-	// Return the price
-	config.CachedRplPrice = &floatRplPrice
-	return floatRplPrice, nil
 }
 
 func PriEth(denom string) (float64, error) {
@@ -69,6 +51,9 @@ func PriEth(denom string) (float64, error) {
 	case config.CZK:
 		f = exchanges.Coinmate
 		ticker = "ETH_" + denom
+	case config.USDT:
+		f = exchanges.Binance
+
 	default:
 		return 0, fmt.Errorf("unsupported denominating currency: %s", denom)
 	}
@@ -78,17 +63,4 @@ func PriEth(denom string) (float64, error) {
 	}
 	cache.Cache.Set(ticker, ab.Ask, 60)
 	return ab.Ask, nil
-}
-
-func PriRpl(denom string) (float64, error) {
-	//rplPrice, err := PriRplEthReal()
-	rplPrice, err := PriRplEthOracle()
-	if err != nil {
-		return 0, err
-	}
-	ethPrice, err := PriEth(denom)
-	if err != nil {
-		return 0, err
-	}
-	return rplPrice * ethPrice, nil
 }

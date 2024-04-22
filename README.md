@@ -8,7 +8,7 @@ Rocketreport is a tool that fetches stats about Rocketpool node and other crypto
 
 Use `gasPrice` plugin to display Eth gas price:
 ```
-./rocketreport plugin gasPrice
+./rocketreport plugin gasPriceBeaconChain
 ```
 
 Print stats based on plugin configiuration, pass config file
@@ -79,54 +79,7 @@ plugins:
 - `desc` is description you want to see in report message (if your prefer to change it over the default)
 - `args` is a list of arguments to a plugin. You can see plugin description is `list-plugins` command.
 
-Rocketreport ships with following plugins:
-
-### Rocketpool Plugins
-
-| Name | Description |
-|------|-------------|
-| ethPrice | Check ETH/USD* price |
-| rpActualStake | Check actual RPL stake of Rocketpool node |
-| rpEarnedConsesusEth | Check the amount of consensus ETH in USD* |
-| rpEstimatedRewards | Check the estimated RPL rewards for the current interval |
-| rpEth1sync | Check the sync status of Eth1 client (with Rocketpool Golang library) |
-| rpEth2sync | Check the sync status of Eth2 client (with Rocketpool Golang library) |
-| rpIntervalEnds | Check the end of the current interval |
-| rpMinStake | Check the minimum RPL stake for Rocketpool node |
-| rpOracleRplPrice | Check the RPL price from Rocketpool oracle |
-| rpOwnEthDeposit | Check the amount of ETH deposited in Rocketpool node |
-| rpUntilEndOfInterval | Check the time until the end of the current interval |
-| rplPrice | Check RPL/USD* price (RPL/ETH based on Rocketpool Oracle) |
-
-
-### Exchange Plugins
-
-| Name | Description | Args | Defaults |
-|------|-------------|------|--------------|
-| bitfinex | Get the latest ticker price from Bitfinex | ticker (string), amount (float64) | ETHEUR, 1 |
-| coinmate | Get the latest ticker price from Coinmate | ticker (string), amount (float64) | ETH_EUR, 1 |
-| kraken | Get the latest ticker price from Kraken | ticker (string), amount (float64) | XETHZEUR, 1 |
-
-
-### Meta Plugins
-
-| Name | Description | Args | Defaults |
-|------|-------------|------|--------------|
-| add | Sum of given args, either numbers or plugin outputs, adds args and outputs a float | list of values - numbers or plugin outputs ([]interface {}) | [] |
-| div | Divide first arg by second, either numbers or plugin outputs, divides args and outputs a float | list of values - numbers or plugin outputs ([]interface {}) | [] |
-| mul | Product of given args, either numbers or plugin outputs, multiplies args and outputs a float | list of values - numbers or plugin outputs ([]interface {}) | [] |
-| sub | Subtract second arg from first, either numbers or plugin outputs, subtracts args and outputs a float | list of values - numbers or plugin outputs ([]interface {}) | [] |
-
-
-### Common Plugins
-
-| Name | Description |
-|------|-------------|
-| gasPrice | Get the latest gas price |
-
-
-
-&ast; you can use different fiat as quote currency in these plugins if you set `fiat` option in config.yml
+You can see all plugins listed in [PLUGINS.md](PLUGINS.md).
 
 You can list existing plugins with `rocketreport plugins`. Plugin config file is passed with `-p` parameter to rocketreport. Plugin config file is yaml containing key `plugins` with list of selected plugins. See example in [plugins.yml](plugins.yml).
 

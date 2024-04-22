@@ -79,5 +79,6 @@ func ExchangeTickerPlugins() map[string]types.RRPlugin {
 		"kraken":   CreateExchangeTickerPlugin("Kraken", "XETHZEUR", exchanges.Kraken),
 		"bitfinex": CreateExchangeTickerPlugin("Bitfinex", "ETHEUR", exchanges.Bitfinex),
 		"coinmate": CreateExchangeTickerPlugin("Coinmate", "ETH_EUR", exchanges.Coinmate),
+		"binance":  CreateExchangeTickerPlugin("Binance", "ETHUSDT", exchanges.Binance),
 	}
 }

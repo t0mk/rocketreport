@@ -16,6 +16,36 @@ type AskBid struct {
 
 type ExchangeGetter func(string) (*AskBid, error)
 
+type BinanceTicker struct {
+	Ask string `json:"askPrice"`
+	Bid string `json:"bidPrice"`
+}
+
+func Binance(ticker string) (*AskBid, error) {
+	url := "https://api.binance.com/api/v3/ticker/bookTicker?symbol=" + ticker
+	body, err := utils.GetHTTPResponseBodyFromUrl(url)
+	if err != nil {
+		return nil, err
+	}
+	//fmt.Println(string(body))
+	var tickerData BinanceTicker
+	err = json.Unmarshal(body, &tickerData)
+	if err != nil {
+		return nil, err
+	}
+	a := tickerData.Ask
+	b := tickerData.Bid
+	af, err := strconv.ParseFloat(a, 64)
+	if err != nil {
+		return nil, err
+	}
+	bf, err := strconv.ParseFloat(b, 64)
+	if err != nil {
+		return nil, err
+	}
+	return &AskBid{af, bf}, nil
+}
+
 func Bitfinex(ticker string) (*AskBid, error) {
 	url := "https://api-pub.bitfinex.com/v2/ticker/t" + ticker
 	body, err := utils.GetHTTPResponseBodyFromUrl(url)

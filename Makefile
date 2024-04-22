@@ -28,11 +28,11 @@ MAIN_PATH=./cmd/rocketreport/main.go
 # Default target
 all: test build
 
-docs:
-	$(GOCMD) run cmd/generate_readme/main.go
+plugins_md:
+	$(GOCMD) run cmd/generate_PLUGINS.md/main.go
 
 # Build the binary
-build: docs
+build: plugins_md
 	$(GOBUILD) -ldflags "-X main.buildTime=$(NOW) -X main.version=$(VERSION)" -o $(BINARY_NAME) $(MAIN_PATH)
 # Clean the binary
 clean:
