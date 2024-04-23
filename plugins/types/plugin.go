@@ -8,12 +8,13 @@ import (
 type PluginCat string
 
 const (
-	PluginCatRocket   PluginCat = "Rocketpool"
-	PluginCatMeta     PluginCat = "Meta"
-	PluginCatCommon   PluginCat = "Common"
-	PluginCatExchange PluginCat = "Exchange"
-	OptOkGreen                  = "okgreen"
-	OptNegativeRed              = "negativered"
+	PluginCatRocket    PluginCat = "Rocketpool"
+	PluginCatMeta      PluginCat = "Meta"
+	PluginCatCommon    PluginCat = "Common"
+	PluginCatExchange  PluginCat = "Exchange"
+	OptOkGreen                   = "okgreen"
+	OptNegativeRed               = "negativered"
+	OptRedIfLessThan10           = "rediflessthan10"
 )
 
 type RRPlugin struct {
@@ -95,7 +96,6 @@ func (p *RRPlugin) Error() string {
 func (p *RRPlugin) RawOutput() interface{} {
 	return p.rawOutput
 }
-
 
 func (p *RRPlugin) SetArgs(args []interface{}) {
 	p.args = args

@@ -19,8 +19,11 @@ func buttonize(s1, s2 string) tgbotapi.InlineKeyboardButton {
 func (ps *PluginSelection) TelegramFormat(chatId int64, subj string) *tgbotapi.MessageConfig {
 	rows := [][]tgbotapi.InlineKeyboardButton{}
 	for _, p := range *ps {
-		row := []tgbotapi.InlineKeyboardButton{}
 		p.Plugin.Eval()
+		if p.Hide {
+			continue
+		}
+		row := []tgbotapi.InlineKeyboardButton{}
 		row = append(row, buttonize(p.Plugin.Desc, Void))
 		row = append(row, buttonize(p.Plugin.Output(), p.Id))
 		rows = append(rows, row)
@@ -38,27 +41,35 @@ func (ps *PluginSelection) TextFormat() string {
 	s := ""
 	for _, p := range *ps {
 		p.Plugin.Eval()
+		if p.Hide {
+			continue
+		}
 		descLen := len(p.Plugin.Desc)
 		indent := max(25, descLen)
 		fString := fmt.Sprintf("%%-%ds ", indent)
-		l := fmt.Sprintf(fString, p.Plugin.Desc)
-		out := p.Plugin.Output()
+		desc := fmt.Sprintf(fString, p.Plugin.Desc)
+		var value string
 		if p.Plugin.Output() != "" {
-			out = fmt.Sprintf("%s%s%s", formatting.ColorBlue, p.Plugin.Output(), formatting.ColorReset)
+			out := p.Plugin.Output()
+			value = fmt.Sprintf("%s%s%s", formatting.ColorBlue, out, formatting.ColorReset)
 			if p.Plugin.Opts != nil {
 				if slices.Contains(p.Plugin.Opts, types.OptOkGreen) {
-					out = fmt.Sprintf("%s%s%s", formatting.ColorGreen, out, formatting.ColorReset)
+					value = fmt.Sprintf("%s%s%s", formatting.ColorGreen, out, formatting.ColorReset)
 				} else if slices.Contains(p.Plugin.Opts, types.OptNegativeRed) {
 					if p.Plugin.RawOutput().(float64) < 0 {
-						out = fmt.Sprintf("%s%s%s", formatting.ColorRed, out, formatting.ColorReset)
+						value = fmt.Sprintf("%s%s%s", formatting.ColorRed, out, formatting.ColorReset)
+					}
+				} else if slices.Contains(p.Plugin.Opts, types.OptRedIfLessThan10) {
+					if p.Plugin.RawOutput().(float64) < 10 {
+						value = fmt.Sprintf("%s%s%s", formatting.ColorRed, out, formatting.ColorReset)
 					}
 				}
 			}
 		}
 		if p.Plugin.Error() != "" {
-			out = fmt.Sprintf("%sError: %s%s", formatting.ColorRed, p.Plugin.Error(), formatting.ColorReset)
+			value = fmt.Sprintf("%sError: %s%s", formatting.ColorRed, p.Plugin.Error(), formatting.ColorReset)
 		}
-		s += fmt.Sprintf("%s\t%s\n", l, out)
+		s += fmt.Sprintf("%s\t%s\n", desc, value)
 	}
 	return s
 }

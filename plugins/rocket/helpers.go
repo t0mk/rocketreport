@@ -7,28 +7,55 @@ import (
 	"github.com/jellydator/ttlcache/v3"
 	"github.com/rocket-pool/rocketpool-go/network"
 	"github.com/rocket-pool/rocketpool-go/node"
+	"github.com/rocket-pool/rocketpool-go/rewards"
 	"github.com/t0mk/rocketreport/cache"
 	"github.com/t0mk/rocketreport/config"
 	"github.com/t0mk/rocketreport/utils"
 	"github.com/t0mk/rocketreport/zaplog"
 )
 
-func GetActualStake(...interface{}) (interface{}, error) {
+func GetNodeStake() (float64, error) {
 	actualStake, err := node.GetNodeRPLStake(config.RP(), config.NodeAddress(), nil)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 	actualStakeFloat, _ := utils.WeiToEther(actualStake).Float64()
 	return actualStakeFloat, nil
 }
 
-func GetMinStake(...interface{}) (interface{}, error) {
+func GetMinStake() (float64, error) {
 	minStake, err := node.GetNodeMinimumRPLStake(config.RP(), config.NodeAddress(), nil)
 	if err != nil {
-		return nil, err
+		return 0., err
 	}
 	minStakeFloat, _ := utils.WeiToEther(minStake).Float64()
 	return minStakeFloat, nil
+}
+
+func GetEthMatched() (float64, error) {
+	ethMatched, err := node.GetNodeEthMatched(config.RP(), config.NodeAddress(), nil)
+	if err != nil {
+		return 0, err
+	}
+	ethMatchedFloat, _ := utils.WeiToEther(ethMatched).Float64()
+	return ethMatchedFloat, nil
+}
+
+func GetStakeRatio() (float64, error) {
+	price, err := cache.Float("rpOracleRplPrice", GetRplEthOraclePrice)
+	if err != nil {
+		return 0., err
+	}
+	ethMatched, err := cache.Float("rpEthMatched", GetEthMatched)
+	if err != nil {
+		return 0., err
+	}
+	nodeStake, err := cache.Float("rpNodeStake", GetNodeStake)
+	if err != nil {
+		return 0., err
+	}
+	ethRatio := nodeStake / (ethMatched / price)
+	return ethRatio * 100, nil
 }
 
 func CachedGetMinipoolDetails(cacheKey string) (*utils.MinipoolInterestingDetails, error) {
@@ -53,21 +80,7 @@ func CachedGetMinipoolDetails(cacheKey string) (*utils.MinipoolInterestingDetail
 	return &details, nil
 }
 
-func RplEthOraclePriceCached() (float64, error) {
-	priceRaw, ok := cache.Get("rplEthOraclePrice")
-
-	if ok {
-		return priceRaw.(float64), nil
-	}
-	price, err := RplEthOraclePrice()
-	if err != nil {
-		return 0, err
-	}
-	cache.Set("rplEthOraclePrice", price)
-	return price, nil
-}
-
-func RplEthOraclePrice() (float64, error) {
+func GetRplEthOraclePrice() (float64, error) {
 	rplPrice, err := network.GetRPLPrice(config.RP(), nil)
 	if err != nil {
 		return 0, err
@@ -76,7 +89,7 @@ func RplEthOraclePrice() (float64, error) {
 	return floatRplPrice, nil
 }
 
-func RplPriceBlock() (uint64, error) {
+func GetRplPriceBlock() (uint64, error) {
 	rplPriceBlock, err := network.GetPricesBlock(config.RP(), nil)
 	if err != nil {
 		return 0, err
@@ -86,14 +99,14 @@ func RplPriceBlock() (uint64, error) {
 	return rplPriceBlock, nil
 }
 
-func NextRplPriceUpdate() (time.Time, error) {
+func GetNextRplPriceUpdate() (time.Time, error) {
 	c := context.Background()
 	latestBlock, err := config.EC().BlockNumber(c)
 	if err != nil {
 		return time.Time{}, err
 	}
 	now := time.Now()
-	lastRplPriceUpdateBlock, err := RplPriceBlock()
+	lastRplPriceUpdateBlock, err := GetRplPriceBlock()
 	if err != nil {
 		return time.Time{}, err
 	}
@@ -108,10 +121,29 @@ func GetFeeDistributorBalance() (float64, error) {
 	if err != nil {
 		return 0, err
 	}
-	balanceRaw, err := config.RP().Client.BalanceAt(context.Background(), fdAddr, nil)
+	return utils.AddressBallance(fdAddr)
+}
+
+func GetNodeBalance() (float64, error) {
+	return utils.AddressBallance(config.NodeAddress())
+}
+
+func GetIntervalEnd() (time.Time, error) {
+	start, err := rewards.GetClaimIntervalTimeStart(config.RP(), nil)
+	if err != nil {
+		return time.Time{}, err
+	}
+	duration, err := rewards.GetClaimIntervalTime(config.RP(), nil)
+	if err != nil {
+		return time.Time{}, err
+	}
+	return start.Add(duration).UTC(), nil
+}
+
+func GetWithdrawalAddressBallance() (float64, error) {
+	nd, err := node.GetNodeDetails(config.RP(), config.NodeAddress(), nil)
 	if err != nil {
 		return 0, err
 	}
-	balance, _ := utils.WeiToEther(balanceRaw).Float64()
-	return balance, nil
+	return utils.AddressBallance(nd.WithdrawalAddress)
 }

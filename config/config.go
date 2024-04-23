@@ -57,10 +57,9 @@ func findEthClientUrl(t EthClientType) string {
 type PluginConf struct {
 	Name string        `yaml:"name" json:"name"`
 	Desc string        `yaml:"desc" json:"desc"`
-	Id   string        `yaml:"id" json:"id"`
+	Labl string        `yaml:"labl" json:"labl"`
 	Args []interface{} `yaml:"args" json:"args"`
-	Opts []string      `yaml:"opts" json:"opts"`
-	Mute bool          `yaml:"mute" json:"mute"`
+	Hide bool          `yaml:"hide" json:"hide"`
 }
 
 type PluginConfs struct {

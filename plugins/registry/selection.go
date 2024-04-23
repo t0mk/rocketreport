@@ -9,9 +9,9 @@ import (
 
 func (ps *PluginSelection) DocList(doEval bool) string {
 	s := ""
-	for _, pair := range *ps {
-		p := pair.Plugin
-		s += fmt.Sprintf("%s%s%-30s%s%s%-20s%s\n", formatting.ColorGreen, formatting.ColorBold, pair.Name, formatting.ColorReset, formatting.ColorBlue, p.Desc, formatting.ColorReset)
+	for _, namedPlugin := range *ps {
+		p := namedPlugin.Plugin
+		s += fmt.Sprintf("%s%s%-30s%s%s%-20s%s\n", formatting.ColorGreen, formatting.ColorBold, namedPlugin.Name, formatting.ColorReset, formatting.ColorBlue, p.Desc, formatting.ColorReset)
 		if p.ArgDescs != nil {
 			s += "  args:\n"
 			for _, a := range p.ArgDescs {
@@ -20,7 +20,6 @@ func (ps *PluginSelection) DocList(doEval bool) string {
 		}
 		if doEval {
 			p.SetArgs(p.ArgDescs.ExamplesIf())
-			p.Opts = p.Opts
 			p.Eval()
 			if p.Error() != "" {
 				s += fmt.Sprintf("  error: %s%s%s\n", formatting.ColorRed, p.Error(), formatting.ColorReset)
@@ -85,15 +84,15 @@ func (ps *PluginSelection) MarkdownTable() string {
 	return s
 }
 
-func (ps *PluginSelection) FindById(id string) *types.RRPlugin {
+func (ps *PluginSelection) FindByIdOrName(idOrName string) *types.RRPlugin {
 	for _, p := range *ps {
-		if p.Id == id {
+		if (p.Id == idOrName) || (p.Name == idOrName) {
 			return &p.Plugin
 		}
 	}
 	return nil
 }
 
-func GetPluginById(id string) *types.RRPlugin {
-	return Selected.FindById(id)
+func GetPluginByIdOrName(idOrName string) *types.RRPlugin {
+	return Selected.FindByIdOrName(idOrName)
 }

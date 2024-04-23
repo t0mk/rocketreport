@@ -7,8 +7,12 @@ import (
 	"math/big"
 	"net/http"
 
+	"context"
+
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/params"
 	"github.com/rocket-pool/smartnode/shared/types/api"
+	"github.com/t0mk/rocketreport/config"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
 )
@@ -83,4 +87,25 @@ func ToIfSlice[T any](slice []T) []interface{} {
 		convertedSlice[i] = v
 	}
 	return convertedSlice
+}
+
+func AddressBalanceString(address string) (float64, error) {
+	return AddressBallance(common.HexToAddress(address))
+}
+
+func AddressBallance(address common.Address) (float64, error) {
+	balanceRaw, err := config.RP().Client.BalanceAt(context.Background(), address, nil)
+	if err != nil {
+		return 0, fmt.Errorf("error getting balance: %w", err)
+	}
+	balance, _ := WeiToEther(balanceRaw).Float64()
+	return balance, nil
+}
+
+func ValidateAndParseAddress(address string) (*common.Address, bool) {
+	if !common.IsHexAddress(address) {
+		return nil, false
+	}
+	addr := common.HexToAddress(address)
+	return &addr, true
 }

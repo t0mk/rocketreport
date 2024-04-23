@@ -20,17 +20,22 @@
 | rpEstimatedRewards | Check the estimated rewards of Rocketpool node |
 | rpEth1sync | Check the sync status of Eth1 client (with Rocketpool Golang library) |
 | rpEth2sync | Check the sync status of Eth2 client (with Rocketpool Golang library) |
+| rpEthMatched | Check the matched ETH of Rocketpool node |
 | rpFeeDistributorBalance | Check the balance of the Rocketpool fee distributor |
 | rpIntervalEnd | Check the end of the current Rocketpool interval |
 | rpMinStake | Check the minimum RPL stake for Rocketpool node |
+| rpNodeBallance | Check the balance of the Rocketpool node |
+| rpNodeStake | Check the RPL stake of Rocketpool node |
 | rpOracleRplPrice | Check the RPL price from Rocketpool oracle |
 | rpOracleRplPriceUpdate | Time of next RPL price update in Rocketpool oracle |
 | rpOwnEthDeposit | Check the amount of ETH deposited in Rocketpool node |
+| rpStakeRatio | Check how much % of the borrowed Eth value is staked |
 | rpTotalRplStake | Check the total RPL stake of Rocketpool node |
 | rpUnclaimedEthRewards | Check the unclaimed ETH rewards of Rocketpool node |
 | rpUnclaimedRplRewards | Check the unclaimed RPL rewards of Rocketpool node |
 | rpUntilIntervalEnd | Check the time until the end of the current Rocketpool interval |
 | rpUntilOracleRplPriceUpdate | Time until next RPL price update in Rocketpool oracle |
+| rpWithdrawalAddressBallance | Check the balance of the Rocketpool withdrawal address |
 
 
 ## Exchange Plugins
@@ -52,12 +57,13 @@
 
 
 ## Common Plugins
-| Name | Description |
-|------|-------------|
-| ethPrice | Check ETH/USDT* price |
-| gasPriceBeaconChain | Get the latest gas price from beaconcha.in |
-| gasPriceExecutionClient | Get the latest gas price from the execution client |
-| rplPriceRealtime | Check realtime RPL-ETH (based on RPL-USDT and ETH-USDT from Binance) |
+| Name | Description | Args | Defaults |
+|------|-------------|------|--------------|
+| addressBalance | Check the balance of an address | address (string) |  |
+| ethPrice | Check ETH/USDT* price |  |  |
+| gasPriceBeaconChain | Get the latest gas price from beaconcha.in |  |  |
+| gasPriceExecutionClient | Get the latest gas price from the execution client |  |  |
+| rplPriceRealtime | Check realtime RPL-ETH (based on RPL-USDT and ETH-USDT from Binance) |  |  |
 
 
 

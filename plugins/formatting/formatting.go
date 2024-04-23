@@ -48,6 +48,9 @@ func SmartFloat(i interface{}) string {
 	f := i.(float64)
 	pr := message.NewPrinter(language.English)
 	absVal := math.Abs(f)
+	if absVal == 0.	{	
+		return pr.Sprintf("%.0f", f)
+	}
 	if absVal < 1 {
 		return pr.Sprintf("%.6f", f)
 	}

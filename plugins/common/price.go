@@ -33,7 +33,7 @@ func PricePlugins() map[string]types.RRPlugin {
 		},
 		"rplPriceRealtime": {
 			Cat:       types.PluginCatCommon,
-			Desc:      "reatime RPL-ETH",
+			Desc:      "Realtime RPL-ETH",
 			Help:      "Check realtime RPL-ETH (based on RPL-USDT and ETH-USDT from Binance)",
 			Formatter: formatting.SmartFloatSuffix("ETH"),
 			Refresh:   func(...interface{}) (interface{}, error) { return PriRplReal() },

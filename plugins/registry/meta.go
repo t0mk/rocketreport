@@ -59,7 +59,7 @@ func GetArgValue(arg interface{}) (float64, error) {
 	if err == nil {
 		return float64(intVal), nil
 	}
-	pl := GetPluginById(argString)
+	pl := GetPluginByIdOrName(argString)
 	if pl == nil {
 		return 0., fmt.Errorf("plugin with Id \"%s\" not found", arg)
 	}

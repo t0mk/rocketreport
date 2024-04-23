@@ -8,14 +8,15 @@ import (
 	"time"
 
 	"github.com/t0mk/rocketreport/config"
+	"github.com/t0mk/rocketreport/plugins/common"
 	"github.com/t0mk/rocketreport/plugins/rocket"
 	"github.com/t0mk/rocketreport/plugins/types"
-	"github.com/t0mk/rocketreport/plugins/common"
 )
 
 type NamedPlugin struct {
 	Id     string
 	Name   string
+	Hide   bool
 	Plugin types.RRPlugin
 }
 
@@ -36,6 +37,7 @@ func RegisterAll() {
 	maps.Copy(All, common.ExchangeTickerPlugins())
 	maps.Copy(All, common.GasPlugins())
 	maps.Copy(All, common.PricePlugins())
+	maps.Copy(All, common.BallancePlugins())
 	maps.Copy(All, MetaPlugins())
 	maps.Copy(All, rocket.BasicPlugins())
 	maps.Copy(All, rocket.ValidatorPlugins())
@@ -59,18 +61,18 @@ func (pm *PluginMap) Select(confs []config.PluginConf) {
 	for _, conf := range confs {
 		p := getPlugin(conf.Name)
 		p.SetArgs(conf.Args)
-		p.Opts = conf.Opts
+		//p.Opts = conf.Opts
 		if conf.Desc != "" {
 			p.Desc = conf.Desc
 		}
-		pluginId := conf.Id
-		if ps.FindById(pluginId) != nil {
+		pluginId := conf.Labl
+		if ps.FindByIdOrName(pluginId) != nil {
 			panic("Duplicate plugin id: " + pluginId)
 		}
 		if pluginId == "" {
 			pluginId = getRandomPluginId(conf.Name)
 		}
-		ps = append(ps, NamedPlugin{pluginId, conf.Name, *p})
+		ps = append(ps, NamedPlugin{pluginId, conf.Name, conf.Hide, *p})
 	}
 	Selected = &ps
 }
@@ -83,7 +85,7 @@ func (pm *PluginMap) SelectAll() {
 	}
 	sort.Strings(sortedKeys)
 	for _, k := range sortedKeys {
-		ps = append(ps, NamedPlugin{getRandomPluginId(k), k, (*pm)[k]})
+		ps = append(ps, NamedPlugin{getRandomPluginId(k), k, false, (*pm)[k]})
 	}
 	Selected = &ps
 }
