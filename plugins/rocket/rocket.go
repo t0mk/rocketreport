@@ -155,19 +155,19 @@ func BasicPlugins() map[string]types.RRPlugin {
 			Formatter: formatting.SmartFloatSuffix("ETH"),
 			Refresh:   cache.FloatWrap("rpFeeDistributorBalance", GetFeeDistributorBalance),
 		},
-		"rpNodeBallance": {
+		"rpNodeBalance": {
 			Cat:       types.PluginCatRocket,
 			Desc:      "Node balance",
 			Help:      "Check the balance of the Rocketpool node",
 			Formatter: formatting.SmartFloatSuffix("ETH"),
 			Refresh:   cache.FloatWrap("rpNodeBalance", GetNodeBalance),
 		},
-		"rpWithdrawalAddressBallance": {
+		"rpWithdrawalAddressBalance": {
 			Cat:       types.PluginCatRocket,
-			Desc:      "Withdrawal address ballance",
+			Desc:      "Withdrawal address balance",
 			Help:      "Check the balance of the Rocketpool withdrawal address",
 			Formatter: formatting.SmartFloatSuffix("ETH"),
-			Refresh:   cache.FloatWrap("rpWithdrawalAddressBallance", GetWithdrawalAddressBallance),
+			Refresh:   cache.FloatWrap("rpWithdrawalAddressBalance", GetWithdrawalAddressBalance),
 		},
 	}
 }

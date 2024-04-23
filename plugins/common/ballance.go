@@ -9,15 +9,15 @@ import (
 	"github.com/t0mk/rocketreport/utils"
 )
 
-func BallancePlugins() map[string]types.RRPlugin {
+func BalancePlugins() map[string]types.RRPlugin {
 	argDescs := types.ArgDescs{
 		{Desc: "address", Default: ""},
 	}
 	return map[string]types.RRPlugin{
-		"addressBallance": {
+		"addressBalance": {
 			Cat:       types.PluginCatCommon,
-			Desc:      "Address ballance",
-			Help:      "Check the ballance of an address",
+			Desc:      "Address balance",
+			Help:      "Check the balance of an address",
 			ArgDescs:  argDescs,
 			Formatter: formatting.SmartFloatSuffix("ETH"),
 			Refresh: func(args ...interface{}) (interface{}, error) {
@@ -31,7 +31,7 @@ func BallancePlugins() map[string]types.RRPlugin {
 				}
 				return cache.Float(
 					"addressBalance"+addr.String(),
-					func() (float64, error) { return utils.AddressBallance(*addr) },
+					func() (float64, error) { return utils.AddressBalance(*addr) },
 				)
 			},
 		},

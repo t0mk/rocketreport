@@ -121,11 +121,11 @@ func GetFeeDistributorBalance() (float64, error) {
 	if err != nil {
 		return 0, err
 	}
-	return utils.AddressBallance(fdAddr)
+	return utils.AddressBalance(fdAddr)
 }
 
 func GetNodeBalance() (float64, error) {
-	return utils.AddressBallance(config.NodeAddress())
+	return utils.AddressBalance(config.NodeAddress())
 }
 
 func GetIntervalEnd() (time.Time, error) {
@@ -140,10 +140,10 @@ func GetIntervalEnd() (time.Time, error) {
 	return start.Add(duration).UTC(), nil
 }
 
-func GetWithdrawalAddressBallance() (float64, error) {
+func GetWithdrawalAddressBalance() (float64, error) {
 	nd, err := node.GetNodeDetails(config.RP(), config.NodeAddress(), nil)
 	if err != nil {
 		return 0, err
 	}
-	return utils.AddressBallance(nd.WithdrawalAddress)
+	return utils.AddressBalance(nd.WithdrawalAddress)
 }

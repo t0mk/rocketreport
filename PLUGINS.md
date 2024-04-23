@@ -24,7 +24,7 @@
 | rpFeeDistributorBalance | Check the balance of the Rocketpool fee distributor |
 | rpIntervalEnd | Check the end of the current Rocketpool interval |
 | rpMinStake | Check the minimum RPL stake for Rocketpool node |
-| rpNodeBallance | Check the balance of the Rocketpool node |
+| rpNodeBalance | Check the balance of the Rocketpool node |
 | rpNodeStake | Check the RPL stake of Rocketpool node |
 | rpOracleRplPrice | Check the RPL price from Rocketpool oracle |
 | rpOracleRplPriceUpdate | Time of next RPL price update in Rocketpool oracle |
@@ -35,7 +35,7 @@
 | rpUnclaimedRplRewards | Check the unclaimed RPL rewards of Rocketpool node |
 | rpUntilIntervalEnd | Check the time until the end of the current Rocketpool interval |
 | rpUntilOracleRplPriceUpdate | Time until next RPL price update in Rocketpool oracle |
-| rpWithdrawalAddressBallance | Check the balance of the Rocketpool withdrawal address |
+| rpWithdrawalAddressBalance | Check the balance of the Rocketpool withdrawal address |
 
 
 ## Exchange Plugins

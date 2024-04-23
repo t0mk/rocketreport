@@ -90,10 +90,10 @@ func ToIfSlice[T any](slice []T) []interface{} {
 }
 
 func AddressBalanceString(address string) (float64, error) {
-	return AddressBallance(common.HexToAddress(address))
+	return AddressBalance(common.HexToAddress(address))
 }
 
-func AddressBallance(address common.Address) (float64, error) {
+func AddressBalance(address common.Address) (float64, error) {
 	balanceRaw, err := config.RP().Client.BalanceAt(context.Background(), address, nil)
 	if err != nil {
 		return 0, fmt.Errorf("error getting balance: %w", err)
