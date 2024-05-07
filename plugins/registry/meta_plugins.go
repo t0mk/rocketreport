@@ -15,7 +15,7 @@ func CreateMetaPlugin(desc, help string, reducer Reducer) types.RRPlugin {
 		Cat:       types.PluginCatMeta,
 		Desc:      desc,
 		Help:      help,
-		Formatter: formatting.FloatSuffix(0, ""),
+		Formatter: formatting.SmartFloat,
 		ArgDescs: types.ArgDescs{
 			{
 				Desc:    "list of values - numbers or plugin outputs",
@@ -59,7 +59,10 @@ func GetArgValue(arg interface{}) (float64, error) {
 	if err == nil {
 		return float64(intVal), nil
 	}
-	pl := GetPluginByIdOrName(argString)
+	pl, err := GetPluginByLabelOrName(argString)
+	if err != nil {
+		return 0., fmt.Errorf("error finding plugin by reference \"%s\": %s", arg, err)
+	}
 	if pl == nil {
 		return 0., fmt.Errorf("plugin with Id \"%s\" not found", arg)
 	}

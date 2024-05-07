@@ -25,7 +25,7 @@ func (ps *PluginSelection) TelegramFormat(chatId int64, subj string) *tgbotapi.M
 		}
 		row := []tgbotapi.InlineKeyboardButton{}
 		row = append(row, buttonize(p.Plugin.Desc, Void))
-		row = append(row, buttonize(p.Plugin.Output(), p.Id))
+		row = append(row, buttonize(p.Plugin.Output(), p.Label))
 		rows = append(rows, row)
 	}
 

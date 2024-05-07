@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"strings"
 
 	"io"
 	"math/big"
@@ -79,6 +80,14 @@ func FmtFiat(p float64) string {
 	f := message.NewPrinter(language.English)
 	i := int(p)
 	return f.Sprintf("%d", i)
+}
+
+func IfSliceToString(slice []interface{}) string {
+	convertedSlice := make([]string, len(slice))
+	for i, v := range slice {
+		convertedSlice[i] = v.(string)
+	}
+	return strings.Join(convertedSlice, " ")
 }
 
 func ToIfSlice[T any](slice []T) []interface{} {

@@ -10,6 +10,7 @@ import (
 	"github.com/t0mk/rocketreport/config"
 	"github.com/t0mk/rocketreport/plugins/formatting"
 	"github.com/t0mk/rocketreport/plugins/types"
+	"github.com/t0mk/rocketreport/utils"
 
 	"os"
 
@@ -25,6 +26,7 @@ import (
 	rprewards "github.com/rocket-pool/smartnode/shared/services/rewards"
 	"github.com/rocket-pool/smartnode/shared/utils/eth2"
 	"golang.org/x/sync/errgroup"
+
 )
 
 type NodeRewardsResponse struct {
@@ -87,7 +89,12 @@ func GetIntervalInfo(interval uint64) (info rprewards.IntervalInfo, err error) {
 	// Check if the tree file exists
 	//info.TreeFilePath = cfg.Smartnode.GetRewardsTreePath(interval, true)
 	n := string(config.Network())
-	info.TreeFilePath = fmt.Sprintf("./rewards-trees/%s/rp-rewards-%s-%d.json", n, n, interval)
+	rtPath, err := config.RewardTreesPath()
+	if err != nil {
+		err = fmt.Errorf("can't get reward trees path: %w", err)
+		return
+	}
+	info.TreeFilePath = fmt.Sprintf("%s/rp-rewards-%s-%d.json", rtPath, n, interval)
 	_, err = os.Stat(info.TreeFilePath)
 	if os.IsNotExist(err) {
 		info.TreeFileExists = false
@@ -134,6 +141,11 @@ func GetIntervalInfo(interval uint64) (info rprewards.IntervalInfo, err error) {
 }
 
 func GetRewards() (*NodeRewardsResponse, error) {
+
+	_, err := utils.RewardTreesDownloadedCheck()
+	if err != nil {
+		return nil, err
+	}
 
 	rp := config.RP()
 	bc := config.BC()

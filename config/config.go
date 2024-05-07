@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"sync"
 
 	"github.com/cristalhq/aconfig"
@@ -22,17 +23,38 @@ const (
 	ConsensusClientEnv = "CONSENSUS_CLIENT"
 )
 
+func RewardTreesPath() (string, error) {
+	hd, err := os.UserHomeDir()
+	if err != nil {
+		return "", fmt.Errorf("can't get os.UserHomeDir: %v", err)
+	}
+	return filepath.Join(hd, ".rocketreport/reward-trees", string(Network())), nil
+}
+
+var Config ConfigData
+var EC = sync.OnceValue(initEC)
+var BC = sync.OnceValue(initBC)
+var RpConfig = sync.OnceValue(initRpConfig)
+var NodeAddress = sync.OnceValue(initNodeAddress)
+var Network = sync.OnceValue(initNetwork)
+var RP = sync.OnceValue(initRP)
+var ChosenFiat = sync.OnceValue(initChosenFiat)
+var TelegramChatID = sync.OnceValue(initTelegramChatId)
+var TelegramToken = sync.OnceValue(initTelegramToken)
+var TelegramBot = sync.OnceValue(initTelegramBot)
+var Plugins []PluginConf
+
+var RocketStorageAddress = map[string]common.Address{
+	"mainnet": common.HexToAddress("0x1d8f8f00cfa6758d7bE78336684788Fb0ee0Fa46"),
+	"holesky": common.HexToAddress("0x594Fb75D3dc2DFa0150Ad03F99F97817747dd4E1"),
+}
+
 type EthClientType string
 
 const (
 	Eth1 EthClientType = "eth1"
 	Eth2 EthClientType = "eth2"
 )
-
-var RocketStorageAddress = map[string]common.Address{
-	"mainnet": common.HexToAddress("0x1d8f8f00cfa6758d7bE78336684788Fb0ee0Fa46"),
-	"holesky": common.HexToAddress("0x594Fb75D3dc2DFa0150Ad03F99F97817747dd4E1"),
-}
 
 func findEthClientUrl(t EthClientType) string {
 	urlVar := Eth1UrlEnv
@@ -92,31 +114,17 @@ type ConfigData struct {
 	Debug           bool   `env:"DEBUG" yaml:"debug" json:"debug"`
 }
 
-var c ConfigData
+func (cd ConfigData) String() string {
+	return fmt.Sprintf("NodeAddress: %s\nEth1Url: %s\nEth2Url: %s\nConsensusClient: %s\nNetwork: %s\nFiat: %s\nTelegramToken: %s\nTelegramChatId: %d\nDebug: %t\n", cd.NodeAddress, cd.Eth1Url, cd.Eth2Url, cd.ConsensusClient, cd.Network, cd.Fiat, cd.TelegramToken, cd.TelegramChatId, cd.Debug)
 
-var EC = sync.OnceValue(initEC)
-var BC = sync.OnceValue(initBC)
-var RpConfig = sync.OnceValue(initRpConfig)
-var NodeAddress = sync.OnceValue(initNodeAddress)
-var Network = sync.OnceValue(initNetwork)
-var RP = sync.OnceValue(initRP)
-var ChosenFiat = sync.OnceValue(initChosenFiat)
-var TelegramChatID = sync.OnceValue(initTelegramChatId)
-var TelegramToken = sync.OnceValue(initTelegramToken)
-var TelegramBot = sync.OnceValue(initTelegramBot)
-var Debug bool
-var Plugins []PluginConf
-var pluginsFileContent PluginConfs
+}
 
-func Setup(configFile, pluginsFile string) {
-	cfgFiles := []string{configFile}
-	if configFile == "" {
-		cfgFiles = []string{}
-	}
-
-	loader := aconfig.LoaderFor(&c, aconfig.Config{
+func FileToPlugins(file string) []PluginConf {
+	pluginsWrap := PluginConfs{}
+	loader := aconfig.LoaderFor(&pluginsWrap, aconfig.Config{
 		SkipFlags: true,
-		Files:     cfgFiles,
+		SkipEnv:   true,
+		Files:     []string{file},
 		FileDecoders: map[string]aconfig.FileDecoder{
 			".yaml": aconfigyaml.New(),
 			".yml":  aconfigyaml.New(),
@@ -126,32 +134,21 @@ func Setup(configFile, pluginsFile string) {
 	if err != nil {
 		panic(err)
 	}
-	if c.Debug {
-		Debug = true
-	}
-	if Debug {
-		fmt.Println("Loaded config")
-		fmt.Println(c)
-	}
-	if pluginsFile == "" {
-		pluginsFile = "defaultplugins.yaml"
-	}
-	loader = aconfig.LoaderFor(&pluginsFileContent, aconfig.Config{
+	return pluginsWrap.Plugins
+}
+
+func LoadConfigFromFile(file string) {
+	loader := aconfig.LoaderFor(&Config, aconfig.Config{
 		SkipFlags: true,
-		SkipEnv:   true,
-		Files:     []string{pluginsFile},
+		//SkipEnv:   true,
+		Files: []string{file},
 		FileDecoders: map[string]aconfig.FileDecoder{
 			".yaml": aconfigyaml.New(),
 			".yml":  aconfigyaml.New(),
 		},
 	})
-	err = loader.Load()
+	err := loader.Load()
 	if err != nil {
 		panic(err)
-	}
-	Plugins = pluginsFileContent.Plugins
-	if Debug {
-		fmt.Println("Loaded plugins")
-		fmt.Println(Plugins)
 	}
 }

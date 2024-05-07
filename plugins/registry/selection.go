@@ -84,15 +84,25 @@ func (ps *PluginSelection) MarkdownTable() string {
 	return s
 }
 
-func (ps *PluginSelection) FindByIdOrName(idOrName string) *types.RRPlugin {
+func (ps *PluginSelection) FindByLabelOrName(labelOrName string) (*types.RRPlugin, error) {
+	found := []types.RRPlugin{}
 	for _, p := range *ps {
-		if (p.Id == idOrName) || (p.Name == idOrName) {
-			return &p.Plugin
+		if (p.Label == labelOrName) {
+			found = append(found, p.Plugin)
+		} else if (p.Name == labelOrName) {
+			found = append(found, p.Plugin)
 		}
 	}
-	return nil
+	if len(found) == 0 {
+		return nil, fmt.Errorf("No plugin found by reference \"%s\"", labelOrName)
+	}
+	if len(found) > 1 {
+		return nil, fmt.Errorf("Multiple plugins found for reference \"%s\"", labelOrName)
+	}
+		
+	return &(found[0]), nil
 }
 
-func GetPluginByIdOrName(idOrName string) *types.RRPlugin {
-	return Selected.FindByIdOrName(idOrName)
+func GetPluginByLabelOrName(labelOrName string) (*types.RRPlugin, error) {
+	return Selected.FindByLabelOrName(labelOrName)
 }

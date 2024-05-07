@@ -18,14 +18,14 @@ const (
 )
 
 type RRPlugin struct {
-	Cat       PluginCat
-	Desc      string
-	args      []interface{}
-	Help      string
-	Formatter func(interface{}) string
-	Opts      []string
-	ArgDescs  ArgDescs
-	Refresh   RefreshFunc
+	Cat            PluginCat
+	Desc           string
+	args           []interface{}
+	Help           string
+	Formatter      func(interface{}) string
+	Opts           []string
+	ArgDescs       ArgDescs
+	Refresh        RefreshFunc
 	// will be set by Eval()
 	err       string
 	rawOutput interface{}
@@ -102,17 +102,10 @@ func (p *RRPlugin) SetArgs(args []interface{}) {
 }
 
 func (p *RRPlugin) GetRaw() (interface{}, error) {
-	/*
-		item := cache.Cache.Get(p.Name)
-		if (item != nil) && (!item.IsExpired()) {
-			return item.Value(), nil
-		}
-	*/
 	val, err := p.Refresh(p.args...)
 	if err != nil {
 		return nil, err
 	}
-	//cache.Cache.Set(p.Name, val, ttlcache.DefaultTTL)
 	return val, nil
 }
 

@@ -11,10 +11,11 @@ import (
 	"github.com/t0mk/rocketreport/plugins/common"
 	"github.com/t0mk/rocketreport/plugins/rocket"
 	"github.com/t0mk/rocketreport/plugins/types"
+	"github.com/t0mk/rocketreport/utils"
 )
 
 type NamedPlugin struct {
-	Id     string
+	Label  string
 	Name   string
 	Hide   bool
 	Plugin types.RRPlugin
@@ -49,32 +50,49 @@ func getRandomPluginId(base string) string {
 	return fmt.Sprintf("%s-%d", base, r.Intn(10000))
 }
 
-func getPlugin(key string) *types.RRPlugin {
+func getPlugin(key string) (*types.RRPlugin, error) {
 	if p, ok := All[key]; ok {
-		return &p
+		return &p, nil
 	}
-	panic(fmt.Sprintf("Plugin not found: %s", key))
+	return nil, fmt.Errorf("Plugin not found: %s", key)
 }
 
-func (pm *PluginMap) Select(confs []config.PluginConf) {
+func (pm *PluginMap) Select(confs []config.PluginConf) error {
 	ps := PluginSelection{}
+	labels := map[string]bool{}
+	names := map[string]bool{}
 	for _, conf := range confs {
-		p := getPlugin(conf.Name)
+		p, err := getPlugin(conf.Name)
+		if err != nil {
+			return err
+		}
+		names[conf.Name] = true
 		p.SetArgs(conf.Args)
 		//p.Opts = conf.Opts
 		if conf.Desc != "" {
 			p.Desc = conf.Desc
+		} else {
+			if conf.Args != nil {
+				p.Desc += " " + utils.IfSliceToString(conf.Args)
+			}
 		}
-		pluginId := conf.Labl
-		if ps.FindByIdOrName(pluginId) != nil {
-			panic("Duplicate plugin id: " + pluginId)
+		pluginLabel := conf.Labl
+		if pluginLabel == "" {
+			pluginLabel = getRandomPluginId(conf.Name)
 		}
-		if pluginId == "" {
-			pluginId = getRandomPluginId(conf.Name)
+		if _, ok := labels[pluginLabel]; ok {
+			return fmt.Errorf("Label %s is already used", pluginLabel)
 		}
-		ps = append(ps, NamedPlugin{pluginId, conf.Name, conf.Hide, *p})
+		labels[pluginLabel] = true
+		ps = append(ps, NamedPlugin{pluginLabel, conf.Name, conf.Hide, *p})
+	}
+	for l := range labels {
+		if _, ok := names[l]; ok {
+			return fmt.Errorf("Label %s clashes with a plugin name", l)
+		}
 	}
 	Selected = &ps
+	return nil
 }
 
 func (pm *PluginMap) SelectAll() {

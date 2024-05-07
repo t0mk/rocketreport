@@ -16,73 +16,73 @@ import (
 )
 
 func initNodeAddress() common.Address {
-	if c.NodeAddress == "" {
+	if Config.NodeAddress == "" {
 		panic("NodeAddress not set in config")
 	}
-	return common.HexToAddress(c.NodeAddress)
+	return common.HexToAddress(Config.NodeAddress)
 }
 
 func Eth1Url() string {
-	if c.Eth1Url == "" {
+	if Config.Eth1Url == "" {
 		panic("Eth1Url not set in config")
 	}
-	return c.Eth1Url
+	return Config.Eth1Url
 }
 
 func Eth2Url() string {
-	if c.Eth2Url == "" {
+	if Config.Eth2Url == "" {
 		panic("Eth2Url not set in config")
 	}
-	return c.Eth2Url
+	return Config.Eth2Url
 }
 
 func ConsensusClient() configtypes.ConsensusClient {
-	if c.ConsensusClient == "" {
+	if Config.ConsensusClient == "" {
 		panic("ConsensusClient not set in config")
 	}
-	return configtypes.ConsensusClient(c.ConsensusClient)
+	return configtypes.ConsensusClient(Config.ConsensusClient)
 }
 
 func initNetwork() configtypes.Network {
-	if c.Network == "" {
+	if Config.Network == "" {
 		panic("Network not set in config")
 	}
-	switch c.Network {
+	switch Config.Network {
 	case "mainnet":
 		return configtypes.Network_Mainnet
 	case "holesky":
 		return configtypes.Network_Holesky
 	}
-	panic(fmt.Sprintf("Unknown network %s", c.Network))
+	panic(fmt.Sprintf("Unknown network %s", Config.Network))
 }
 
 func initChosenFiat() string {
-	if c.Fiat == "" {
+	if Config.Fiat == "" {
 		return "USDT"
 	}
-	if len(c.Fiat) != 3 {
+	if len(Config.Fiat) != 3 {
 		panic("Fiat currency must be 3 letters or \"USDT\"")
 	}
-	for _, c := range c.Fiat {
+	for _, c := range Config.Fiat {
 		if c < 'A' || c > 'Z' {
 			panic("Fiat currency must be all capital letters")
 		}
 	}
-	return c.Fiat
+	return Config.Fiat
 }
 
 func initTelegramToken() string {
-	if c.TelegramToken == "" {
+	if Config.TelegramToken == "" {
 		panic("TelegramToken not set in config")
 	}
-	return c.TelegramToken
+	return Config.TelegramToken
 }
 
 func initTelegramChatId() int64 {
-	if c.TelegramChatId == 0 {
+	if Config.TelegramChatId == 0 {
 		panic("TelegramChatId not set in config")
 	}
-	return c.TelegramChatId
+	return Config.TelegramChatId
 }
 
 func initRpConfig() *config.RocketPoolConfig {

@@ -176,7 +176,10 @@ func RunBot() {
 			if pluginId == registry.Void {
 				continue
 			}
-			p := registry.GetPluginByIdOrName(pluginId)
+			p, err := registry.GetPluginByLabelOrName(pluginId)
+			if err != nil {
+				panic(err)
+			}
 			if p == nil {
 				continue
 			}
