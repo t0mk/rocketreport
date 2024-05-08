@@ -37,9 +37,9 @@ Plugin configuration looks like [_examples/basic/plugins.yml](_examples/basic/pl
 docker run --rm -v $(pwd)/_examples/basic:/conf t0mk/rocketreport -p /conf/plugins.yml print
 ```
 
-### Print Rocketpool stats output
+### Print Rocketpool node stats output
 
-If you want to output Rocketpool status, you need to [configure](#configuration) rocketreport.
+If you want to output Rocketpool node statistics, you need to [configure](#configuration) rocketreport.
 
 For this to work, you need to have eth1 RPC available at http://127.0.0.1:8545 and eth2 client at http://127.0.0.1:5052. See how to do it in section [Eth1 and Eth2 client port tunnelling](#eth1-and-eth2-client-port-tunnelling).
 
@@ -134,7 +134,7 @@ This is further complicated if you run rocketreport from Docker. Then, if you ha
 
 ## Build
 
-If you want to change code and test, just do `make build`. Interoperable static build that works on various Linux distros is a bit more complicated because there's some C crypto in dependencies (or RP smartnode that I'm using). It's in makefile, so just do `make static-build.
+If you want to change code and test, just do `make build`. Interoperable static build that works on various Linux distros is a bit more complicated because there's some C crypto in dependencies (I use code from RP smartnode). It's in makefile, so just do `make static-build.
 
 ## Telegram bot
 
