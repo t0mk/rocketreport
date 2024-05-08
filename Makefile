@@ -65,9 +65,6 @@ c: clean
 # Short alias for test
 t: test
 
-docker-builder-image:
-	# build builder image
-	${DOCKER_BUILD} -t ${DOCKER_BUILDER_IMAGE_NAME}:${VERSION} -f docker/builder .
 
 docker-image: static-build-amd64
 	@if ! test `find ${BINARY_NAME_AMD64} -newermt "10 seconds ago"`; then echo "binary was not created in last 5 secs"; exit 1; fi

@@ -9,21 +9,21 @@ The motivation was to get regular updates about Rocketpool node to phone. Telegr
 To install latest release for Linux:
 
 ```sh
-wget -O /tmp/rocketreport https://github.com/t0mk/rocketreport/releases/latest/download/rocketreport-linux-amd64 && chmod +x /tmp/rocketreport && sudo cp /tmp/rocketreport /usr/local/bin/
+wget -O /tmp/rocketreport https://github.com/t0mk/rocketreport/releases/latest/download/rocketreport-amd64 && chmod +x /tmp/rocketreport && sudo cp /tmp/rocketreport /usr/local/bin/
 ```
 
 You can use rocketreport from Docker, the image is `t0mk/rocketreport`.
 
 ## Usage
 
-### Use `gasPrice` plugin to display Eth gas price
+### Display ETH gas price
 ```
-  ./rocketreport plugin gasPriceBeaconcha.in
+./rocketreport plugin gasPriceBeaconcha.in
 ```
 
 .. or with Docker container
 ```
-  docker run --rm t0mk/rocketereport plugin gasPriceBeaconcha.in
+docker run --rm t0mk/rocketereport plugin gasPriceBeaconcha.in
 ```
 
 ### Print output based on plugin configuration
@@ -132,6 +132,9 @@ However, if you run rocketreport from elsewhere (like your Linux desktop), you c
 
 This is further complicated if you run rocketreport from Docker. Then, if you have eth1 and eth2 clients forwarded to localhost, you need to have the localhost URLs in `eth{1,2}_url` and you need to use `docker run --network host`, so that the container can reach the tunnels. Or, if you run `t0mk/rocketreport` container on the Rocketpool node, you can use container names in config (in other words `http://rocketpool_eth{1,2}`), but you need to run the container in the `rocketpool_net` network - run it like `docker run --rm --network rocketpool_net`.
 
+## Build
+
+If you want to change code and test, just do `make build`. Interoperable static build that works on various Linux distros is a bit more complicated because there's some C crypto in dependencies (or RP smartnode that I'm using). It's in makefile, so just do `make static-build.
 
 ## Telegram bot
 
@@ -152,4 +155,3 @@ Once you have both bot token and Chat ID set, you can create a cronjob to trigge
 ```
 rocketreport -c config.yml -p plugins.yml send -s
 ```
-
