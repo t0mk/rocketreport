@@ -10,6 +10,9 @@ import (
 )
 
 func ValidateAndExpandArgs(args []interface{}, argDescs types.ArgDescs) ([]interface{}, error) {
+	if len(args) < 1 {
+		return nil, fmt.Errorf("not enough arguments, you must pass at least the ticker")
+	}
 	if len(args) > len(argDescs) {
 		return nil, fmt.Errorf("too many arguments, expected %d, got %d", len(argDescs), len(args))
 	}

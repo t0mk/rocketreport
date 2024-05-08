@@ -1,7 +1,9 @@
 package utils
 
 import (
+	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"io"
@@ -85,9 +87,32 @@ func FmtFiat(p float64) string {
 func IfSliceToString(slice []interface{}) string {
 	convertedSlice := make([]string, len(slice))
 	for i, v := range slice {
-		convertedSlice[i] = v.(string)
+		strval, err := toString(v)
+		if err != nil {
+			convertedSlice[i] = fmt.Sprintf("Error converting value: %v", err)
+			continue
+		}
+		convertedSlice[i] = strval
 	}
 	return strings.Join(convertedSlice, " ")
+}
+
+func toString(value interface{}) (string, error) {
+	switch v := value.(type) {
+	case string:
+		return v, nil
+	case float64:
+		// Convert float64 to string using strconv.FormatFloat.
+		// The 'f' indicates a decimal without exponent,
+		// -1 specifies the smallest number of digits necessary,
+		// and 64 means it's a float64.
+		return strconv.FormatFloat(v, 'f', -1, 64), nil
+	case int64:
+		// Convert int64 to string using strconv.FormatInt.
+		return strconv.FormatInt(v, 10), nil
+	default:
+		return "", fmt.Errorf("unsupported type %T", value)
+	}
 }
 
 func ToIfSlice[T any](slice []T) []interface{} {
@@ -117,4 +142,33 @@ func ValidateAndParseAddress(address string) (*common.Address, bool) {
 	}
 	addr := common.HexToAddress(address)
 	return &addr, true
+}
+
+type AddressBalanceEtherscanResponse struct {
+	Status  string `json:"status"`
+	Message string `json:"message"`
+	Result  string `json:"result"`
+}
+
+func AddressBalanceEtherscan(address common.Address) (float64, error) {
+	url := fmt.Sprintf("https://api.etherscan.io/api?module=account&action=balance&address=%s&tag=latest", address.Hex())
+	body, err := GetHTTPResponseBodyFromUrl(url)
+	if err != nil {
+		return 0, fmt.Errorf("error getting Etherscan balance: %w", err)
+	}
+	var response AddressBalanceEtherscanResponse
+	err = json.Unmarshal(body, &response)
+	if err != nil {
+		return 0, fmt.Errorf("error unmarshalling Etherscan response: %w", err)
+	}
+	if response.Status != "1" {
+		return 0, fmt.Errorf("error Etherscan response status: %s", response.Message)
+	}
+	balanceRaw, ok := new(big.Int).SetString(response.Result, 10)
+	if !ok {
+		return 0, fmt.Errorf("error parsing Etherscan balance: %s", response.Result)
+	}
+	balance, _ := WeiToEther(balanceRaw).Float64()
+
+	return balance, nil
 }

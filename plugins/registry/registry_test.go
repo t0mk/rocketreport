@@ -75,6 +75,11 @@ var outputChecks = []PluginTestCase{
     desc: RPLETH
 `, utils.ShouldContain("No plugin found"),
 	},
+	{
+		`plugins:
+  - name: binance
+`, utils.ShouldContain("at least the ticker"),
+	},
 }
 
 var selectChecksShouldFail = []string{
@@ -118,7 +123,7 @@ func TestSelect(t *testing.T) {
 		if err == nil {
 			t.Errorf("Expected error, got nil:\n%s", c)
 		}
-		fmt.Println(err)
+		//fmt.Println(err)
 	}
 }
 

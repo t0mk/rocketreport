@@ -57,7 +57,14 @@ func getPlugin(key string) (*types.RRPlugin, error) {
 	return nil, fmt.Errorf("Plugin not found: %s", key)
 }
 
-func (pm *PluginMap) Select(confs []config.PluginConf) error {
+func (pm *PluginMap) PanickingSelect(confs config.PluginConfs) {
+	err := pm.Select(confs)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func (pm *PluginMap) Select(confs config.PluginConfs) error {
 	ps := PluginSelection{}
 	labels := map[string]bool{}
 	names := map[string]bool{}
@@ -94,6 +101,47 @@ func (pm *PluginMap) Select(confs []config.PluginConf) error {
 	Selected = &ps
 	return nil
 }
+
+/*
+func (pm *PluginMap) Select(confs config.PluginConfs) error {
+	ps := PluginSelection{}
+	labels := map[string]bool{}
+	names := map[string]bool{}
+	for _, conf := range confs {
+		p, err := getPlugin(conf.Name)
+		if err != nil {
+			return err
+		}
+		fmt.Println(p)
+		names[conf.Name] = true
+		p.SetArgs(conf.Args)
+		//p.Opts = conf.Opts
+		if conf.Desc != "" {
+			p.Desc = conf.Desc
+		} else {
+			if conf.Args != nil {
+				p.Desc += " " + utils.IfSliceToString(conf.Args)
+			}
+		}
+		pluginLabel := conf.Labl
+		if pluginLabel == "" {
+			pluginLabel = getRandomPluginId(conf.Name)
+		}
+		if _, ok := labels[pluginLabel]; ok {
+			return fmt.Errorf("Label %s is already used", pluginLabel)
+		}
+		labels[pluginLabel] = true
+		ps = append(ps, NamedPlugin{pluginLabel, conf.Name, conf.Hide, *p})
+	}
+	for l := range labels {
+		if _, ok := names[l]; ok {
+			return fmt.Errorf("Label %s clashes with a plugin name", l)
+		}
+	}
+	Selected = &ps
+	return nil
+}
+*/
 
 func (pm *PluginMap) SelectAll() {
 	ps := PluginSelection{}

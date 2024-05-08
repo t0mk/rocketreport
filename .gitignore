@@ -1,7 +1,4 @@
 rocketreport
 rocketreport-amd64
 vendor
-config.yml
-plugins.yml
-set_eth_clients.sh
 ignore

@@ -59,9 +59,10 @@
 ## Common Plugins
 | Name | Description | Args | Defaults |
 |------|-------------|------|--------------|
-| addressBalance | Check the balance of an address | address (string) |  |
+| addressBalance | Check the balance of an address via Execution client | address (string) |  |
+| addressBalanceEtherscan | Check the balance of an address using Etherscan | address (string) |  |
 | ethPrice | Check ETH/USDT* price |  |  |
-| gasPriceBeaconChain | Get the latest gas price from beaconcha.in |  |  |
+| gasPriceBeaconcha.in | Get the latest gas price from beaconcha.in |  |  |
 | gasPriceExecutionClient | Get the latest gas price from the execution client |  |  |
 | rplPriceRealtime | Check realtime RPL-ETH (based on RPL-USDT and ETH-USDT from Binance) |  |  |
 

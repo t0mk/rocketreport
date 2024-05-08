@@ -1,0 +1,7 @@
+plugins:
+  - name: gasPriceBeaconcha.in
+    desc: Gas price is
+  - name: ethPrice
+  - name: binance
+    args:
+      - RPLUSDT

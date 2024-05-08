@@ -31,6 +31,16 @@ func RewardTreesPath() (string, error) {
 	return filepath.Join(hd, ".rocketreport/reward-trees", string(Network())), nil
 }
 
+var debugFlag bool
+
+func SetDebugFlag() {
+	debugFlag = true
+}
+
+func Debug() bool {
+	return debugFlag || Config.Debug
+}
+
 var Config ConfigData
 var EC = sync.OnceValue(initEC)
 var BC = sync.OnceValue(initBC)
@@ -42,7 +52,7 @@ var ChosenFiat = sync.OnceValue(initChosenFiat)
 var TelegramChatID = sync.OnceValue(initTelegramChatId)
 var TelegramToken = sync.OnceValue(initTelegramToken)
 var TelegramBot = sync.OnceValue(initTelegramBot)
-var Plugins []PluginConf
+var Plugins PluginConfs
 
 var RocketStorageAddress = map[string]common.Address{
 	"mainnet": common.HexToAddress("0x1d8f8f00cfa6758d7bE78336684788Fb0ee0Fa46"),
@@ -84,8 +94,34 @@ type PluginConf struct {
 	Hide bool          `yaml:"hide" json:"hide"`
 }
 
-type PluginConfs struct {
-	Plugins []PluginConf `yaml:"plugins" json:"plugins"`
+type PluginConfs []PluginConf
+
+func (pcs PluginConfs) String() string {
+	s := ""
+	for i, p := range pcs {
+		if p.Name != "" {
+			s += fmt.Sprintf("name: %s\n", p.Name)
+		}
+		if p.Desc != "" {
+			s += fmt.Sprintf("desc: %s\n", p.Desc)
+		}
+		if p.Labl != "" {
+			s += fmt.Sprintf("labl: %s\n", p.Labl)
+		}
+		if p.Args != nil {
+			s += "args:\n"
+			for _, a := range p.Args {
+				s += fmt.Sprintf("  - %v\n", a)
+			}
+		}
+		if p.Hide {
+			s += "hide: true\n"
+		}
+		if i < len(pcs)-1 {
+			s += "----\n"
+		}
+	}
+	return s
 }
 
 func PluginsString(pcs []PluginConf) string {
@@ -120,7 +156,9 @@ func (cd ConfigData) String() string {
 }
 
 func FileToPlugins(file string) []PluginConf {
-	pluginsWrap := PluginConfs{}
+	pluginsWrap := struct {
+		Plugins []PluginConf `yaml:"plugins"`
+	}{}
 	loader := aconfig.LoaderFor(&pluginsWrap, aconfig.Config{
 		SkipFlags: true,
 		SkipEnv:   true,
@@ -134,6 +172,7 @@ func FileToPlugins(file string) []PluginConf {
 	if err != nil {
 		panic(err)
 	}
+	//fmt.Println(pluginsWrap)
 	return pluginsWrap.Plugins
 }
 

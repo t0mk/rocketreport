@@ -1,0 +1,27 @@
+plugins:
+  - name: binance
+    labl: my_btc_in_usdt
+    args:
+      - BTCUSDT
+      - 0.5
+  - name: addressBalanceEtherscan
+    labl: eth_in_address
+    desc: Eth in my address
+    args:
+      - 0xC450c0F2d99c0eAFC3b53336Ac65b7f94f846478
+  - name: binance
+    labl: ethusdt_binance
+    args:
+      - ETHUSDT
+    hide: true
+  - name: mul
+    labl: my_eth_in_usdt
+    desc: My eth in USDT
+    args:
+      - eth_in_address
+      - ethusdt_binance
+  - name: add
+    desc: My portfolio in USDT
+    args:
+      - my_btc_in_usdt
+      - my_eth_in_usdt

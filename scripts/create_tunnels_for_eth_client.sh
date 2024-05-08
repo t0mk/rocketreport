@@ -12,7 +12,7 @@
 
 NODE=$1
 
-[ -z "$NODE" ] && echo "Usage: $0 <sshconfig hostname>" && exit 1
+[ -z "$NODE" ] && echo "Usage: $0 <sshconfig_hostname>" && exit 1
 
 
 ETH1PORT=8545

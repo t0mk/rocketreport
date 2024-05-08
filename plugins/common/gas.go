@@ -17,7 +17,7 @@ const bcGasUrl = "https://beaconcha.in/api/v1/execution/gasnow"
 
 func GasPlugins() map[string]types.RRPlugin {
 	return map[string]types.RRPlugin{
-		"gasPriceBeaconChain": {
+		"gasPriceBeaconcha.in": {
 			Cat:       types.PluginCatCommon,
 			Desc:      "Gas Price",
 			Help:      "Get the latest gas price from beaconcha.in",

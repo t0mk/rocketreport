@@ -24,7 +24,4 @@ fi
 
 echo -n "Building Docker image... "
 docker build -t t0mk/rocketreport-builder:$VERSION -f docker/builder .
-#docker tag t0mk/rocketreport-builder:$VERSION t0mk/rocketreport-builder:latest
-#docker push t0mk/rocketreport-builder:$VERSION
-#docker push t0mk/rocketreport-builder:latest
 echo "done!"

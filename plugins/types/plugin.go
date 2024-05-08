@@ -18,14 +18,14 @@ const (
 )
 
 type RRPlugin struct {
-	Cat            PluginCat
-	Desc           string
-	args           []interface{}
-	Help           string
-	Formatter      func(interface{}) string
-	Opts           []string
-	ArgDescs       ArgDescs
-	Refresh        RefreshFunc
+	Cat       PluginCat
+	Desc      string
+	args      []interface{}
+	Help      string
+	Formatter func(interface{}) string
+	Opts      []string
+	ArgDescs  ArgDescs
+	Refresh   RefreshFunc
 	// will be set by Eval()
 	err       string
 	rawOutput interface{}
@@ -35,8 +35,8 @@ type RRPlugin struct {
 type RefreshFunc func(...interface{}) (interface{}, error)
 
 type ArgDesc struct {
-	Desc    string
-	Default interface{}
+	Desc     string
+	Default  interface{}
 }
 
 type ArgDescs []ArgDesc

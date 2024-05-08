@@ -19,6 +19,13 @@ func initNodeAddress() common.Address {
 	if Config.NodeAddress == "" {
 		panic("NodeAddress not set in config")
 	}
+	// check that it's valid eth address
+
+	if !common.IsHexAddress(Config.NodeAddress) {
+		s := fmt.Sprintf("wrong value for node_address in config file. \"%s\" is not a valid Ethereum address", Config.NodeAddress)
+		panic(s)
+	}
+
 	return common.HexToAddress(Config.NodeAddress)
 }
 

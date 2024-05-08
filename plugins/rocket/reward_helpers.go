@@ -20,13 +20,14 @@ import (
 	"github.com/rocket-pool/rocketpool-go/rewards"
 	"github.com/rocket-pool/rocketpool-go/tokens"
 
+
+
 	"github.com/rocket-pool/rocketpool-go/utils/eth"
 	rpstate "github.com/rocket-pool/rocketpool-go/utils/state"
 	"github.com/rocket-pool/smartnode/shared/services/beacon"
 	rprewards "github.com/rocket-pool/smartnode/shared/services/rewards"
 	"github.com/rocket-pool/smartnode/shared/utils/eth2"
 	"golang.org/x/sync/errgroup"
-
 )
 
 type NodeRewardsResponse struct {
@@ -280,6 +281,7 @@ func GetRewards() (*NodeRewardsResponse, error) {
 	})
 
 	// Get the total network effective stake
+	//isHoustonDeployed := config.Network() == configtypes.Network_Holesky
 	wg.Go(func() error {
 		multicallerAddress := common.HexToAddress(cfg.Smartnode.GetMulticallAddress())
 		balanceBatcherAddress := common.HexToAddress(cfg.Smartnode.GetBalanceBatcherAddress())

@@ -7,6 +7,7 @@ import (
 	"github.com/t0mk/rocketreport/plugins/types"
 )
 
+
 func (ps *PluginSelection) DocList(doEval bool) string {
 	s := ""
 	for _, namedPlugin := range *ps {
@@ -87,9 +88,9 @@ func (ps *PluginSelection) MarkdownTable() string {
 func (ps *PluginSelection) FindByLabelOrName(labelOrName string) (*types.RRPlugin, error) {
 	found := []types.RRPlugin{}
 	for _, p := range *ps {
-		if (p.Label == labelOrName) {
+		if p.Label == labelOrName {
 			found = append(found, p.Plugin)
-		} else if (p.Name == labelOrName) {
+		} else if p.Name == labelOrName {
 			found = append(found, p.Plugin)
 		}
 	}
@@ -99,7 +100,7 @@ func (ps *PluginSelection) FindByLabelOrName(labelOrName string) (*types.RRPlugi
 	if len(found) > 1 {
 		return nil, fmt.Errorf("Multiple plugins found for reference \"%s\"", labelOrName)
 	}
-		
+
 	return &(found[0]), nil
 }
 
