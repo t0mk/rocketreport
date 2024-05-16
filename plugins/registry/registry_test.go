@@ -7,7 +7,7 @@ import (
 
 	"os"
 
-	"github.com/t0mk/rocketreport/config"
+	"github.com/t0mk/rocketreport/plugins/types"
 	"github.com/t0mk/rocketreport/utils"
 )
 
@@ -130,8 +130,8 @@ func TestSelect(t *testing.T) {
 func SingleTestSelect(pluginConfYaml string) error {
 	fname, del := contentToTempFile(pluginConfYaml)
 	defer del()
-	pluginConf := config.FileToPlugins(fname)
-	return All.Select(pluginConf)
+	pluginConf := types.FileToPlugins(fname)
+	return AvailablePlugins.Select(pluginConf)
 }
 
 func TestOutputs(t *testing.T) {
@@ -139,8 +139,8 @@ func TestOutputs(t *testing.T) {
 	for _, c := range outputChecks {
 		fname, del := contentToTempFile(c.Content)
 		defer del()
-		pluginConf := config.FileToPlugins(fname)
-		err := All.Select(pluginConf)
+		pluginConf := types.FileToPlugins(fname)
+		err := AvailablePlugins.Select(pluginConf)
 		if err != nil {
 			t.Errorf("got error during Select: %s", err)
 		}

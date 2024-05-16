@@ -16,7 +16,7 @@ DOCKER_BUILD=$(DOCKER) build
 DOCKER_BUILDX=$(DOCKER) buildx
 DOCKER_RUN=$(DOCKER) run
 DOCKER_IMAGE_NAME=t0mk/rocketreport
-DOCKER_BUILDER_IMAGE_NAME=t0mk/rocketreport
+DOCKER_BUILDER_IMAGE_NAME=t0mk/rocketreport-builder
 
 # Name of the binary
 BINARY_NAME=rocketreport
@@ -38,11 +38,11 @@ build: plugins_md
 static-build-amd64:
 	# build statically compiled binary
 	# there's ld warning "/usr/bin/ld: warning: bint-x64-amd64.o: missing .note.GNU-stack section implies executable stack" and I don't know how to get rid of it
-	${DOCKER_RUN} --rm -v ${shell pwd}:/app ${DOCKER_BUILDER_IMAGE_NAME}:${VERSION} /app/build-inside-container.sh amd64 || true
+	${DOCKER_RUN} --rm -v ${shell pwd}:/app ${DOCKER_BUILDER_IMAGE_NAME} /app/build-inside-container.sh amd64 || true
 
 static-build-arm64:
 	# build statically compiled binary
-	${DOCKER_RUN} --rm -v ${shell pwd}:/app ${DOCKER_BUILDER_IMAGE_NAME}:${VERSION} /app/build-inside-container.sh arm64
+	${DOCKER_RUN} --rm -v ${shell pwd}:/app ${DOCKER_BUILDER_IMAGE_NAME} /app/build-inside-container.sh arm64
 
 static-builds: static-build-amd64 static-build-arm64
 
@@ -67,7 +67,7 @@ t: test
 
 
 docker-image: static-build-amd64
-	@if ! test `find ${BINARY_NAME_AMD64} -newermt "10 seconds ago"`; then echo "binary was not created in last 5 secs"; exit 1; fi
+	@if ! test `find ${BINARY_NAME_AMD64} -newermt "10 seconds ago"`; then echo "binary was not created in last 10 secs"; exit 1; fi
 	# build actual docker image for t0mk/rocketreport
 	$(DOCKER_BUILDX) build --platform=linux/amd64 -t $(DOCKER_IMAGE_NAME) -f docker/Dockerfile --load .
 

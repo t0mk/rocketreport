@@ -8,6 +8,7 @@ require (
 	github.com/cristalhq/aconfig/aconfigyaml v0.17.1
 	github.com/ethereum/go-ethereum v1.10.26
 	github.com/go-telegram-bot-api/telegram-bot-api v4.6.4+incompatible
+	github.com/gorhill/cronexpr v0.0.0-20180427100037-88b0669f7d75
 	github.com/jellydator/ttlcache/v3 v3.2.0
 	github.com/rocket-pool/rocketpool-go v1.8.2
 	github.com/rocket-pool/smartnode v1.11.7

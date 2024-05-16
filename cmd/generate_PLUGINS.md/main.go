@@ -18,7 +18,7 @@ func getSectionLink(c string) string {
 
 func main() {
 	registry.RegisterAll()
-	registry.All.SelectAll()
+	registry.AvailablePlugins.SelectAll()
 
 	plugins_md := `
 # Rocketreport Plugins

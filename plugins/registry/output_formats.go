@@ -34,6 +34,7 @@ func (ps *PluginSelection) TelegramFormat(chatId int64, subj string) *tgbotapi.M
 	nm.DisableWebPagePreview = true
 	nm.ParseMode = "Markdown"
 	nm.ReplyMarkup = kb
+
 	return &nm
 }
 

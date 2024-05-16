@@ -3,6 +3,7 @@ package formatting
 import (
 	"fmt"
 	"math"
+	"strings"
 	"time"
 
 	"github.com/t0mk/rocketreport/prices"
@@ -39,16 +40,15 @@ func SmartFloatSuffix(suffix string) func(interface{}) string {
 	}
 }
 
-func Time (i interface{}) string {
+func Time(i interface{}) string {
 	return i.(time.Time).Format("2006-01-02 15:04:05")
 }
-
 
 func SmartFloat(i interface{}) string {
 	f := i.(float64)
 	pr := message.NewPrinter(language.English)
 	absVal := math.Abs(f)
-	if absVal == 0.	{	
+	if absVal == 0. {
 		return pr.Sprintf("%.0f", f)
 	}
 	if absVal < 1 {
@@ -72,17 +72,29 @@ func Duration(i interface{}) string {
 	days := duration / (time.Hour * 24)
 	hours := (duration % (time.Hour * 24)) / time.Hour
 	minutes := (duration % time.Hour) / time.Minute
+	seconds := (duration % time.Minute) / time.Second
 
-	formatted := ""
+	items := []string{}
 	if days > 0 {
-		formatted += fmt.Sprintf("%dd ", days)
+		items = append(items, fmt.Sprintf("%dd", days))
 	}
-	if hours > 0 {
-		formatted += fmt.Sprintf("%dh ", hours)
+	if days < 7 {
+		if hours > 0 {
+			items = append(items, fmt.Sprintf("%dh", hours))
+		}
 	}
-	if minutes > 0 {
-		formatted += fmt.Sprintf("%dmin", minutes)
+	if days == 0 {
+		if minutes > 0 {
+			items = append(items, fmt.Sprintf("%dm", minutes))
+		}
+		if hours == 0 {
+			if seconds > 0 {
+				items = append(items, fmt.Sprintf("%ds", seconds))
+			}
+		}
 	}
+
+	formatted := strings.Join(items, " ")
 
 	return formatted
 }

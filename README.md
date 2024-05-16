@@ -61,7 +61,7 @@ If this example doesn't work, try to change the `consensus_client` in [_examples
 
 [_examples/portfolio/plugins.yml](_examples/portfolio/plugins.yml) implements following scenario:
 
-You have 0.5 BTC, and some ETH in address 0xC450c0F2d99c0eAFC3b53336Ac65b7f94f846478. You want to know (be regularly reminded) how much is it USDT.
+You have 0.5 BTC, and some ETH in address 0xC450c0F2d99c0eAFC3b53336Ac65b7f94f846478. You want to know (be regularly reminded) how much is it alltogether in USDT.
 
 ```
 docker run --rm -v $(pwd)/_examples/portfolio:/conf t0mk/rocketreport -p /conf/plugins.yml print
@@ -72,11 +72,11 @@ Output might be:
 Binance ticker BTCUSDT 0.5 	31,124
 Eth in my address         	1.1176 Ξ
 My eth in USDT            	3,357
-My portfolio in USDT      	34,482
+My total portfolio in USDT  34,482
 ```
 
 
-### Send same stats as Telegram message
+### Run Send portfolio value as Telegram message
 ```
 ./rocketreport -p plugins.yml -c config.yml send -s
 ```

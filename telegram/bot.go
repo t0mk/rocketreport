@@ -2,10 +2,11 @@ package telegram
 
 import (
 	"fmt"
-	"strings"
+	"os"
 	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/gorhill/cronexpr"
 	"github.com/t0mk/rocketreport/config"
 	"github.com/t0mk/rocketreport/plugins/formatting"
 	"github.com/t0mk/rocketreport/plugins/registry"
@@ -13,77 +14,7 @@ import (
 	"github.com/t0mk/rocketreport/zaplog"
 )
 
-func strIs(s string, patterns ...string) bool {
-	for _, p := range patterns {
-		if strings.EqualFold(s, p) {
-			return true
-		}
-	}
-	return false
-}
-
-type BotCommand struct {
-	Key  string
-	Desc string
-	Func func(chatId string) *tgbotapi.MessageConfig
-}
-
-/*
-type BotLogic struct {
-	Plugins  *plugins.PluginSet
-	Commands []BotCommand
-}
-
-func (bl *BotLogic) Help() *tgbotapi.MessageConfig {
-	text := "Available commands:\n"
-	for _, c := range bl.Commands {
-		text += c.Key + " - " + c.Desc + "\n"
-	}
-	return &tgbotapi.MessageConfig{
-		Text: text,
-	}
-}
-
-func getLogic(ps plugins.PluginSet) *BotLogic {
-	bl := &BotLogic{
-		Plugins: &ps,
-		Commands: []BotCommand{
-			{
-				Key:  "open",
-				Desc: "Open the bot",
-				Func: func(chatId) *tgbotapi.MessageConfig {
-					return tgbotapi.NewMessage()
-				},
-			},
-			{
-				Key:  "help",
-				Desc: "Show help",
-				Func: func() *tgbotapi.MessageConfig {
-					return bl.Help()
-				},
-			},
-		},
-	}
-	return bl
-}
-
-func allPrefixes(s string) []string {
-	prefixes := []string{}
-	for i := 1; i < len(s); i++ {
-		prefixes = append(prefixes, s[:i])
-	}
-	return prefixes
-}
-
-func (bl *BotLogic) getCommandFunc(command string) func() *tgbotapi.MessageConfig {
-	for _, c := range bl.Commands {
-		if strIs(command, allPrefixes()...) {
-			return c.Func
-		}
-	}
-	return nil
-}
-*/
+var CronExpression *cronexpr.Expression
 
 func newMsg(chatId int64, text string) *tgbotapi.MessageConfig {
 	ret := tgbotapi.NewMessage(chatId, text)
@@ -133,12 +64,49 @@ func ReportChatID() {
 
 }
 
-func RunBot() {
+func sendReport(bot *tgbotapi.BotAPI) error {
+	ps := registry.Selected
+
+	msg := ps.TelegramFormat(config.TelegramChatID(), MessageSubject())
+	_, err := bot.Send(msg)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func sendReportAndSchedule(bot *tgbotapi.BotAPI) error {
+	err := sendReport(bot)
+	if err != nil {
+		return err
+	}
+	if CronExpression != nil {
+		// shcedule goroutine for next report
+		go func() {
+			time.AfterFunc(time.Until(CronExpression.Next(time.Now())), func() {
+				err := sendReportAndSchedule(bot)
+				if err != nil {
+					fmt.Println("Error while sending and scheduling: ", err)
+				}
+			})
+		}()
+	}
+	return nil
+}
+
+func RunBot(schedule string) {
 
 	log := zaplog.New()
+	if schedule != "" {
+		var err error
+		CronExpression, err = cronexpr.Parse(schedule)
+		if err != nil {
+			panic(err)
+		}
+	}
 	bot := config.TelegramBot()
 
-	log.Info("Authorized on account", bot.Self.UserName)
+	log.Info("Authorized on account: ", bot.Self.UserName)
 
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
@@ -148,37 +116,76 @@ func RunBot() {
 		panic(err)
 	}
 
-	ps := registry.Selected
+	msg := newMsg(config.TelegramChatID(), "Starting Rocketreport bot")
+	kbMarkup := &tgbotapi.ReplyKeyboardMarkup{
+		Keyboard:       [][]tgbotapi.KeyboardButton{{
+			tgbotapi.KeyboardButton{Text: "Check Now"},
+			tgbotapi.KeyboardButton{Text: "Kill Bot"},
+			tgbotapi.KeyboardButton{Text: "When Next?"},
+		}},
+		ResizeKeyboard: true,
+	}
+
+	msg.ReplyMarkup = kbMarkup
+
+	_, err = bot.Send(msg)
+	if err != nil {
+		panic(err)
+	}
+
+	err = sendReportAndSchedule(bot)
+	if err != nil {
+		panic(err)
+	}
 
 	for update := range updates {
 		if update.Message != nil {
-			//chatId := update.Message.Chat.ID
-			//logic := getLogic(*ps, chatId)
-			var msg *tgbotapi.MessageConfig
-
-			received := update.Message.Text
-			if strIs(received, "open", "o", "ope", "refresh", "r", "re", "ref") {
-				msg = ps.TelegramFormat(update.Message.Chat.ID, MessageSubject())
+			if update.Message.Chat.ID != config.TelegramChatID() {
+				continue
 			}
-			if strIs(received, "help", "h", "he", "hel") {
-				msg = newMsg(update.Message.Chat.ID, "help")
-			}
-			if msg != nil {
-				_, err := bot.Send(*msg)
+			if update.Message.Text == "Check Now" {
+				err = sendReport(bot)
 				if err != nil {
 					panic(err)
 				}
+				continue
+			}
+			if update.Message.Text == "Kill Bot" {
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Killing bot")
+				_, err = bot.Send(msg)
+				if err != nil {
+					panic(err)
+				}
+				fmt.Println("killed by user")
+				os.Exit(0)
+				return
+			}
+			if update.Message.Text == "When Next?" {
+				whenNextText := "Reports are not scheduled"
+				if CronExpression != nil {
+					nextTime := CronExpression.Next(time.Now())
+					untilNext := time.Until(nextTime)
+					whenNextText = fmt.Sprintf("Next scheduled report in %s (on %s)",
+						formatting.Duration(untilNext), nextTime.Format("Mon 02-Jan 15:04"))
+				}
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, whenNextText)
+				_, err = bot.Send(msg)
+				if err != nil {
+					panic(err)
+				}
+				continue
 			}
 
 		} else if update.CallbackQuery != nil {
-			fmt.Println(update.CallbackQuery.Data)
+			fmt.Println("Callback for", update.CallbackQuery.Data)
 			pluginId := update.CallbackQuery.Data
 			if pluginId == registry.Void {
 				continue
 			}
 			p, err := registry.GetPluginByLabelOrName(pluginId)
 			if err != nil {
-				panic(err)
+				fmt.Println("Err while processing callbackj: ", err)
+				continue
 			}
 			if p == nil {
 				continue
