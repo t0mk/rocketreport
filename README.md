@@ -194,7 +194,7 @@ telegram_token: ...
 telegram_chat_id: ...
 ```
 
-You will report with Gas price to Telegram every minute by running:
+You will get report with Gas price to Telegram every minute by running:
 ```
 TELEGRAM_MESSAGE_SCHEDULE="* * * * *" rocketreport -c config.yml -p plugins.yml serve
 ```
