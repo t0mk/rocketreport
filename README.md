@@ -71,7 +71,7 @@ That will print
 ```
 Gas price is              	11.79
 ETH-USDT                  	3,035 $T
-Binance RPLUSDT             19.24
+Binance RPLUSDT           	19.24
 ```
 
 ### Print Rocketpool node stats output
