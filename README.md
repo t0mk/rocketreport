@@ -41,7 +41,7 @@ That will print
 ```
 Gas price is              	11.79
 ETH-USDT                  	3,035 $T
-Binance ticker RPLUSDT    	19.24
+Binance RPLUSDT             19.24
 ```
 
 ### Print Rocketpool node stats output
@@ -78,14 +78,14 @@ docker run --rm -v $(pwd)/_examples/portfolio:/conf t0mk/rocketreport -p /conf/p
 
 Output might be:
 ```
-Binance ticker BTCUSDT 0.5 	31,124
+My 0.5 BTC worth in USDT 	31,124
 Eth in my address         	1.1176 Ξ
 My eth in USDT            	3,357
 My total portfolio in USDT  34,482
 ```
 
 
-### Run Telegram bot and send po
+### Report over Telegram
 ```
 ./rocketreport -p plugins.yml -c config.yml send -s
 ```
@@ -199,7 +199,6 @@ You will get report with Gas price to Telegram every minute by running:
 TELEGRAM_MESSAGE_SCHEDULE="* * * * *" rocketreport -c config.yml -p plugins.yml serve
 ```
 
-
 ### Single send
 
 If you'd like to get reports regularly, but don't want to have rocketreport running all the time (in the "serve" mode), you can also send a single message to a Telegram chat. Considering you put `telegram_token` and `telegram_chat_id` to config.yml, and some plugin configuration to `plugins.yml`, you can run
@@ -218,11 +217,11 @@ The report in Telegram message is in format of "inline keyboard", so that it loo
 
 ![notification](https://iamges.com/rr_notification.png)
 
-You can template the message body to a small extent by the TELEGRAM_HEADER configuration value. It's a string with space-delimited identifiers. If identifier starts with %, it's substituted by looked-up value. Otherwise, identifier is put to the message.
+You can template the message body to a small extent by the TELEGRAM_HEADER_TEMPLATE configuration value. It's a string with space-delimited identifiers. If identifier starts with "_", it's substituted by looked-up value. Otherwise, identifier is put to the message.
 
 The substitution identifiers can refer to configured plugins by label ("labl" find in plugin conf), or they refer to plugins with no arguments.
 
 Examples of header templates:
-- `TELEGRAM_HEADER="Hi!"` will send report with "Hi!" in the body
-- `TELEGRAM_HEADER="%timeMin ETH: %ethPrice` will send report with "2024-05-16_14:34 ETH: 2,998 $T" in the header.
-- If you have plugin 
+- `TELEGRAM_HEADER_TEMPLATE="Hi!"` will send report with "Hi!" in the body
+- `TELEGRAM_HEADER_TEMPLATE="_timeMin ETH: _ethPrice` will send report with "2024-05-16_14:34 ETH: 2,998 $T" in the header.
+- If you use [plugins.yml from _examples/portfolio](_examples/portfolio/plugins.yml), you can do `TELEGRAM_HEADER_TEMPLATE="Total: _total"`, and the header will have value of plugin marked with "labl" "total".

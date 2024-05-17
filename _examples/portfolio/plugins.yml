@@ -1,5 +1,6 @@
 plugins:
   - name: binance
+    desc: My 0.5 BTC worth in USDT
     labl: my_0.5_btc_in_usdt
     args:
       - BTCUSDT
@@ -22,6 +23,7 @@ plugins:
       - ethusdt_binance
   - name: add
     desc: My total portfolio in USDT
+    labl: total
     args:
       - my_0.5_btc_in_usdt
       - my_eth_in_usdt

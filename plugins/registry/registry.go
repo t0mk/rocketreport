@@ -39,7 +39,6 @@ func RegisterAll() {
 	maps.Copy(AvailablePlugins, common.ExchangeTickerPlugins())
 	maps.Copy(AvailablePlugins, common.GasPlugins())
 	maps.Copy(AvailablePlugins, common.PricePlugins())
-	maps.Copy(AvailablePlugins, common.TimePlugins())
 	maps.Copy(AvailablePlugins, common.BalancePlugins())
 	maps.Copy(AvailablePlugins, MetaPlugins())
 	maps.Copy(AvailablePlugins, rocket.BasicPlugins())
@@ -103,6 +102,47 @@ func (pm *PluginMap) Select(confs types.PluginConfs) error {
 	Selected = &ps
 	return nil
 }
+
+/*
+func (pm *PluginMap) Select(confs config.PluginConfs) error {
+	ps := PluginSelection{}
+	labels := map[string]bool{}
+	names := map[string]bool{}
+	for _, conf := range confs {
+		p, err := getPlugin(conf.Name)
+		if err != nil {
+			return err
+		}
+		fmt.Println(p)
+		names[conf.Name] = true
+		p.SetArgs(conf.Args)
+		//p.Opts = conf.Opts
+		if conf.Desc != "" {
+			p.Desc = conf.Desc
+		} else {
+			if conf.Args != nil {
+				p.Desc += " " + utils.IfSliceToString(conf.Args)
+			}
+		}
+		pluginLabel := conf.Labl
+		if pluginLabel == "" {
+			pluginLabel = getRandomPluginId(conf.Name)
+		}
+		if _, ok := labels[pluginLabel]; ok {
+			return fmt.Errorf("Label %s is already used", pluginLabel)
+		}
+		labels[pluginLabel] = true
+		ps = append(ps, NamedPlugin{pluginLabel, conf.Name, conf.Hide, *p})
+	}
+	for l := range labels {
+		if _, ok := names[l]; ok {
+			return fmt.Errorf("Label %s clashes with a plugin name", l)
+		}
+	}
+	Selected = &ps
+	return nil
+}
+*/
 
 func (pm *PluginMap) SelectAll() {
 	ps := PluginSelection{}
