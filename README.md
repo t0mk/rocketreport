@@ -7,9 +7,6 @@ The motivation was to get regular updates about Rocketpool node to phone. Telegr
 ![showcase](https://i.ibb.co/dBsNdXP/showcase1.png)
 
 <!--ts-->
-Table of Contents
-=================
-
 * [Rocketreport](#rocketreport)
 * [Table of Contents](#table-of-contents)
    * [Install binaries](#install-binaries)
