@@ -271,14 +271,14 @@ You can put this command to Cron if you want to have the report sent regularly.
 
 The report in Telegram message is in format of "inline keyboard", so that it looks like a table. The message body is meant to be very short, but meaningful because you will see it in notification:
 
-![notification](https://iamges.com/rr_notification.png)
+![notification](https://i.ibb.co/dP2DvWH/notification.png)
 
-You can template the message body to a small extent by the TELEGRAM_HEADER_TEMPLATE configuration value. It's a string with space-delimited identifiers. If identifier starts with "_", it's substituted by looked-up value. Otherwise, identifier is put to the message.
+You can template the message body to a small extent by the TELEGRAM_HEADER_TEMPLATE configuration value. It's a string with space-delimited identifiers. If identifier starts with "%", it's substituted by looked-up value. Otherwise, identifier is put to the message.
 
 The substitution identifiers can refer to configured plugins by label ("labl" find in plugin conf), or they refer to plugins with no arguments.
 
 Examples of header templates:
 - `TELEGRAM_HEADER_TEMPLATE="Hi!"` will send report with "Hi!" in the body
-- `TELEGRAM_HEADER_TEMPLATE="_timeMin ETH: _ethPrice` will send report with "2024-05-16_14:34 ETH: 2,998 $T" in the header.
-- If you use [plugins.yml from _examples/portfolio](_examples/portfolio/plugins.yml), you can do `TELEGRAM_HEADER_TEMPLATE="Total: _total"`, and the header will have value of plugin marked with "labl" "total".
+- `TELEGRAM_HEADER_TEMPLATE="%timeMin ETH: %ethPrice` will send report with "2024-05-16_14:34 ETH: 2,998 $T" in the header.
+- If you use [plugins.yml from _examples/portfolio](_examples/portfolio/plugins.yml), you can do `TELEGRAM_HEADER_TEMPLATE="Total: %total"`, and the header will have value of plugin marked with "labl" "total".
 
