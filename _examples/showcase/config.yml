@@ -3,4 +3,5 @@ eth2_url: http://127.0.0.1:5052
 eth1_url: http://127.0.0.1:8545
 network: mainnet
 telegram_header_template: "%dateMin €/Ξ: %ethPrice"
+# Send reports at 10 AM every day
 telegram_message_schedule: "0 10 * * *"

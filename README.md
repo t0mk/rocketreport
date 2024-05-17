@@ -6,20 +6,23 @@ The motivation was to get regular updates about Rocketpool node to phone. Telegr
 
 ![showcase](https://i.ibb.co/dBsNdXP/showcase1.png)
 
+<!--ts-->
 Table of Contents
 =================
 
 * [Rocketreport](#rocketreport)
+* [Table of Contents](#table-of-contents)
    * [Install binaries](#install-binaries)
    * [Usage](#usage)
       * [Print ETH gas price](#print-eth-gas-price)
       * [Print output based on plugin configuration](#print-output-based-on-plugin-configuration)
       * [Print Rocketpool node stats output](#print-rocketpool-node-stats-output)
       * [Print portfolio details](#print-portfolio-details)
-      * [Report over Telegram](#report-over-telegram)
+      * [Report over Telegram like in the title image](#report-over-telegram-like-in-the-title-image)
    * [Plugins (<a href="PLUGINS.md">list</a>)](PLUGINS.md)
    * [Configuration](#configuration)
    * [Eth1 and Eth2 client port tunnelling](#eth1-and-eth2-client-port-tunnelling)
+   * [Reward trees](#reward-trees)
    * [Build](#build)
    * [Telegram](#telegram)
       * [Create bot and get token](#create-bot-and-get-token)
@@ -28,6 +31,7 @@ Table of Contents
          * [Message schedule](#message-schedule)
       * [Single send](#single-send)
       * [Telegram message "header"](#telegram-message-header)
+<!--te-->
 
 
 ## Install binaries
@@ -111,16 +115,36 @@ My total portfolio in USDT  34,482
 ```
 
 
-### Report over Telegram
+### Report over Telegram like in the title image
+
+Configuration is in [_examples/showcase](_examples/showcase).
+
+You will need to tunnel eth1 and eth2 clients to localhost as in [Print Rocketpool node stats output](#print-rocketpool-node-stats-output), and set Rocketpool node address in config.yml (but you can test with the current one).
+
+You will need 2 mandatory Telegram config values - TELEGRAM_TOKEN and TELEGRAM_CHAT_ID. Go obtain them as documented in the [Telegram section](#telegram).
+
+Then run:
+
 ```
-./rocketreport -p plugins.yml -c config.yml send -s
+TELEGRAM_TOKEN="<your token>" \
+TELEGRAM_CHAT_ID=<your chat id> \
+rocketreport \
+-p _examples/showcase/plugins.yml \
+-c _examples/showcase/config.yml \
+serve
 ```
 
-You can run it with Docker too
+With Docker:
 
 ```
-docker run --rm t0mk/rocketreport plugin gasPrice
-docker run --rm -v $(pwd):/confs/ t0mk/rocketreport -p /confs/plugins.yml -c /confs/config.yml print
+docker run --network host --rm \
+    -e TELEGRAM_TOKEN="<your token>" \
+    -e TELEGRAM_CHAT_ID=<your chat id> \    
+    -v $(pwd)/_examples/showcase:/conf \
+    t0mk/rocketreport \
+    -p /conf/plugins.yml \
+    -c /conf/config.yml \
+    serve
 ```
 
 ## Plugins ([list](PLUGINS.md))
@@ -166,6 +190,12 @@ For most of the Rocketpool plugins, you need to have eth1 and eth2 client RPC AP
 However, if you run rocketreport from elsewhere (like your Linux desktop), you can tunnel ports from the Rocketpool nodes to `https://127.0.0.1:8545` (eth1) and `http://127.0.0.1:5052` (eth2), and then set the localhost urls in `config.yml`. I prepared script that connects to Rocketpool server , finds IPs of the eth1 and eth2 containers, and tunnels the ports to localhost: [scripts/create_tunnels_for_eth_client.sh](scripts/create_tunnels_for_eth_client.sh).
 
 This is further complicated if you run rocketreport from Docker. Then, if you have eth1 and eth2 clients forwarded to localhost (like suggested in previous paragraph), you need to have the localhost URLs in `eth{1,2}_url` in `config.yml`, and you need to use `docker run --network host`, so that the container can reach the tunnels. Or, if you run `t0mk/rocketreport` container on the Rocketpool node, you can use container names in config (in other words `eth1_url: http://rocketpool_eth1:8545` and `eth2_url: http://rocketpool_eth2:5052`). Then, you need to run the container in the `rocketpool_net` network - `docker run --rm --network rocketpool_net`.
+
+## Reward trees
+
+There are plugins reporting rewards, so you need to have Rocketpool reward trees available locally, in `~/.rocketreport/reward-trees/<network>`. You can use command `rocketreport download-reward-trees`. You will need to run this after end of every RP interval.
+
+You don't need to mind this with Docker, the rewards trees are stored in the Docker image. Just pull new image after end of interval.
 
 ## Build
 
@@ -251,3 +281,4 @@ Examples of header templates:
 - `TELEGRAM_HEADER_TEMPLATE="Hi!"` will send report with "Hi!" in the body
 - `TELEGRAM_HEADER_TEMPLATE="_timeMin ETH: _ethPrice` will send report with "2024-05-16_14:34 ETH: 2,998 $T" in the header.
 - If you use [plugins.yml from _examples/portfolio](_examples/portfolio/plugins.yml), you can do `TELEGRAM_HEADER_TEMPLATE="Total: _total"`, and the header will have value of plugin marked with "labl" "total".
+
