@@ -16,14 +16,14 @@ const (
 
 func RewardPlugins() map[string]types.RRPlugin {
 	floatRewardPluginNameDescHelpUnits := [][]string{
-		{"rpEffectiveRplStake", "Effective RPL stake", "Check the effective RPL stake of Rocketpool node", "RPL"},
-		{"rpTotalRplStake", "Total RPL stake", "Check the total RPL stake of Rocketpool node", "RPL"},
-		{"rpEstimatedRewards", "Estimated rewards", "Check the estimated rewards of Rocketpool node", "RPL"},
-		{"rpCumulativeRplRewards", "Cumulative RPL rewards", "Check the cumulative RPL rewards of Rocketpool node", "RPL"},
-		{"rpCumulativeEthRewards", "Cumulative ETH rewards", "Check the cumulative ETH rewards of Rocketpool node", "ETH"},
-		{"rpUnclaimedRplRewards", "Unclaimed RPL rewards", "Check the unclaimed RPL rewards of Rocketpool node", "RPL"},
-		{"rpUnclaimedEthRewards", "Unclaimed ETH rewards", "Check the unclaimed ETH rewards of Rocketpool node", "ETH"},
-		{"rpBeaconRewards", "Beacon rewards", "Check the beacon rewards of Rocketpool node", "ETH"},
+		{"rpEffectiveRplStake", "Effective RPL stake", "effective RPL stake of Rocketpool node", "RPL"},
+		{"rpTotalRplStake", "Total RPL stake", "total RPL stake of Rocketpool node", "RPL"},
+		{"rpEstimatedRewards", "Estimated rewards", "estimated rewards of Rocketpool node", "RPL"},
+		{"rpCumulativeRplRewards", "Cumulative RPL rewards", "cumulative RPL rewards of Rocketpool node", "RPL"},
+		{"rpCumulativeEthRewards", "Cumulative ETH rewards", "cumulative ETH rewards of Rocketpool node", "ETH"},
+		{"rpUnclaimedRplRewards", "Unclaimed RPL rewards", "unclaimed RPL rewards of Rocketpool node", "RPL"},
+		{"rpUnclaimedEthRewards", "Unclaimed ETH rewards", "unclaimed ETH rewards of Rocketpool node", "ETH"},
+		{"rpBeaconRewards", "Beacon rewards", "beacon rewards of Rocketpool node", "ETH"},
 	}
 	rewardPlugins := map[string]types.RRPlugin{}
 	for _, frp := range floatRewardPluginNameDescHelpUnits {
@@ -37,7 +37,7 @@ func BasicPlugins() map[string]types.RRPlugin {
 		"rpEth1sync": {
 			Cat:       types.PluginCatRocket,
 			Desc:      "Eth1 client",
-			Help:      "Check the sync status of Eth1 client (with Rocketpool Golang library)",
+			Help:      "sync status of Eth1 client (with Rocketpool Golang library)",
 			Formatter: formatting.Str,
 			Opts:      []string{types.OptOkGreen},
 			Refresh: func(...interface{}) (interface{}, error) {
@@ -48,7 +48,7 @@ func BasicPlugins() map[string]types.RRPlugin {
 		"rpEth2sync": {
 			Cat:       types.PluginCatRocket,
 			Desc:      "Eth2 client",
-			Help:      "Check the sync status of Eth2 client (with Rocketpool Golang library)",
+			Help:      "sync status of Eth2 client (with Rocketpool Golang library)",
 			Formatter: formatting.Str,
 			Opts:      []string{types.OptOkGreen},
 			Refresh: func(...interface{}) (interface{}, error) {
@@ -59,28 +59,28 @@ func BasicPlugins() map[string]types.RRPlugin {
 		"rpEthMatched": {
 			Cat:       types.PluginCatRocket,
 			Desc:      "Matched ETH",
-			Help:      "Check the matched ETH of Rocketpool node",
+			Help:      "matched ETH of Rocketpool node",
 			Formatter: formatting.FloatSuffix(0, "ETH"),
 			Refresh:   cache.FloatWrap("rpEthMatched", GetEthMatched),
 		},
 		"rpMinStake": {
 			Cat:       types.PluginCatRocket,
 			Desc:      "Minimum stake",
-			Help:      "Check the minimum RPL stake for Rocketpool node",
+			Help:      "minimum RPL stake for Rocketpool node",
 			Formatter: formatting.SmartFloatSuffix("RPL"),
 			Refresh:   cache.FloatWrap("rpMinStake", GetMinStake),
 		},
 		"rpNodeStake": {
 			Cat:       types.PluginCatRocket,
 			Desc:      "Node stake",
-			Help:      "Check the RPL stake of Rocketpool node",
+			Help:      "RPL stake of Rocketpool node",
 			Formatter: formatting.SmartFloatSuffix("RPL"),
 			Refresh:   cache.FloatWrap("rpNodeStake", GetNodeStake),
 		},
 		"rpStakeRatio": {
 			Cat:       types.PluginCatRocket,
 			Desc:      "Stake ratio",
-			Help:      "Check how much % of the borrowed Eth value is staked",
+			Help:      "How much % of the borrowed Eth value is staked",
 			Opts:      []string{types.OptRedIfLessThan10},
 			Formatter: formatting.FloatSuffix(2, "%"),
 			Refresh:   cache.FloatWrap("rpStakeRatio", GetStakeRatio),
@@ -88,14 +88,14 @@ func BasicPlugins() map[string]types.RRPlugin {
 		"rpOracleRplPrice": {
 			Cat:       types.PluginCatRocket,
 			Desc:      "Oracle RPL-ETH",
-			Help:      "Check the RPL price from Rocketpool oracle",
+			Help:      "RPL price from Rocketpool oracle",
 			Formatter: formatting.FloatSuffix(6, "ETH"),
 			Refresh:   cache.FloatWrap("rpEthOraclePrice", GetRplEthOraclePrice),
 		},
 		"rpOwnEthDeposit": {
 			Cat:       types.PluginCatRocket,
 			Desc:      "Own ETH deposit",
-			Help:      "Check the amount of ETH deposited in Rocketpool node",
+			Help:      "amount of ETH deposited in Rocketpool node",
 			Formatter: formatting.FloatSuffix(0, "ETH"),
 			Refresh: func(...interface{}) (interface{}, error) {
 				mpd, err := CachedGetMinipoolDetails(minipoolDetails)
@@ -108,14 +108,14 @@ func BasicPlugins() map[string]types.RRPlugin {
 		"rpIntervalEnd": types.RRPlugin{
 			Cat:       types.PluginCatRocket,
 			Desc:      "End of current RP interval",
-			Help:      "Check the end of the current Rocketpool interval",
+			Help:      "end of the current Rocketpool interval",
 			Formatter: formatting.Time("2006-01-02 15:04:05"),
 			Refresh:   cache.TimeWrap("rpIntervalEnd", GetIntervalEnd),
 		},
 		"rpUntilIntervalEnd": types.RRPlugin{
 			Cat:       types.PluginCatRocket,
 			Desc:      "Until end of RP interval",
-			Help:      "Check the time until the end of the current Rocketpool interval",
+			Help:      "time until the end of the current Rocketpool interval",
 			Formatter: formatting.Duration,
 			Refresh: func(args ...interface{}) (interface{}, error) {
 				intervalEnd, err := cache.Time("rpIntervalEnd", GetIntervalEnd)
@@ -151,21 +151,21 @@ func BasicPlugins() map[string]types.RRPlugin {
 		"rpFeeDistributorBalance": {
 			Cat:       types.PluginCatRocket,
 			Desc:      "Fee distributor balance",
-			Help:      "Check the balance of the Rocketpool fee distributor",
+			Help:      "balance of the Rocketpool fee distributor",
 			Formatter: formatting.SmartFloatSuffix("ETH"),
 			Refresh:   cache.FloatWrap("rpFeeDistributorBalance", GetFeeDistributorBalance),
 		},
 		"rpNodeBalance": {
 			Cat:       types.PluginCatRocket,
 			Desc:      "Node balance",
-			Help:      "Check the balance of the Rocketpool node",
+			Help:      "balance of the Rocketpool node",
 			Formatter: formatting.SmartFloatSuffix("ETH"),
 			Refresh:   cache.FloatWrap("rpNodeBalance", GetNodeBalance),
 		},
 		"rpWithdrawalAddressBalance": {
 			Cat:       types.PluginCatRocket,
 			Desc:      "Withdrawal address balance",
-			Help:      "Check the balance of the Rocketpool withdrawal address",
+			Help:      "balance of the Rocketpool withdrawal address",
 			Formatter: formatting.SmartFloatSuffix("ETH"),
 			Refresh:   cache.FloatWrap("rpWithdrawalAddressBalance", GetWithdrawalAddressBalance),
 		},

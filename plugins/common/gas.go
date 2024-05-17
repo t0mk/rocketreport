@@ -20,7 +20,7 @@ func GasPlugins() map[string]types.RRPlugin {
 		"gasPriceBeaconcha.in": {
 			Cat:       types.PluginCatCommon,
 			Desc:      "Gas Price",
-			Help:      "Get the latest gas price from beaconcha.in",
+			Help:      "latest gas price from beaconcha.in",
 			Formatter: formatting.SmartFloat,
 			Refresh: func(...interface{}) (interface{}, error) {
 				body, err := utils.GetHTTPResponseBodyFromUrl(bcGasUrl)
@@ -40,7 +40,7 @@ func GasPlugins() map[string]types.RRPlugin {
 		"gasPriceExecutionClient": {
 			Cat:       types.PluginCatCommon,
 			Desc:      "Gas Price",
-			Help:      "Get the latest gas price from the execution client",
+			Help:      "latest gas price from the execution client",
 			Formatter: formatting.SmartFloat,
 			Refresh: func(...interface{}) (interface{}, error) {
 				c := context.Background()

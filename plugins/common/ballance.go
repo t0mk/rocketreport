@@ -17,7 +17,7 @@ func BalancePlugins() map[string]types.RRPlugin {
 		"addressBalanceEtherscan": {
 			Cat:       types.PluginCatCommon,
 			Desc:      "Address balance from Etherscan",
-			Help:      "Check the balance of an address using Etherscan",
+			Help:      "balance of an address using Etherscan",
 			ArgDescs:  argDescs,
 			Formatter: formatting.SmartFloatSuffix("ETH"),
 			Refresh: func(args ...interface{}) (interface{}, error) {
@@ -38,7 +38,7 @@ func BalancePlugins() map[string]types.RRPlugin {
 		"addressBalance": {
 			Cat:       types.PluginCatCommon,
 			Desc:      "Address balance",
-			Help:      "Check the balance of an address via Execution client",
+			Help:      "balance of an address via Execution client",
 			ArgDescs:  argDescs,
 			Formatter: formatting.SmartFloatSuffix("ETH"),
 			Refresh: func(args ...interface{}) (interface{}, error) {

@@ -13,7 +13,7 @@ func ValidatorPlugins() map[string]types.RRPlugin {
 		"rpEarnedConsesusEth": {
 			Cat:       types.PluginCatRocket,
 			Desc:      "Earned consensus ETH",
-			Help:      fmt.Sprintf("Check the amount of consensus ETH in %s*", config.ChosenFiat()),
+			Help:      fmt.Sprintf("amount of consensus ETH in %s*", config.ChosenFiat()),
 			Formatter: formatting.FloatSuffix(5, "ETH"),
 			Refresh: func(...interface{}) (interface{}, error) {
 				details, err := CachedGetMinipoolDetails(minipoolDetails)

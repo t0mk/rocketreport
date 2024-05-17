@@ -32,11 +32,12 @@ func ReportChatID() {
 		panic(err)
 	}
 	fmt.Println("To find out Chat ID, send a message to your bot (@" + botMe.UserName + ")")
+	fmt.Println("https://t.me/" + botMe.UserName)
 
 	update := <-updates
 	if update.Message != nil {
 		chatId := update.Message.Chat.ID
-		txt := fmt.Sprintf("Your  Chat ID is:\n%d", chatId)
+		txt := fmt.Sprintf("Your Chat ID is:\n%d", chatId)
 		fmt.Println(txt)
 		msg := newMsg(chatId, txt)
 		_, err := bot.Send(*msg)

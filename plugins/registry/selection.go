@@ -2,11 +2,11 @@ package registry
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/t0mk/rocketreport/plugins/formatting"
 	"github.com/t0mk/rocketreport/plugins/types"
 )
-
 
 func (ps *PluginSelection) DocList(doEval bool) string {
 	s := ""
@@ -68,17 +68,18 @@ func (ps *PluginSelection) MarkdownTable() string {
 		}
 	}
 
-	s := "| Name | Description | Args | Defaults |\n"
+	s := "| Name | Description | Args (type) | Defaults |\n"
 	s += "|------|-------------|------|--------------|\n"
 	if !selectionHasArgs {
 		s = "| Name | Description |\n"
 		s += "|------|-------------|\n"
 	}
 	for _, p := range *ps {
+		helpWithFirstCharUpper := strings.ToUpper(p.Plugin.Help[:1]) + p.Plugin.Help[1:]
 		if selectionHasArgs {
-			s += fmt.Sprintf("| %s | %s | %s | %s |\n", p.Name, p.Plugin.Help, p.Plugin.ArgDescs.HelpStringDoc(), p.Plugin.ArgDescs.ExamplesString())
+			s += fmt.Sprintf("| %s | %s | %s | %s |\n", p.Name, helpWithFirstCharUpper, p.Plugin.ArgDescs.HelpStringDoc(), p.Plugin.ArgDescs.ExamplesString())
 		} else {
-			s += fmt.Sprintf("| %s | %s |\n", p.Name, p.Plugin.Help)
+			s += fmt.Sprintf("| %s | %s |\n", p.Name, helpWithFirstCharUpper)
 		}
 	}
 

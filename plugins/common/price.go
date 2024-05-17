@@ -27,14 +27,14 @@ func PricePlugins() map[string]types.RRPlugin {
 		"ethPrice": {
 			Cat:       types.PluginCatCommon,
 			Desc:      fmt.Sprintf("ETH-%s", config.ChosenFiat()),
-			Help:      fmt.Sprintf("Check ETH/%s* price", config.ChosenFiat()),
+			Help:      fmt.Sprintf("ETH/%s* price", config.ChosenFiat()),
 			Formatter: formatting.FloatSuffix(0, config.ChosenFiat()),
 			Refresh:   func(...interface{}) (interface{}, error) { return prices.PriEth(config.ChosenFiat()) },
 		},
 		"rplPriceRealtime": {
 			Cat:       types.PluginCatCommon,
 			Desc:      "Realtime RPL-ETH",
-			Help:      "Check realtime RPL-ETH (based on RPL-USDT and ETH-USDT from Binance)",
+			Help:      "Realtime RPL-ETH (based on RPL-USDT and ETH-USDT from Binance)",
 			Formatter: formatting.SmartFloatSuffix("ETH"),
 			Refresh:   func(...interface{}) (interface{}, error) { return PriRplReal() },
 		},

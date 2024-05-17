@@ -12,43 +12,43 @@
 ## Rocketpool Plugins
 | Name | Description |
 |------|-------------|
-| rpBeaconRewards | Check the beacon rewards of Rocketpool node |
-| rpCumulativeEthRewards | Check the cumulative ETH rewards of Rocketpool node |
-| rpCumulativeRplRewards | Check the cumulative RPL rewards of Rocketpool node |
-| rpEarnedConsesusEth | Check the amount of consensus ETH in USDT* |
-| rpEffectiveRplStake | Check the effective RPL stake of Rocketpool node |
-| rpEstimatedRewards | Check the estimated rewards of Rocketpool node |
-| rpEth1sync | Check the sync status of Eth1 client (with Rocketpool Golang library) |
-| rpEth2sync | Check the sync status of Eth2 client (with Rocketpool Golang library) |
-| rpEthMatched | Check the matched ETH of Rocketpool node |
-| rpFeeDistributorBalance | Check the balance of the Rocketpool fee distributor |
-| rpIntervalEnd | Check the end of the current Rocketpool interval |
-| rpMinStake | Check the minimum RPL stake for Rocketpool node |
-| rpNodeBalance | Check the balance of the Rocketpool node |
-| rpNodeStake | Check the RPL stake of Rocketpool node |
-| rpOracleRplPrice | Check the RPL price from Rocketpool oracle |
+| rpBeaconRewards | Beacon rewards of Rocketpool node |
+| rpCumulativeEthRewards | Cumulative ETH rewards of Rocketpool node |
+| rpCumulativeRplRewards | Cumulative RPL rewards of Rocketpool node |
+| rpEarnedConsesusEth | Amount of consensus ETH in USDT* |
+| rpEffectiveRplStake | Effective RPL stake of Rocketpool node |
+| rpEstimatedRewards | Estimated rewards of Rocketpool node |
+| rpEth1sync | Sync status of Eth1 client (with Rocketpool Golang library) |
+| rpEth2sync | Sync status of Eth2 client (with Rocketpool Golang library) |
+| rpEthMatched | Matched ETH of Rocketpool node |
+| rpFeeDistributorBalance | Balance of the Rocketpool fee distributor |
+| rpIntervalEnd | End of the current Rocketpool interval |
+| rpMinStake | Minimum RPL stake for Rocketpool node |
+| rpNodeBalance | Balance of the Rocketpool node |
+| rpNodeStake | RPL stake of Rocketpool node |
+| rpOracleRplPrice | RPL price from Rocketpool oracle |
 | rpOracleRplPriceUpdate | Time of next RPL price update in Rocketpool oracle |
-| rpOwnEthDeposit | Check the amount of ETH deposited in Rocketpool node |
-| rpStakeRatio | Check how much % of the borrowed Eth value is staked |
-| rpTotalRplStake | Check the total RPL stake of Rocketpool node |
-| rpUnclaimedEthRewards | Check the unclaimed ETH rewards of Rocketpool node |
-| rpUnclaimedRplRewards | Check the unclaimed RPL rewards of Rocketpool node |
-| rpUntilIntervalEnd | Check the time until the end of the current Rocketpool interval |
+| rpOwnEthDeposit | Amount of ETH deposited in Rocketpool node |
+| rpStakeRatio | How much % of the borrowed Eth value is staked |
+| rpTotalRplStake | Total RPL stake of Rocketpool node |
+| rpUnclaimedEthRewards | Unclaimed ETH rewards of Rocketpool node |
+| rpUnclaimedRplRewards | Unclaimed RPL rewards of Rocketpool node |
+| rpUntilIntervalEnd | Time until the end of the current Rocketpool interval |
 | rpUntilOracleRplPriceUpdate | Time until next RPL price update in Rocketpool oracle |
-| rpWithdrawalAddressBalance | Check the balance of the Rocketpool withdrawal address |
+| rpWithdrawalAddressBalance | Balance of the Rocketpool withdrawal address |
 
 
 ## Exchange Plugins
-| Name | Description | Args | Defaults |
+| Name | Description | Args (type) | Defaults |
 |------|-------------|------|--------------|
-| binance | Get the latest ticker price from Binance | ticker (string), amount (float64) | ETHUSDT, 1 |
-| bitfinex | Get the latest ticker price from Bitfinex | ticker (string), amount (float64) | ETHEUR, 1 |
-| coinmate | Get the latest ticker price from Coinmate | ticker (string), amount (float64) | ETH_EUR, 1 |
-| kraken | Get the latest ticker price from Kraken | ticker (string), amount (float64) | XETHZEUR, 1 |
+| binance | Latest ticker price from Binance | ticker (string), amount (float64) | ETHUSDT, 1 |
+| bitfinex | Latest ticker price from Bitfinex | ticker (string), amount (float64) | ETHEUR, 1 |
+| coinmate | Latest ticker price from Coinmate | ticker (string), amount (float64) | ETH_EUR, 1 |
+| kraken | Latest ticker price from Kraken | ticker (string), amount (float64) | XETHZEUR, 1 |
 
 
 ## Meta Plugins
-| Name | Description | Args | Defaults |
+| Name | Description | Args (type) | Defaults |
 |------|-------------|------|--------------|
 | add | Sum of given args, either numbers or plugin outputs, adds args and outputs a float | list of values - numbers or plugin outputs ([]interface {}) | [] |
 | div | Divide first arg by second, either numbers or plugin outputs, divides args and outputs a float | list of values - numbers or plugin outputs ([]interface {}) | [] |
@@ -57,17 +57,17 @@
 
 
 ## Common Plugins
-| Name | Description | Args | Defaults |
+| Name | Description | Args (type) | Defaults |
 |------|-------------|------|--------------|
-| addressBalance | Check the balance of an address via Execution client | address (string) |  |
-| addressBalanceEtherscan | Check the balance of an address using Etherscan | address (string) |  |
-| date | Get the current date |  |  |
-| ethPrice | Check ETH/USDT* price |  |  |
-| gasPriceBeaconcha.in | Get the latest gas price from beaconcha.in |  |  |
-| gasPriceExecutionClient | Get the latest gas price from the execution client |  |  |
-| rplPriceRealtime | Check realtime RPL-ETH (based on RPL-USDT and ETH-USDT from Binance) |  |  |
-| timeMin | Get the current time up to minutes |  |  |
-| timeSec | Get the current time up to seconds |  |  |
+| addressBalance | Balance of an address via Execution client | address (string) |  |
+| addressBalanceEtherscan | Balance of an address using Etherscan | address (string) |  |
+| date | Current date |  |  |
+| ethPrice | ETH/USDT* price |  |  |
+| gasPriceBeaconcha.in | Latest gas price from beaconcha.in |  |  |
+| gasPriceExecutionClient | Latest gas price from the execution client |  |  |
+| rplPriceRealtime | Realtime RPL-ETH (based on RPL-USDT and ETH-USDT from Binance) |  |  |
+| timeMin | Current time up to minutes |  |  |
+| timeSec | Current time up to seconds |  |  |
 
 
 

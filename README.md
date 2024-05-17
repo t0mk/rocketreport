@@ -60,7 +60,7 @@ For this example we have [_examples/rocketpool/config.yml](_examples/rocketpool/
 docker run --network host --rm -v $(pwd)/_examples/rocketpool:/conf t0mk/rocketreport -c /conf/config.yml -p /conf/plugins.yml print
 ```
 
-Output might look like [this](_examples/rocketpool/output.png).
+Output might look like [this](https://i.ibb.co/17ZmXFF/ouput.png).
 
 You need to use `--network host` for the Docker container to reach the SSH tunnels.
 
@@ -85,7 +85,7 @@ My total portfolio in USDT  34,482
 ```
 
 
-### Run Telegram bot and send Portfolio regularly
+### Run Telegram bot and send po
 ```
 ./rocketreport -p plugins.yml -c config.yml send -s
 ```
@@ -139,28 +139,90 @@ For most of the Rocketpool plugins, you need to have eth1 and eth2 client RPC AP
 
 However, if you run rocketreport from elsewhere (like your Linux desktop), you can tunnel ports from the Rocketpool nodes to `https://127.0.0.1:8545` (eth1) and `http://127.0.0.1:5052` (eth2), and then set the localhost urls in `config.yml`. I prepared script that connects to Rocketpool server , finds IPs of the eth1 and eth2 containers, and tunnels the ports to localhost: [scripts/create_tunnels_for_eth_client.sh](scripts/create_tunnels_for_eth_client.sh).
 
-This is further complicated if you run rocketreport from Docker. Then, if you have eth1 and eth2 clients forwarded to localhost, you need to have the localhost URLs in `eth{1,2}_url` and you need to use `docker run --network host`, so that the container can reach the tunnels. Or, if you run `t0mk/rocketreport` container on the Rocketpool node, you can use container names in config (in other words `http://rocketpool_eth{1,2}`), but you need to run the container in the `rocketpool_net` network - run it like `docker run --rm --network rocketpool_net`.
+This is further complicated if you run rocketreport from Docker. Then, if you have eth1 and eth2 clients forwarded to localhost (like suggested in previous paragraph), you need to have the localhost URLs in `eth{1,2}_url` in `config.yml`, and you need to use `docker run --network host`, so that the container can reach the tunnels. Or, if you run `t0mk/rocketreport` container on the Rocketpool node, you can use container names in config (in other words `eth1_url: http://rocketpool_eth1:8545` and `eth2_url: http://rocketpool_eth2:5052`). Then, you need to run the container in the `rocketpool_net` network - `docker run --rm --network rocketpool_net`.
 
 ## Build
 
-If you want to change code and test, just do `make build`. Interoperable static build that works on various Linux distros is a bit more complicated because there's some C crypto in dependencies (I use code from RP smartnode). It's in makefile, so just do `make static-build.
+If you want to change code and test, just do `make build`. Interoperable static build that works on various Linux distros is a bit more complicated because there's some C crypto in dependencies (I use code from RP smartnode). It's in makefile, so just do `make static-build-amd64`. There's still some issues with static build for arm64.
 
-## Telegram bot
+## Telegram
 
-To serve Telegram bot with Rocketreport, you need to create your bot first. Follow https://core.telegram.org/bots/tutorial until "Obtain Your Bot Token", and then use the token in config.yml as `telegram_token`.
+You can send reports over Telegrem. You can have either
+- rocketreport listening on Telegram bot message, aka "serve" mode
+- rocketreport just sending message from bot to a chat - `rocketreport send`
 
-## Telegram chat send
+### Create bot and get token
 
-If you'd like to get reports regularly, but don't want to haver Telegram bot running all the time (in the "serve" mode), you can configure it to send message to a Telegram Chat, maybe to your mobile device. To do that, you need to specify Telegram Chat ID. Frist create the bot, put `telegram_token` to `config.yml` and run
+To use Telegram bot with Rocketreport, you need to create your bot first. Follow https://core.telegram.org/bots/tutorial until "Obtain Your Bot Token", and then use the token in config.yml as `telegram_token`.
+
+### Find out Chat ID
+
+Rocketreport bot can only send message to a single chat (for the sake of security). Chat is a Telegram chat in your phone app. Once you get your bot token, you need to send message to the bot and find out ID of your chat. Just run
 
 ```
-rocketreport -c config.yml report-chat-id
+TELEGRAM_TOKEN=... rocketreport report-chat-id
+```
+.. or with Docker
+
+```
+docker run -e TELEGRAM_TOKEN="..." --rm t0mk/rocketreport report-chat-id
 ```
 
-rocketreport will wait for a messagei from your device, and then print Chat ID which you can put to `config.yml` as `telegram_chat_id`.
+.. and then send a message to the bot. You can open Telegram chat with the bot by visiting link `https://t.me/<bot_username>`. The bot will reply with chat ID and will also print it to stdout.
 
-Once you have both bot token and Chat ID set, you can create a cronjob to trigger
+### "serve" mode
+
+Once you have Telegram token and a chat ID, you can send messages via Telegram.
+
+You can run rocketreport in "serve" mode, where the rocketreport process stays on and reacts on Telegram messages. You can then get reports in your Telegram chat on-demand, by pressing a button.
+
+#### Message schedule
+
+You can also have reports sent regularly by setting TELEGRAM_MESSAGE_SCHEDULE to a 
+[Cron expression](https://en.wikipedia.org/wiki/Cron#Overview), for example, with  `plugins.yml` as
+
+```yaml
+plugins:
+  - name: gasPriceBeaconcha.in
+    desc: Gas price is
+```
+
+and `config.yml` as
+
+```yaml
+telegram_token: ...
+telegram_chat_id: ...
+```
+
+You will report with Gas price to Telegram every minute by running:
+```
+TELEGRAM_MESSAGE_SCHEDULE="* * * * *" rocketreport -c config.yml -p plugins.yml serve
+```
+
+
+### Single send
+
+If you'd like to get reports regularly, but don't want to have rocketreport running all the time (in the "serve" mode), you can also send a single message to a Telegram chat. Considering you put `telegram_token` and `telegram_chat_id` to config.yml, and some plugin configuration to `plugins.yml`, you can run
 
 ```
 rocketreport -c config.yml -p plugins.yml send -s
 ```
+
+Rocketreport will evaluate the plugins and send report to Telegram.
+
+You can put this command to Cron if you want to have the report sent regularly.
+
+### Telegram message "header"
+
+The report in Telegram message is in format of "inline keyboard", so that it looks like a table. The message body is meant to be very short, but meaningful because you will see it in notification:
+
+![notification](https://iamges.com/rr_notification.png)
+
+You can template the message body to a small extent by the TELEGRAM_HEADER configuration value. It's a string with space-delimited identifiers. If identifier starts with %, it's substituted by looked-up value. Otherwise, identifier is put to the message.
+
+The substitution identifiers can refer to configured plugins by label ("labl" find in plugin conf), or they refer to plugins with no arguments.
+
+Examples of header templates:
+- `TELEGRAM_HEADER="Hi!"` will send report with "Hi!" in the body
+- `TELEGRAM_HEADER="%timeMin ETH: %ethPrice` will send report with "2024-05-16_14:34 ETH: 2,998 $T" in the header.
+- If you have plugin 

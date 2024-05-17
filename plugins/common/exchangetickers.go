@@ -57,7 +57,7 @@ func CreateExchangeTickerPlugin(name, exampleTicker string, getter exchanges.Exc
 	return types.RRPlugin{
 		Cat:       types.PluginCatExchange,
 		Desc:      fmt.Sprintf("%s ticker", name),
-		Help:      fmt.Sprintf("Get the latest ticker price from %s", name),
+		Help:      fmt.Sprintf("Latest ticker price from %s", name),
 		Formatter: formatting.SmartFloat,
 		ArgDescs:  argDescs,
 		Refresh: func(args ...interface{}) (interface{}, error) {
