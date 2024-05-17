@@ -1,5 +1,9 @@
 # Rocketreport
 
+Rocketreport is a tool that fetches stats about Rocketpool node and other crypto data. It can then send a report over Telegram.
+
+The motivation was to get regular updates about Rocketpool node to phone. Telegram seemed least bad. I'm open to implement other channels too.
+
 ![showcase](https://i.ibb.co/dBsNdXP/showcase1.png)
 
 Table of Contents
@@ -25,10 +29,6 @@ Table of Contents
       * [Single send](#single-send)
       * [Telegram message "header"](#telegram-message-header)
 
-
-Rocketreport is a tool that fetches stats about Rocketpool node and other crypto data. It can then send a report over Telegram.
-
-The motivation was to get regular updates about Rocketpool node to phone. Telegram seemed least bad. I'm open to implement other channels too.
 
 ## Install binaries
 
