@@ -7,8 +7,6 @@ The motivation was to get regular updates about Rocketpool node to phone. Telegr
 ![showcase](https://i.ibb.co/dBsNdXP/showcase1.png)
 
 <!--ts-->
-* [Rocketreport](#rocketreport)
-* [Table of Contents](#table-of-contents)
    * [Install binaries](#install-binaries)
    * [Usage](#usage)
       * [Print ETH gas price](#print-eth-gas-price)
@@ -28,6 +26,10 @@ The motivation was to get regular updates about Rocketpool node to phone. Telegr
          * [Message schedule](#message-schedule)
       * [Single send](#single-send)
       * [Telegram message "header"](#telegram-message-header)
+
+<!-- Created by https://github.com/ekalinin/github-markdown-toc -->
+<!-- Added by: tomk, at: Fri May 17 07:35:32 PM CEST 2024 -->
+
 <!--te-->
 
 
