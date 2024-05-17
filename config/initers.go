@@ -3,6 +3,7 @@ package config
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -11,6 +12,8 @@ import (
 	"github.com/rocket-pool/smartnode/shared/services"
 	"github.com/rocket-pool/smartnode/shared/services/config"
 	"github.com/t0mk/rocketreport/zaplog"
+
+	"github.com/gorhill/cronexpr"
 
 	configtypes "github.com/rocket-pool/smartnode/shared/types/config"
 )
@@ -200,4 +203,23 @@ func initTelegramBot() *tgbotapi.BotAPI {
 		panic(err)
 	}
 	return bot
+}
+
+func initTelegramMessageSchedule() *cronexpr.Expression {
+	if Config.TelegramMessageSchedule == "" {
+		return nil
+	}
+	expr, err := cronexpr.Parse(Config.TelegramMessageSchedule)
+	if err != nil {
+		panic(err)
+	}
+	return expr
+}
+
+func initTelegramHeaderTemplate() []string {
+	if Config.TelegramHeaderTemplate == "" {
+		return []string{"%timeMin", "%ethPrice"}
+	}
+	fields := strings.Split(Config.TelegramHeaderTemplate, " ")
+	return fields
 }

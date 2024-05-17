@@ -109,7 +109,7 @@ func BasicPlugins() map[string]types.RRPlugin {
 			Cat:       types.PluginCatRocket,
 			Desc:      "End of current RP interval",
 			Help:      "Check the end of the current Rocketpool interval",
-			Formatter: formatting.Time,
+			Formatter: formatting.Time("2006-01-02 15:04:05"),
 			Refresh:   cache.TimeWrap("rpIntervalEnd", GetIntervalEnd),
 		},
 		"rpUntilIntervalEnd": types.RRPlugin{
@@ -131,7 +131,7 @@ func BasicPlugins() map[string]types.RRPlugin {
 			Cat:       types.PluginCatRocket,
 			Desc:      "Oracle RPL price update",
 			Help:      "Time of next RPL price update in Rocketpool oracle",
-			Formatter: formatting.Time,
+			Formatter: formatting.Time("2006-01-02 15:04:05"),
 			Refresh:   cache.TimeWrap("rpOracleRplPriceUpdate", GetNextRplPriceUpdate),
 		},
 		"rpUntilOracleRplPriceUpdate": types.RRPlugin{

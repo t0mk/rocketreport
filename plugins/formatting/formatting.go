@@ -40,8 +40,10 @@ func SmartFloatSuffix(suffix string) func(interface{}) string {
 	}
 }
 
-func Time(i interface{}) string {
-	return i.(time.Time).Format("2006-01-02 15:04:05")
+func Time(format string) func(interface{}) string {
+	return func(i interface{}) string {
+		return i.(time.Time).Format(format)
+	}
 }
 
 func SmartFloat(i interface{}) string {

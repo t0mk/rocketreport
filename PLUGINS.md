@@ -61,10 +61,13 @@
 |------|-------------|------|--------------|
 | addressBalance | Check the balance of an address via Execution client | address (string) |  |
 | addressBalanceEtherscan | Check the balance of an address using Etherscan | address (string) |  |
+| date | Get the current date |  |  |
 | ethPrice | Check ETH/USDT* price |  |  |
 | gasPriceBeaconcha.in | Get the latest gas price from beaconcha.in |  |  |
 | gasPriceExecutionClient | Get the latest gas price from the execution client |  |  |
 | rplPriceRealtime | Check realtime RPL-ETH (based on RPL-USDT and ETH-USDT from Binance) |  |  |
+| timeMin | Get the current time up to minutes |  |  |
+| timeSec | Get the current time up to seconds |  |  |
 
 
 

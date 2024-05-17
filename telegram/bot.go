@@ -6,30 +6,15 @@ import (
 	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-	"github.com/gorhill/cronexpr"
 	"github.com/t0mk/rocketreport/config"
 	"github.com/t0mk/rocketreport/plugins/formatting"
 	"github.com/t0mk/rocketreport/plugins/registry"
-	"github.com/t0mk/rocketreport/prices"
 	"github.com/t0mk/rocketreport/zaplog"
 )
-
-var CronExpression *cronexpr.Expression
 
 func newMsg(chatId int64, text string) *tgbotapi.MessageConfig {
 	ret := tgbotapi.NewMessage(chatId, text)
 	return &ret
-}
-
-func MessageSubject() string {
-	ethFiat, err := prices.PriEth(config.ChosenFiat())
-	if err != nil {
-		panic(err)
-	}
-	suff := fmt.Sprintf("%s/Ξ", config.ChosenFiat())
-	ts := time.Now().Format("Mon 02-Jan 15:04")
-	ethFiatStr := formatting.FloatSuffix(0, suff)(ethFiat)
-	return fmt.Sprintf("%s - %s", ts, ethFiatStr)
 }
 
 func ReportChatID() {
@@ -67,7 +52,7 @@ func ReportChatID() {
 func sendReport(bot *tgbotapi.BotAPI) error {
 	ps := registry.Selected
 
-	msg := ps.TelegramFormat(config.TelegramChatID(), MessageSubject())
+	msg := ps.TelegramFormat(config.TelegramChatID())
 	_, err := bot.Send(msg)
 	if err != nil {
 		return err
@@ -80,10 +65,10 @@ func sendReportAndSchedule(bot *tgbotapi.BotAPI) error {
 	if err != nil {
 		return err
 	}
-	if CronExpression != nil {
+	if config.TelegramMessageSchedule() != nil {
 		// shcedule goroutine for next report
 		go func() {
-			time.AfterFunc(time.Until(CronExpression.Next(time.Now())), func() {
+			time.AfterFunc(time.Until(config.TelegramMessageSchedule().Next(time.Now())), func() {
 				err := sendReportAndSchedule(bot)
 				if err != nil {
 					fmt.Println("Error while sending and scheduling: ", err)
@@ -94,16 +79,9 @@ func sendReportAndSchedule(bot *tgbotapi.BotAPI) error {
 	return nil
 }
 
-func RunBot(schedule string) {
-
+func RunBot() {
+	// header is space-separated keys of either labels or plugins-without args
 	log := zaplog.New()
-	if schedule != "" {
-		var err error
-		CronExpression, err = cronexpr.Parse(schedule)
-		if err != nil {
-			panic(err)
-		}
-	}
 	bot := config.TelegramBot()
 
 	log.Info("Authorized on account: ", bot.Self.UserName)
@@ -118,7 +96,7 @@ func RunBot(schedule string) {
 
 	msg := newMsg(config.TelegramChatID(), "Starting Rocketreport bot")
 	kbMarkup := &tgbotapi.ReplyKeyboardMarkup{
-		Keyboard:       [][]tgbotapi.KeyboardButton{{
+		Keyboard: [][]tgbotapi.KeyboardButton{{
 			tgbotapi.KeyboardButton{Text: "Check Now"},
 			tgbotapi.KeyboardButton{Text: "Kill Bot"},
 			tgbotapi.KeyboardButton{Text: "When Next?"},
@@ -162,8 +140,8 @@ func RunBot(schedule string) {
 			}
 			if update.Message.Text == "When Next?" {
 				whenNextText := "Reports are not scheduled"
-				if CronExpression != nil {
-					nextTime := CronExpression.Next(time.Now())
+				if config.TelegramMessageSchedule() != nil {
+					nextTime := config.TelegramMessageSchedule().Next(time.Now())
 					untilNext := time.Until(nextTime)
 					whenNextText = fmt.Sprintf("Next scheduled report in %s (on %s)",
 						formatting.Duration(untilNext), nextTime.Format("Mon 02-Jan 15:04"))

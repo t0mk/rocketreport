@@ -20,7 +20,7 @@ const (
 type RRPlugin struct {
 	Cat       PluginCat
 	Desc      string
-	args      []interface{}
+	Args      []interface{}
 	Help      string
 	Formatter func(interface{}) string
 	Opts      []string
@@ -98,11 +98,11 @@ func (p *RRPlugin) RawOutput() interface{} {
 }
 
 func (p *RRPlugin) SetArgs(args []interface{}) {
-	p.args = args
+	p.Args = args
 }
 
 func (p *RRPlugin) GetRaw() (interface{}, error) {
-	val, err := p.Refresh(p.args...)
+	val, err := p.Refresh(p.Args...)
 	if err != nil {
 		return nil, err
 	}

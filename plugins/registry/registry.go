@@ -39,6 +39,7 @@ func RegisterAll() {
 	maps.Copy(AvailablePlugins, common.ExchangeTickerPlugins())
 	maps.Copy(AvailablePlugins, common.GasPlugins())
 	maps.Copy(AvailablePlugins, common.PricePlugins())
+	maps.Copy(AvailablePlugins, common.TimePlugins())
 	maps.Copy(AvailablePlugins, common.BalancePlugins())
 	maps.Copy(AvailablePlugins, MetaPlugins())
 	maps.Copy(AvailablePlugins, rocket.BasicPlugins())

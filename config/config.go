@@ -52,6 +52,8 @@ var ChosenFiat = sync.OnceValue(initChosenFiat)
 var TelegramChatID = sync.OnceValue(initTelegramChatId)
 var TelegramToken = sync.OnceValue(initTelegramToken)
 var TelegramBot = sync.OnceValue(initTelegramBot)
+var TelegramMessageSchedule = sync.OnceValue(initTelegramMessageSchedule)
+var TelegramHeaderTemplate = sync.OnceValue(initTelegramHeaderTemplate)
 
 var RocketStorageAddress = map[string]common.Address{
 	"mainnet": common.HexToAddress("0x1d8f8f00cfa6758d7bE78336684788Fb0ee0Fa46"),
@@ -65,26 +67,6 @@ const (
 	Eth2 EthClientType = "eth2"
 )
 
-func findEthClientUrl(t EthClientType) string {
-	urlVar := Eth1UrlEnv
-	if t == Eth2 {
-		urlVar = Eth2UrlEnv
-	}
-	val := os.Getenv(urlVar)
-	if val != "" {
-		return val
-	}
-	ips, err := FindContainerIPs(string(t))
-	if err != nil {
-		panic(errMissingEthClientURL(t))
-	}
-	port := "8545"
-	if t == Eth2 {
-		port = "5052"
-	}
-	return fmt.Sprintf("http://%s:%s", ips[0], port)
-}
-
 type ConfigData struct {
 	NodeAddress     string `env:"NODE_ADDRESS" yaml:"node_address" json:"node_address"`
 	Eth1Url         string `env:"ETH1_URL" yaml:"eth1_url" json:"eth1_url"`
@@ -94,6 +76,8 @@ type ConfigData struct {
 	Fiat            string `default:"USD" env:"FIAT" yaml:"fiat" json:"fiat"`
 	TelegramToken   string `env:"TELEGRAM_TOKEN" yaml:"telegram_token" json:"telegram_token"`
 	TelegramChatId  int64  `env:"TELEGRAM_CHAT_ID" yaml:"telegram_chat_id" json:"telegram_chat_id"`
+	TelegramMessageSchedule string `env:"TELEGRAM_MESSAGE_SCHEDULE" yaml:"telegram_message_schedule" json:"telegram_message_schedule"`
+	TelegramHeaderTemplate string `env:"TELEGRAM_HEADER_TEMPLATE" yaml:"telegram_header_template" json:"telegram_header_template"`
 	Debug           bool   `env:"DEBUG" yaml:"debug" json:"debug"`
 }
 

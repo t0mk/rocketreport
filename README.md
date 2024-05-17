@@ -1,6 +1,6 @@
 # Rocketreport
 
-Rocketreport is a tool that fetches stats about Rocketpool node and other crypto data. It can then send it over Telegram.
+Rocketreport is a tool that fetches stats about Rocketpool node and other crypto data. It can then send a report over Telegram.
 
 The motivation was to get regular updates about Rocketpool node to phone. Telegram seemed least bad. I'm open to implement other channels too.
 
@@ -16,14 +16,14 @@ You can use rocketreport from Docker, the image is `t0mk/rocketreport`.
 
 ## Usage
 
-### Display ETH gas price
+### Print ETH gas price
 ```
 ./rocketreport plugin gasPriceBeaconcha.in
 ```
 
 .. or with Docker container
 ```
-docker run --rm t0mk/rocketereport plugin gasPriceBeaconcha.in
+docker run --rm t0mk/rocketreport plugin gasPriceBeaconcha.in
 ```
 
 ### Print output based on plugin configuration
@@ -35,6 +35,13 @@ Plugin configuration looks like [_examples/basic/plugins.yml](_examples/basic/pl
 .. or with Docker
 ```
 docker run --rm -v $(pwd)/_examples/basic:/conf t0mk/rocketreport -p /conf/plugins.yml print
+```
+
+That will print
+```
+Gas price is              	11.79
+ETH-USDT                  	3,035 $T
+Binance ticker RPLUSDT    	19.24
 ```
 
 ### Print Rocketpool node stats output
@@ -53,15 +60,17 @@ For this example we have [_examples/rocketpool/config.yml](_examples/rocketpool/
 docker run --network host --rm -v $(pwd)/_examples/rocketpool:/conf t0mk/rocketreport -c /conf/config.yml -p /conf/plugins.yml print
 ```
 
+Output might look like [this](_examples/rocketpool/output.png).
+
 You need to use `--network host` for the Docker container to reach the SSH tunnels.
 
 If this example doesn't work, try to change the `consensus_client` in [_examples/rocketpool/config.yml](_examples/rocketpool/config.yml). 
 
-### Report portfolio value in USDT
+### Print portfolio details
 
 [_examples/portfolio/plugins.yml](_examples/portfolio/plugins.yml) implements following scenario:
 
-You have 0.5 BTC, and some ETH in address 0xC450c0F2d99c0eAFC3b53336Ac65b7f94f846478. You want to know (be regularly reminded) how much is it alltogether in USDT.
+You have 0.5 BTC somewhere, and some ETH in address 0xC450c0F2d99c0eAFC3b53336Ac65b7f94f846478. You want to know (be regularly reminded) how much is it alltogether in USDT.
 
 ```
 docker run --rm -v $(pwd)/_examples/portfolio:/conf t0mk/rocketreport -p /conf/plugins.yml print
@@ -76,7 +85,7 @@ My total portfolio in USDT  34,482
 ```
 
 
-### Run Send portfolio value as Telegram message
+### Run Telegram bot and send Portfolio regularly
 ```
 ./rocketreport -p plugins.yml -c config.yml send -s
 ```
@@ -88,9 +97,9 @@ docker run --rm t0mk/rocketreport plugin gasPrice
 docker run --rm -v $(pwd):/confs/ t0mk/rocketreport -p /confs/plugins.yml -c /confs/config.yml print
 ```
 
-## Plugins
+## Plugins ([list](PLUGINS.md))
 
-Rocketreport messages are compiled from plugin output, one plugin per row. That way you can configure what info you want to see in your messages.
+Rocketreport messages are compiled from plugin outputs, one plugin per row. That way you can configure what info you want to see in your reports.
 
 Plugin configuration is a yaml file with list of plugins to evaluate, see `plugins.yml` in subdirs or [_examples](_examples), for example [_examples/portfolio/plugins.yml](_examples/portfolio/plugins.yml).
 
@@ -113,7 +122,7 @@ docker run --rm -v $(pwd)/_examples/portfolio:/conf t0mk/rocketreport -p /conf/p
 You can also run a single plugin:
 
 ```
-docker run --rm t0mk/rocketereport plugin gasPriceBeaconcha.in
+docker run --rm t0mk/rocketreport plugin gasPriceBeaconcha.in
 ```
 
 ## Configuration

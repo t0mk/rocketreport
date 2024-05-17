@@ -2,10 +2,12 @@ package registry
 
 import (
 	"fmt"
+	"strings"
 
 	"slices"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/t0mk/rocketreport/config"
 	"github.com/t0mk/rocketreport/plugins/formatting"
 	"github.com/t0mk/rocketreport/plugins/types"
 )
@@ -16,13 +18,44 @@ func buttonize(s1, s2 string) tgbotapi.InlineKeyboardButton {
 	return tgbotapi.NewInlineKeyboardButtonData(s1, s2)
 }
 
-func (ps *PluginSelection) TelegramFormat(chatId int64, subj string) *tgbotapi.MessageConfig {
+func getTelegramMessageSubject(labelValue map[string]string) (string, error) {
+	subjectFields := config.TelegramHeaderTemplate()
+	headerFields := []string{}
+	for _, f := range subjectFields {
+		if strings.HasPrefix(f, "%") {
+			label := strings.TrimPrefix(f, "%")
+			if v, ok := labelValue[label]; ok {
+				headerFields = append(headerFields, v)
+				continue
+			}
+			if p, ok := AvailablePlugins[label]; ok {
+				if len(p.Args) > 0 {
+					panic(fmt.Errorf("TELEGRAM_HEADER_TEMPLATE: you can't use plugin %s in header template, it requires arguments", label))
+				}
+				p.Eval()
+				if p.Error() != "" {
+					return "", fmt.Errorf("TELEGRAM_HEADER_TEMPLATE: %s", p.Error())
+				}
+				headerFields = append(headerFields, p.Output())
+				continue
+			}
+		
+		} else {
+			headerFields = append(headerFields, f)
+		}
+	}
+	return strings.Join(headerFields, " "), nil
+}
+
+func (ps *PluginSelection) TelegramFormat(chatId int64) *tgbotapi.MessageConfig {
 	rows := [][]tgbotapi.InlineKeyboardButton{}
+	labelValue := map[string]string{}
 	for _, p := range *ps {
 		p.Plugin.Eval()
 		if p.Hide {
 			continue
 		}
+		labelValue[p.Label] = p.Plugin.Output()
 		row := []tgbotapi.InlineKeyboardButton{}
 		row = append(row, buttonize(p.Plugin.Desc, Void))
 		row = append(row, buttonize(p.Plugin.Output(), p.Label))
@@ -30,6 +63,10 @@ func (ps *PluginSelection) TelegramFormat(chatId int64, subj string) *tgbotapi.M
 	}
 
 	kb := tgbotapi.NewInlineKeyboardMarkup(rows...)
+	subj, err := getTelegramMessageSubject(labelValue)
+	if err != nil {
+		panic(err)
+	}
 	nm := tgbotapi.NewMessage(chatId, subj)
 	nm.DisableWebPagePreview = true
 	nm.ParseMode = "Markdown"
