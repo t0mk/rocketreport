@@ -1,7 +1,6 @@
 node_address: 0x0Dc9E89A3A9B6de622dD8F5Ed5f8595357228A6D
 eth2_url: http://127.0.0.1:5052
 eth1_url: http://127.0.0.1:8545
-consensus_client: lighthouse
 network: mainnet
-fiat: EUR
-telegram_header_template: "_timeMin _ethPrice"
+telegram_header_template: "%dateMin €/Ξ: %ethPrice"
+telegram_message_schedule: "0 10 * * *"

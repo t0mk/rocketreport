@@ -26,7 +26,8 @@ func FindAndReplaceAllCurrencyOccurencesBySign(s string) string {
 	return ret
 }
 
-func PriEth(denom string) (float64, error) {
+func PriEth() (float64, error) {
+	denom := config.ChosenFiat()
 	log := zaplog.New()
 	log.Debug("priEthtypes.denom", denom)
 	item := cache.Cache.Get("price" + denom)

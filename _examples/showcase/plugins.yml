@@ -1,21 +1,21 @@
 plugins:
   - name: rpEth1sync
   - name: rpEth2sync
-  - name: ethPrice
-  - name: rpOraclePrice
-  - name: rpUntilIntervalEnd
-  - name: rpUntilOracleRplPriceUpdate
+  - name: rpOracleRplPrice
   - name: rplPriceRealtime
+  - name: rpUntilOracleRplPriceUpdate
+  - name: rpUntilIntervalEnd
   - name: binance
     labl: rplusdt
-    args: RPLUSDT
-  - name: rpEffectiveRplStake
+    args: 
+     - RPLUSDT
+  - name: rpNodeStake
   - name: rpMinStake
   - name: sub
     desc: RPL Stake Reserve
     labl: reserve
     args:
-      - rpEffectiveRplStake
+      - rpNodeStake
       - rpMinStake
   - name: mul
     desc: RPL Stake Reserve in USDT

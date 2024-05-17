@@ -27,7 +27,6 @@ func Binance(ticker string) (*AskBid, error) {
 	if err != nil {
 		return nil, err
 	}
-	//fmt.Println(string(body))
 	var tickerData BinanceTicker
 	err = json.Unmarshal(body, &tickerData)
 	if err != nil {

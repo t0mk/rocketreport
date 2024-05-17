@@ -9,11 +9,11 @@ import (
 )
 
 type PluginConf struct {
-	Name string        `yaml:"name" json:"name"`
-	Desc string        `yaml:"desc" json:"desc"`
-	Labl string        `yaml:"labl" json:"labl"`
-	Args []interface{} `yaml:"args" json:"args"`
-	Hide bool          `yaml:"hide" json:"hide"`
+	Name    string        `yaml:"name" json:"name"`
+	Desc    string        `yaml:"desc" json:"desc"`
+	Labl    string        `yaml:"labl" json:"labl"`
+	Args    []interface{} `yaml:"args" json:"args"`
+	Hide    bool          `yaml:"hide" json:"hide"`
 }
 
 func (pc PluginConf) Hash() string {
@@ -83,4 +83,5 @@ func FileToPlugins(file string) []PluginConf {
 		panic(err)
 	}
 	return pluginsWrap.Plugins
+
 }

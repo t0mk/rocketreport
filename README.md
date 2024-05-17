@@ -1,5 +1,31 @@
 # Rocketreport
 
+![showcase](https://i.ibb.co/dBsNdXP/showcase1.png)
+
+Table of Contents
+=================
+
+* [Rocketreport](#rocketreport)
+   * [Install binaries](#install-binaries)
+   * [Usage](#usage)
+      * [Print ETH gas price](#print-eth-gas-price)
+      * [Print output based on plugin configuration](#print-output-based-on-plugin-configuration)
+      * [Print Rocketpool node stats output](#print-rocketpool-node-stats-output)
+      * [Print portfolio details](#print-portfolio-details)
+      * [Report over Telegram](#report-over-telegram)
+   * [Plugins (<a href="PLUGINS.md">list</a>)](PLUGINS.md)
+   * [Configuration](#configuration)
+   * [Eth1 and Eth2 client port tunnelling](#eth1-and-eth2-client-port-tunnelling)
+   * [Build](#build)
+   * [Telegram](#telegram)
+      * [Create bot and get token](#create-bot-and-get-token)
+      * [Find out Chat ID](#find-out-chat-id)
+      * ["serve" mode](#serve-mode)
+         * [Message schedule](#message-schedule)
+      * [Single send](#single-send)
+      * [Telegram message "header"](#telegram-message-header)
+
+
 Rocketreport is a tool that fetches stats about Rocketpool node and other crypto data. It can then send a report over Telegram.
 
 The motivation was to get regular updates about Rocketpool node to phone. Telegram seemed least bad. I'm open to implement other channels too.

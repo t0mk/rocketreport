@@ -16,11 +16,14 @@ import (
 	"github.com/ethereum/go-ethereum/params"
 	"github.com/rocket-pool/smartnode/shared/types/api"
 	"github.com/t0mk/rocketreport/config"
+	"github.com/t0mk/rocketreport/zaplog"
+	"go.uber.org/zap"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
 )
 
 func GetHTTPResponseBodyFromUrl(url string) ([]byte, error) {
+	log := zaplog.New()
 	resp, err := http.Get(url)
 	if err != nil {
 		return nil, fmt.Errorf("http.Get: %v", err)
@@ -30,6 +33,8 @@ func GetHTTPResponseBodyFromUrl(url string) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("ioutil.ReadAll: %v", err)
 	}
+	log.Debug("HTTP response", zap.String("url", url), zap.String("body", string(body)))
+
 	return body, nil
 }
 

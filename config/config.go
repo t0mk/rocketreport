@@ -68,24 +68,23 @@ const (
 )
 
 type ConfigData struct {
-	NodeAddress     string `env:"NODE_ADDRESS" yaml:"node_address" json:"node_address"`
-	Eth1Url         string `env:"ETH1_URL" yaml:"eth1_url" json:"eth1_url"`
-	Eth2Url         string `env:"ETH2_URL" yaml:"eth2_url" json:"eth2_url"`
-	ConsensusClient string `env:"CONSENSUS_CLIENT" yaml:"consensus_client" json:"consensus_client"`
-	Network         string `env:"NETWORK" yaml:"network" json:"network"`
-	Fiat            string `default:"USD" env:"FIAT" yaml:"fiat" json:"fiat"`
-	TelegramToken   string `env:"TELEGRAM_TOKEN" yaml:"telegram_token" json:"telegram_token"`
-	TelegramChatId  int64  `env:"TELEGRAM_CHAT_ID" yaml:"telegram_chat_id" json:"telegram_chat_id"`
+	NodeAddress             string `env:"NODE_ADDRESS" yaml:"node_address" json:"node_address"`
+	Eth1Url                 string `env:"ETH1_URL" yaml:"eth1_url" json:"eth1_url"`
+	Eth2Url                 string `env:"ETH2_URL" yaml:"eth2_url" json:"eth2_url"`
+	ConsensusClient         string `env:"CONSENSUS_CLIENT" yaml:"consensus_client" json:"consensus_client"`
+	Network                 string `env:"NETWORK" yaml:"network" json:"network"`
+	Fiat                    string `default:"USD" env:"FIAT" yaml:"fiat" json:"fiat"`
+	TelegramToken           string `env:"TELEGRAM_TOKEN" yaml:"telegram_token" json:"telegram_token"`
+	TelegramChatId          int64  `env:"TELEGRAM_CHAT_ID" yaml:"telegram_chat_id" json:"telegram_chat_id"`
 	TelegramMessageSchedule string `env:"TELEGRAM_MESSAGE_SCHEDULE" yaml:"telegram_message_schedule" json:"telegram_message_schedule"`
-	TelegramHeaderTemplate string `env:"TELEGRAM_HEADER_TEMPLATE" yaml:"telegram_header_template" json:"telegram_header_template"`
-	Debug           bool   `env:"DEBUG" yaml:"debug" json:"debug"`
+	TelegramHeaderTemplate  string `env:"TELEGRAM_HEADER_TEMPLATE" yaml:"telegram_header_template" json:"telegram_header_template"`
+	Debug                   bool   `env:"DEBUG" yaml:"debug" json:"debug"`
 }
 
 func (cd ConfigData) String() string {
 	return fmt.Sprintf("NodeAddress: %s\nEth1Url: %s\nEth2Url: %s\nConsensusClient: %s\nNetwork: %s\nFiat: %s\nTelegramToken: %s\nTelegramChatId: %d\nDebug: %t\n", cd.NodeAddress, cd.Eth1Url, cd.Eth2Url, cd.ConsensusClient, cd.Network, cd.Fiat, cd.TelegramToken, cd.TelegramChatId, cd.Debug)
 
 }
-
 
 func LoadConfigFromFile(file string) {
 	loader := aconfig.LoaderFor(&Config, aconfig.Config{
@@ -97,6 +96,7 @@ func LoadConfigFromFile(file string) {
 			".yml":  aconfigyaml.New(),
 		},
 	})
+
 	err := loader.Load()
 	if err != nil {
 		panic(err)

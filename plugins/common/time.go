@@ -13,17 +13,17 @@ func now(...interface{}) (interface{}, error) {
 
 func TimePlugins() map[string]types.RRPlugin {
 	return map[string]types.RRPlugin{
-		"timeSec": {
+		"dateSec": {
 			Cat:       types.PluginCatCommon,
 			Desc:      "Time",
-			Help:      "current time up to seconds",
+			Help:      "Current date up to seconds",
 			Formatter: formatting.Time("2006-01-02_15:04:05"),
 			Refresh:   now,
 		},
-		"timeMin": {
+		"dateMin": {
 			Cat:       types.PluginCatCommon,
 			Desc:      "Time",
-			Help:      "current time up to minutes",
+			Help:      "Current date up to minutes",
 			Formatter: formatting.Time("2006-01-02_15:04"),
 			Refresh:   now,
 		},
@@ -32,6 +32,20 @@ func TimePlugins() map[string]types.RRPlugin {
 			Desc:      "Date",
 			Help:      "current date",
 			Formatter: formatting.Time("2006-01-02"),
+			Refresh:   now,
+		},
+		"time": {
+			Cat:       types.PluginCatCommon,
+			Desc:      "Time",
+			Help:      "current time",
+			Formatter: formatting.Time("15:04:05"),
+			Refresh:   now,
+		},
+		"timeMin": {
+			Cat:       types.PluginCatCommon,
+			Desc:      "Time",
+			Help:      "current time up to minutes",
+			Formatter: formatting.Time("15:04"),
 			Refresh:   now,
 		},
 	}

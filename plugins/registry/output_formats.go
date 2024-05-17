@@ -39,12 +39,20 @@ func getTelegramMessageSubject(labelValue map[string]string) (string, error) {
 				headerFields = append(headerFields, p.Output())
 				continue
 			}
-		
+
 		} else {
 			headerFields = append(headerFields, f)
 		}
 	}
 	return strings.Join(headerFields, " "), nil
+}
+
+func escapeTextForTelegram(s string) string {
+	s = strings.ReplaceAll(s, "_", "\\_")
+	s = strings.ReplaceAll(s, "*", "\\*")
+	s = strings.ReplaceAll(s, "[", "\\[")
+	s = strings.ReplaceAll(s, "`", "\\`")
+	return s
 }
 
 func (ps *PluginSelection) TelegramFormat(chatId int64) *tgbotapi.MessageConfig {
@@ -67,11 +75,10 @@ func (ps *PluginSelection) TelegramFormat(chatId int64) *tgbotapi.MessageConfig 
 	if err != nil {
 		panic(err)
 	}
-	nm := tgbotapi.NewMessage(chatId, subj)
+	nm := tgbotapi.NewMessage(chatId, escapeTextForTelegram(subj))
 	nm.DisableWebPagePreview = true
 	nm.ParseMode = "Markdown"
 	nm.ReplyMarkup = kb
-
 	return &nm
 }
 

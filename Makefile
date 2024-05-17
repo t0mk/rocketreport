@@ -37,7 +37,9 @@ build: plugins_md
 
 static-build-amd64:
 	# build statically compiled binary
-	# there's ld warning "/usr/bin/ld: warning: bint-x64-amd64.o: missing .note.GNU-stack section implies executable stack" and I don't know how to get rid of it
+	# there's ld warning:
+	# "/usr/bin/ld: warning: bint-x64-amd64.o: missing .note.GNU-stack section implies executable stack" 
+	# .. and I don't know how to get rid of it, that's why the " || true"
 	${DOCKER_RUN} --rm -v ${shell pwd}:/app ${DOCKER_BUILDER_IMAGE_NAME} /app/build-inside-container.sh amd64 || true
 
 static-build-arm64:

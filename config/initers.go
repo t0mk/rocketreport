@@ -48,7 +48,7 @@ func Eth2Url() string {
 
 func ConsensusClient() configtypes.ConsensusClient {
 	if Config.ConsensusClient == "" {
-		panic("ConsensusClient not set in config")
+		return "lighthouse"
 	}
 	return configtypes.ConsensusClient(Config.ConsensusClient)
 }
@@ -198,6 +198,7 @@ func initRP() *rpgo.RocketPool {
 
 func initTelegramBot() *tgbotapi.BotAPI {
 	token := TelegramToken()
+	fmt.Println("Token: ", token)
 	bot, err := tgbotapi.NewBotAPI(token)
 	if err != nil {
 		panic(err)

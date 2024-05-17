@@ -2,3 +2,5 @@ rocketreport
 rocketreport-amd64
 vendor
 ignore
+run_showcase_docker.sh
+run_showcase_local.sh

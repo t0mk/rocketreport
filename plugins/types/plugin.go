@@ -3,6 +3,9 @@ package types
 import (
 	"fmt"
 	"strings"
+
+	"github.com/t0mk/rocketreport/zaplog"
+	"go.uber.org/zap"
 )
 
 type PluginCat string
@@ -35,8 +38,8 @@ type RRPlugin struct {
 type RefreshFunc func(...interface{}) (interface{}, error)
 
 type ArgDesc struct {
-	Desc     string
-	Default  interface{}
+	Desc    string
+	Default interface{}
 }
 
 type ArgDescs []ArgDesc
@@ -102,6 +105,9 @@ func (p *RRPlugin) SetArgs(args []interface{}) {
 }
 
 func (p *RRPlugin) GetRaw() (interface{}, error) {
+	log := zaplog.New()
+	log.Debug("Refreshing plugin", zap.String("plugin", p.Desc))
+
 	val, err := p.Refresh(p.Args...)
 	if err != nil {
 		return nil, err

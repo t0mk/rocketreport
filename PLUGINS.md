@@ -62,12 +62,14 @@
 | addressBalance | Balance of an address via Execution client | address (string) |  |
 | addressBalanceEtherscan | Balance of an address using Etherscan | address (string) |  |
 | date | Current date |  |  |
+| dateMin | Current date up to minutes |  |  |
+| dateSec | Current date up to seconds |  |  |
 | ethPrice | ETH/USDT* price |  |  |
 | gasPriceBeaconcha.in | Latest gas price from beaconcha.in |  |  |
 | gasPriceExecutionClient | Latest gas price from the execution client |  |  |
 | rplPriceRealtime | Realtime RPL-ETH (based on RPL-USDT and ETH-USDT from Binance) |  |  |
+| time | Current time |  |  |
 | timeMin | Current time up to minutes |  |  |
-| timeSec | Current time up to seconds |  |  |
 
 
 

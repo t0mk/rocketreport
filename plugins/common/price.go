@@ -3,6 +3,7 @@ package common
 import (
 	"fmt"
 
+	"github.com/t0mk/rocketreport/cache"
 	"github.com/t0mk/rocketreport/config"
 	"github.com/t0mk/rocketreport/exchanges"
 	"github.com/t0mk/rocketreport/plugins/formatting"
@@ -28,15 +29,17 @@ func PricePlugins() map[string]types.RRPlugin {
 			Cat:       types.PluginCatCommon,
 			Desc:      fmt.Sprintf("ETH-%s", config.ChosenFiat()),
 			Help:      fmt.Sprintf("ETH/%s* price", config.ChosenFiat()),
-			Formatter: formatting.FloatSuffix(0, config.ChosenFiat()),
-			Refresh:   func(...interface{}) (interface{}, error) { return prices.PriEth(config.ChosenFiat()) },
+			//Formatter: formatting.FloatSuffix(0, config.ChosenFiat()),
+			Formatter: formatting.SmartFloat,
+			//Refresh:   func(...interface{}) (interface{}, error) { return prices.PriEth(config.ChosenFiat()) },
+			Refresh:   cache.FloatWrap("ethPrice", prices.PriEth),
 		},
 		"rplPriceRealtime": {
 			Cat:       types.PluginCatCommon,
-			Desc:      "Realtime RPL-ETH",
+			Desc:      "RPL-ETH from Exchange",
 			Help:      "Realtime RPL-ETH (based on RPL-USDT and ETH-USDT from Binance)",
 			Formatter: formatting.SmartFloatSuffix("ETH"),
-			Refresh:   func(...interface{}) (interface{}, error) { return PriRplReal() },
+			Refresh:   cache.FloatWrap("rplPriceRealtime", PriRplReal),
 		},
 	}
 }
