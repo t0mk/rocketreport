@@ -2,6 +2,8 @@
 
 Rocketreport is a tool that fetches stats about Rocketpool node and other crypto data. It can then send a report over Telegram.
 
+**You don't have to (and shouldn't) run rocketreport on your RP node. You just need to tunnel execution (eth1) and consensus (eth2) clients.**
+
 The motivation was to get regular updates about Rocketpool node to phone. Telegram seemed least bad. I'm open to implement other channels too.
 
 ![showcase](https://i.ibb.co/dBsNdXP/showcase1.png)
