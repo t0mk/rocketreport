@@ -59,8 +59,8 @@
 ## Common Plugins
 | Name | Description | Args (type) | Defaults |
 |------|-------------|------|--------------|
-| addressBalance | Balance of an address via Execution client | address (string) |  |
-| addressBalanceEtherscan | Balance of an address using Etherscan | address (string) |  |
+| addressBalances | Sum of balances of a list of addresses via Execution client | addresses ([]string) | [] |
+| addressBalancesEtherscan | Balance of one or more addresses using Etherscan. Use only once, Etherescan has rate limits. | addresses ([]string) | [] |
 | date | Current date |  |  |
 | dateMin | Current date up to minutes |  |  |
 | dateSec | Current date up to seconds |  |  |

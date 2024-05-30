@@ -101,7 +101,7 @@ If this example doesn't work, try to change the `consensus_client` in [_examples
 
 [_examples/portfolio/plugins.yml](_examples/portfolio/plugins.yml) implements following scenario:
 
-You have 0.5 BTC somewhere, and some ETH in address 0xC450c0F2d99c0eAFC3b53336Ac65b7f94f846478. You want to know (be regularly reminded) how much is it alltogether in USDT.
+You have 0.5 BTC somewhere, and some ETH in addresses 0xC450c0F2d99c0eAFC3b53336Ac65b7f94f846478 and 0xcb39bbd4f4622638ac761eeb5db42e142dfbd6cb. You want to know (be regularly reminded) how much is it alltogether in USDT.
 
 ```
 docker run --rm -v $(pwd)/_examples/portfolio:/conf t0mk/rocketreport -p /conf/plugins.yml print

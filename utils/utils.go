@@ -149,20 +149,46 @@ func ValidateAndParseAddress(address string) (*common.Address, bool) {
 	return &addr, true
 }
 
-type AddressBalanceEtherscanResponse struct {
+type AddressBalanceEtherscanResponseSingle struct {
 	Status  string `json:"status"`
 	Message string `json:"message"`
 	Result  string `json:"result"`
 }
 
-func AddressBalanceEtherscan(address common.Address) (float64, error) {
-	url := fmt.Sprintf("https://api.etherscan.io/api?module=account&action=balance&address=%s&tag=latest", address.Hex())
-	body, err := GetHTTPResponseBodyFromUrl(url)
+type AddressBalanceEtherscanResponseMultiple struct {
+	Status  string `json:"status"`
+	Message string `json:"message"`
+	Result  []struct {
+		Account string `json:"account"`
+		Balance string `json:"balance"`
+	} `json:"result"`
+}
+
+func addressBalanceEtherscanMultiple(body []byte) (float64, error) {
+	var response AddressBalanceEtherscanResponseMultiple
+	err := json.Unmarshal(body, &response)
 	if err != nil {
-		return 0, fmt.Errorf("error getting Etherscan balance: %w", err)
+		return 0, fmt.Errorf("error unmarshalling Etherscan response: %w", err)
 	}
-	var response AddressBalanceEtherscanResponse
-	err = json.Unmarshal(body, &response)
+	if response.Status != "1" {
+		return 0, fmt.Errorf("error Etherscan response status: %s", response.Message)
+	}
+	total := 0.0
+	for _, result := range response.Result {
+		balanceRaw, ok := new(big.Int).SetString(result.Balance, 10)
+		if !ok {
+			return 0, fmt.Errorf("error parsing Etherscan balance: %s", result.Balance)
+		}
+		balance, _ := WeiToEther(balanceRaw).Float64()
+		total += balance
+	}
+
+	return total, nil
+}
+
+func addressBalanceEtherscanSingle(body []byte) (float64, error) {
+	var response AddressBalanceEtherscanResponseSingle
+	err := json.Unmarshal(body, &response)
 	if err != nil {
 		return 0, fmt.Errorf("error unmarshalling Etherscan response: %w", err)
 	}
@@ -176,4 +202,27 @@ func AddressBalanceEtherscan(address common.Address) (float64, error) {
 	balance, _ := WeiToEther(balanceRaw).Float64()
 
 	return balance, nil
+}
+
+func AddressBalanceEtherscan(addrs []string) (float64, error) {
+	for _, addr := range addrs {
+		if !common.IsHexAddress(addr) {
+			return 0, fmt.Errorf("invalid address: %s", addr)
+		}
+	}
+	addressField := strings.Join(addrs, ",")
+	action := "balance"
+	if len(addrs) > 1 {
+		action = "balancemulti"
+	}
+
+	url := fmt.Sprintf("https://api.etherscan.io/api?module=account&action=%s&address=%s&tag=latest", action, addressField)
+	body, err := GetHTTPResponseBodyFromUrl(url)
+	if err != nil {
+		return 0, fmt.Errorf("error getting Etherscan balance: %w", err)
+	}
+	if len(addrs) == 1 {
+		return addressBalanceEtherscanSingle(body)
+	}
+	return addressBalanceEtherscanMultiple(body)
 }

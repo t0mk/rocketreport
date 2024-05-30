@@ -10,12 +10,6 @@ VERSION=$1
 
 VERSION=${VERSION#v}
 
-
-make docker-image || exit 1
-
-docker tag t0mk/rocketreport:latest t0mk/rocketreport:$VERSION || exit 1
-
-docker push t0mk/rocketreport:$VERSION || exit 1
-docker push t0mk/rocketreport:latest || exit 1
+make static-builds
 
 gh release create v${VERSION} 'rocketreport-amd64' || exit 1

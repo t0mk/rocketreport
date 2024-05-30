@@ -2,7 +2,9 @@ package common
 
 import (
 	"fmt"
+	"strings"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/t0mk/rocketreport/cache"
 	"github.com/t0mk/rocketreport/plugins/formatting"
 	"github.com/t0mk/rocketreport/plugins/types"
@@ -11,49 +13,69 @@ import (
 
 func BalancePlugins() map[string]types.RRPlugin {
 	argDescs := types.ArgDescs{
-		{Desc: "address", Default: ""},
+		{Desc: "addresses", Default: []string{}},
 	}
 	return map[string]types.RRPlugin{
-		"addressBalanceEtherscan": {
+		"addressBalancesEtherscan": {
 			Cat:       types.PluginCatCommon,
 			Desc:      "Address balance from Etherscan",
-			Help:      "balance of an address using Etherscan",
+			Help:      "Balance of one or more addresses using Etherscan. Use only once, Etherescan has rate limits.",
 			ArgDescs:  argDescs,
 			Formatter: formatting.SmartFloatSuffix("ETH"),
 			Refresh: func(args ...interface{}) (interface{}, error) {
-				if len(args) != 1 {
-					return "", fmt.Errorf("expected 1 argument, got %d", len(args))
+				if len(args) == 0 {
+					return "", fmt.Errorf("expected at least 1 argument, got 0")
 				}
-				s := args[0].(string)
-				addr, ok := utils.ValidateAndParseAddress(s)
-				if !ok {
-					return "", fmt.Errorf("invalid address: %s", s)
+				addrStrings := []string{}
+				for _, arg := range args {
+					s, ok := arg.(string)
+					if !ok {
+						return "", fmt.Errorf("expected string argument, got %T", arg)
+					}
+					addrStrings = append(addrStrings, s)
 				}
+
 				return cache.Float(
-					"addressBalanceEtherscan"+addr.String(),
-					func() (float64, error) { return utils.AddressBalanceEtherscan(*addr) },
+					"addressBalanceEtherscan"+strings.Join(addrStrings, ","), func() (float64, error) {
+						return utils.AddressBalanceEtherscan(addrStrings)
+					},
 				)
 			},
 		},
-		"addressBalance": {
+		"addressBalances": {
 			Cat:       types.PluginCatCommon,
-			Desc:      "Address balance",
-			Help:      "balance of an address via Execution client",
+			Desc:      "Address balances",
+			Help:      "Sum of balances of a list of addresses via Execution client",
 			ArgDescs:  argDescs,
 			Formatter: formatting.SmartFloatSuffix("ETH"),
 			Refresh: func(args ...interface{}) (interface{}, error) {
-				if len(args) != 1 {
-					return "", fmt.Errorf("expected 1 argument, got %d", len(args))
+				addresses := []*common.Address{}
+				if len(args) == 0 {
+					return "", fmt.Errorf("expected at least 1 argument, got 0")
 				}
-				s := args[0].(string)
-				addr, ok := utils.ValidateAndParseAddress(s)
-				if !ok {
-					return "", fmt.Errorf("invalid address: %s", s)
+				for _, arg := range args {
+					s, ok := arg.(string)
+					if !ok {
+						return "", fmt.Errorf("expected string argument, got %T", arg)
+					}
+					addr, ok := utils.ValidateAndParseAddress(s)
+					if !ok {
+						return "", fmt.Errorf("invalid address: %s", s)
+					}
+					addresses = append(addresses, addr)
 				}
-				return cache.Float(
-					"addressBalance"+addr.String(),
-					func() (float64, error) { return utils.AddressBalance(*addr) },
-				)
+				total := 0.0
+				for _, addr := range addresses {
+					balance, err := cache.Float(
+						"addressBalance"+addr.String(),
+						func() (float64, error) { return utils.AddressBalance(*addr) },
+					)
+					if err != nil {
+						return "", err
+					}
+					total += balance
+				}
+				return total, nil
 			},
 		},
 	}

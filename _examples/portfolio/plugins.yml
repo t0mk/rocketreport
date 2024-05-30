@@ -5,11 +5,12 @@ plugins:
     args:
       - BTCUSDT
       - 0.5
-  - name: addressBalanceEtherscan
+  - name: addressBalancesEtherscan
     labl: eth_in_address
     desc: Eth in my address
     args:
       - 0xC450c0F2d99c0eAFC3b53336Ac65b7f94f846478
+      - 0xcb39bbd4f4622638ac761eeb5db42e142dfbd6cb
   - name: binance
     labl: ethusdt_binance
     args:
